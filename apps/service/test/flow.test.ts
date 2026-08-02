@@ -328,3 +328,82 @@ test('the booking page cannot be broken out of by slot data', async () => {
   assert.ok(page.body.includes('type="application/json" id="slots-data"'));
   assert.ok(!/<script>[^<]*var all = \[/.test(page.body), 'slot data is not inlined into executable script');
 });
+
+test('L4 a booking can be moved from the management link', async () => {
+  await post('/intro/book', {
+    start: '2026-06-01T13:00:00Z', end: '2026-06-01T14:00:00Z',
+    name: 'Ada', email: 'ada@example.com', booker_tz: 'Europe/London',
+  });
+  const token = mail.sent.find((m) => m.to === 'ada@example.com')!.token!;
+
+  const page = await get(`/b/${token}`);
+  assert.ok(page.body.includes('Move it'), 'the manage page offers other times');
+  assert.ok(page.body.includes('data-start="2026-06-01T14:00:00Z"'), 'and they are real slots');
+
+  mail.sent.length = 0;
+  const moved = await post(`/b/${token}/reschedule`, {
+    start: '2026-06-01T15:00:00Z', end: '2026-06-01T16:00:00Z',
+  });
+  assert.equal(moved.status, 200);
+
+  const { rows } = await sql.query(
+    `SELECT starts_at FROM bookings WHERE status='confirmed'`,
+  );
+  assert.equal(rows.length, 1, 'exactly one confirmed interval — never two, never none');
+  assert.equal(new Date(String(rows[0]?.['starts_at'])).toISOString(), '2026-06-01T15:00:00.000Z');
+
+  // M5 · both parties learn it moved.
+  assert.equal(mail.sent.filter((m) => m.kind === 'rescheduled').length, 2);
+
+  // The vacated time is bookable again.
+  const publicPage = await get('/intro');
+  assert.ok(publicPage.body.includes('data-start="2026-06-01T13:00:00Z"'), 'the old slot is free');
+});
+
+test('L4 a move into a taken slot conflicts and leaves the booking unmoved', async () => {
+  await post('/intro/book', {
+    start: '2026-06-01T13:00:00Z', end: '2026-06-01T14:00:00Z',
+    name: 'Ada', email: 'ada@example.com',
+  });
+  const token = mail.sent.find((m) => m.to === 'ada@example.com')!.token!;
+  await post('/intro/book', {
+    start: '2026-06-01T15:00:00Z', end: '2026-06-01T16:00:00Z',
+    name: 'Grace', email: 'grace@example.com',
+  }, '2.2.2.2');
+
+  const clash = await post(`/b/${token}/reschedule`, {
+    start: '2026-06-01T15:00:00Z', end: '2026-06-01T16:00:00Z',
+  });
+  assert.equal(clash.status, 409);
+  assert.ok(clash.body.includes('Someone just took that time'));
+
+  const { rows } = await sql.query(
+    `SELECT starts_at FROM bookings WHERE status='confirmed' ORDER BY starts_at`,
+  );
+  assert.equal(rows.length, 2);
+  assert.equal(
+    new Date(String(rows[0]?.['starts_at'])).toISOString(),
+    '2026-06-01T13:00:00.000Z',
+    'a failed move leaves the booking exactly where it was',
+  );
+});
+
+test('L3 a management link stops working after the booking is long past', async () => {
+  await post('/intro/book', {
+    start: '2026-06-01T13:00:00Z', end: '2026-06-01T14:00:00Z',
+    name: 'Ada', email: 'ada@example.com',
+  });
+  const token = mail.sent.find((m) => m.to === 'ada@example.com')!.token!;
+
+  assert.equal((await get(`/b/${token}`)).status, 200, 'valid while the booking is current');
+
+  // Eight days after the meeting ended, past the seven-day grace.
+  const later = { ...deps, now: () => '2026-06-09T14:00:00Z' };
+  const expired = await handle(later, { method: 'GET', path: `/b/${token}`, ip: '1.1.1.1' });
+  assert.equal(expired.status, 404, 'an old link in an old mailbox stops working');
+  assert.ok(expired.body.includes('not valid'), 'and says nothing about why');
+
+  // It cannot act either, not merely display.
+  const cancel = await handle(later, { method: 'POST', path: `/b/${token}/cancel`, ip: '1.1.1.1', form: {} });
+  assert.equal(cancel.status, 404);
+});

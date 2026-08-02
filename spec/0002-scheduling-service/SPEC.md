@@ -441,13 +441,18 @@ or enforcement, and none of it should be assumed present:
 
 | Clause | Missing |
 |---|---|
-| **L3** | Token expiry is never checked on management links. A booking link works indefinitely. |
-| **L4** | Reschedule over HTTP. The store implements it and it is proven under contention; no route reaches it. |
 | **D3** | Owner deletion. A booker can delete their own details; an owner cannot delete their account. |
 | **D6/D7** | The subprocessor list and the retention statement are not published. |
 | **O2** | Secret loading is present but no secret is required yet beyond the database URL. |
 | **O4** | Versions are reported on readiness but a mismatch does not refuse startup. |
 | **O5** | Server timezone independence is asserted nowhere. |
+
+**Implemented since — L3, L4 (2026-08-02).** A management link now expires seven
+days after the booking ends, enforced in the lookup rather than at each call
+site, and expressed as "not found" so an expired link is indistinguishable from
+a wrong one. Reschedule has a route: the manage page offers the engine's other
+available times, the move is atomic, a loser gets the refreshed list, and both
+parties are notified.
 
 **Implemented since — I1, I2, I3, I4 (2026-08-02).** Invites are consumed
 atomically with account creation and proven under 15 rounds of parallel

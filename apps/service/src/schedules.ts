@@ -69,6 +69,33 @@ export async function findScheduleBySlug(
   };
 }
 
+export async function findScheduleById(
+  sql: SqlClient,
+  scheduleId: string,
+): Promise<Schedule | undefined> {
+  const { rows } = await sql.query(
+    `SELECT sc.schedule_id, sc.owner_id, sc.slug, sc.title, o.timezone AS owner_timezone,
+            sc.duration_minutes, sc.granularity_minutes, sc.buffer_before_minutes,
+            sc.buffer_after_minutes, sc.minimum_notice_minutes, sc.maximum_horizon_days,
+            sc.max_bookings_per_day
+       FROM schedules sc JOIN owners o ON o.owner_id = sc.owner_id
+      WHERE sc.schedule_id = $1`,
+    [scheduleId],
+  );
+  const r = rows[0];
+  if (!r) return undefined;
+  return {
+    schedule_id: s(r['schedule_id']), owner_id: s(r['owner_id']), slug: s(r['slug']),
+    title: s(r['title']), owner_timezone: s(r['owner_timezone']),
+    duration_minutes: n(r['duration_minutes']), granularity_minutes: n(r['granularity_minutes']),
+    buffer_before_minutes: n(r['buffer_before_minutes']),
+    buffer_after_minutes: n(r['buffer_after_minutes']),
+    minimum_notice_minutes: n(r['minimum_notice_minutes']),
+    maximum_horizon_days: n(r['maximum_horizon_days']),
+    max_bookings_per_day: r['max_bookings_per_day'] === null ? null : n(r['max_bookings_per_day']),
+  };
+}
+
 async function loadRules(sql: SqlClient, scheduleId: string): Promise<AvailabilityRule[]> {
   const { rows } = await sql.query(
     `SELECT weekday, starts_local, ends_local FROM availability_rules

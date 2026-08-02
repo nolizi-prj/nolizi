@@ -8,7 +8,7 @@
 import { randomBytes, randomUUID } from 'node:crypto';
 import { Temporal } from '@js-temporal/polyfill';
 import { PostgresBookingStore, type SqlClient, type Transactor } from './store.ts';
-import { availableSlots, findScheduleBySlug, type Schedule } from './schedules.ts';
+import { availableSlots, findScheduleById, findScheduleBySlug, type Schedule } from './schedules.ts';
 import {
   bookingPage, confirmedPage, errorPage, loginPage, managePage, ownerHome, signupPage,
   type ScheduleSummary,
@@ -19,6 +19,7 @@ import {
 } from './identity.ts';
 import { RATE_LIMITS, type Config } from './config.ts';
 import type { MailPort } from './mail.ts';
+import type { Slot } from '@pumasi/scheduling-core';
 
 export interface Reply {
   status: number;
@@ -140,11 +141,16 @@ export async function handle(
     if (await overLimit(sql, `mgmt:${req.ip}`, RATE_LIMITS.management_lookups_per_ip_per_minute, 60, now)) {
       return html(429, errorPage(429, 'Too many requests. Try again shortly.'));
     }
+    // L3 · a management link expires at the booking's end plus a grace period.
+    // Enforced in the lookup, so no later branch can forget it, and expressed
+    // as "not found" so an expired link is indistinguishable from a wrong one.
+    const graceCutoff = Temporal.Instant.from(now).subtract({ hours: 24 * L3_GRACE_DAYS }).toString();
     const { rows } = await sql.query(
-      `SELECT b.booking_id, b.starts_at, b.status, s.title
+      `SELECT b.booking_id, b.starts_at, b.ends_at, b.status, b.schedule_id, b.owner_id, s.title
          FROM bookings b LEFT JOIN schedules s ON s.schedule_id = b.schedule_id
-        WHERE b.token = $1 ORDER BY (b.status='confirmed') DESC, b.id DESC LIMIT 1`,
-      [token],
+        WHERE b.token = $1 AND b.ends_at > $2
+        ORDER BY (b.status='confirmed') DESC, b.id DESC LIMIT 1`,
+      [token, graceCutoff],
     );
     const r = rows[0];
     // L2 · reveals nothing about any other booking, including whether one exists.
@@ -154,8 +160,53 @@ export async function handle(
     const startIso = new Date(String(r['starts_at'])).toISOString().replace('.000Z', 'Z');
     const title = String(r['title'] ?? 'Booking');
 
+    const status = String(r['status']);
+    const scheduleId = r['schedule_id'] === null ? undefined : String(r['schedule_id']);
+
+    /** L4 · other times this booking could move to. The engine decides them. */
+    const moveOptions = async (): Promise<Slot[]> => {
+      if (status !== 'confirmed' || !scheduleId) return [];
+      const s = await findScheduleById(sql, scheduleId);
+      if (!s) return [];
+      const computed = await slotsFor(deps, s, now);
+      return computed.slots.slice(0, 24);
+    };
+
     if (req.method === 'GET') {
-      return html(200, managePage({ title, start: startIso, token, status: String(r['status']) }));
+      return html(200, managePage({ title, start: startIso, token, status, slots: await moveOptions() }));
+    }
+
+    // L4 · reschedule. Atomic in the store (B6, P2a); a losing move returns
+    // conflict and leaves the booking confirmed and unmoved.
+    if (req.method === 'POST' && parts[2] === 'reschedule') {
+      if (status !== 'confirmed') {
+        return html(409, errorPage(409, 'This booking is no longer active.'));
+      }
+      const newStart = req.form?.['start'];
+      const newEnd = req.form?.['end'];
+      if (!newStart || !newEnd) {
+        return html(400, managePage({ title, start: startIso, token, status,
+          slots: await moveOptions(), error: 'Pick a time to move to.' }));
+      }
+      const store = new PostgresBookingStore(sql, String(r['owner_id']), deps.tx);
+      const moved = await store.move(bookingId, newStart, newEnd, `move:${token}:${newStart}`);
+      if (!moved.ok) {
+        return html(409, managePage({ title, start: startIso, token, status,
+          slots: await moveOptions(), error: 'Someone just took that time. Here are the rest.' }));
+      }
+      // M5 · both parties learn the meeting moved.
+      const owner = await ownerForBooking(sql, bookingId);
+      const booker = await bookerFor(sql, bookingId);
+      if (booker?.email) {
+        await mail.send({ kind: 'rescheduled', to: booker.email, bookingId,
+          start: newStart, token, timezone: booker.timezone });
+      }
+      if (owner) {
+        await mail.send({ kind: 'rescheduled', to: owner.email, bookingId,
+          start: newStart, timezone: owner.timezone });
+      }
+      return html(200, managePage({ title, start: newStart, token, status: 'confirmed',
+        slots: await moveOptions() }));
     }
     if (req.method === 'POST' && parts[2] === 'cancel') {
       const store = new PostgresBookingStore(sql, 'unused', deps.tx);
@@ -368,6 +419,20 @@ interface Contact {
 
 async function ownerContact(sql: SqlClient, ownerId: string): Promise<Contact | undefined> {
   const { rows } = await sql.query(`SELECT email, timezone FROM owners WHERE owner_id = $1`, [ownerId]);
+  const r = rows[0];
+  return r ? { email: String(r['email']), timezone: String(r['timezone']) } : undefined;
+}
+
+/** L3 · how long a management link outlives the meeting it manages. */
+export const L3_GRACE_DAYS = 7;
+
+async function bookerFor(sql: SqlClient, bookingId: string): Promise<Contact | undefined> {
+  const { rows } = await sql.query(
+    `SELECT booker_email AS email, coalesce(booker_tz, 'UTC') AS timezone
+       FROM bookings WHERE booking_id = $1 AND booker_email IS NOT NULL
+      ORDER BY id DESC LIMIT 1`,
+    [bookingId],
+  );
   const r = rows[0];
   return r ? { email: String(r['email']), timezone: String(r['timezone']) } : undefined;
 }

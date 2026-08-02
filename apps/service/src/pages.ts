@@ -140,16 +140,42 @@ export function managePage(opts: {
   start: string;
   token: string;
   status: string;
+  slots?: Slot[];
+  error?: string;
 }): string {
   const active = opts.status === 'confirmed';
+  const slots = opts.slots ?? [];
+
+  // L4 · reschedule. The slots come from the engine exactly as the booking page
+  // gets them; this offers them, it does not compute them.
+  const moveForm =
+    active && slots.length > 0
+      ? `<h2>Move it</h2>
+<form method="post" action="/b/${esc(opts.token)}/reschedule" id="mv">
+  <input type="hidden" name="start" id="ms"><input type="hidden" name="end" id="me">
+  <div class="slots">${slots
+    .map(
+      (s) =>
+        `<button type="button" class="slot" data-start="${esc(s.start)}" data-end="${esc(s.end)}">${esc(s.start.slice(11, 16))} UTC</button>`,
+    )
+    .join('')}</div>
+  <button class="submit" type="submit" id="mb" disabled>Move to the selected time</button>
+</form>`
+      : active
+        ? '<p class="muted">No other times are available to move to right now.</p>'
+        : '';
+
   return SHELL(
     'Your booking',
     `<h1>Your booking</h1>
 <p>${esc(opts.title)} — <time datetime="${esc(opts.start)}" id="t">${esc(opts.start)}</time></p>
 <p class="muted">Status: ${esc(opts.status)}</p>
+${opts.error ? `<p class="err">${esc(opts.error)}</p>` : ''}
 ${
   active
-    ? `<form method="post" action="/b/${esc(opts.token)}/cancel">
+    ? `${moveForm}
+       <h2>Or cancel</h2>
+       <form method="post" action="/b/${esc(opts.token)}/cancel">
          <button class="submit" type="submit">Cancel this booking</button>
        </form>
        <!-- D8 · a bearer link may cancel, but deleting data takes a second step -->
@@ -160,8 +186,21 @@ ${
        </form>`
     : '<p class="muted">This booking is no longer active.</p>'
 }
-<script>var t=document.getElementById('t');
- t.textContent=new Date(t.getAttribute('datetime')).toLocaleString();</script>`,
+<style>h2{font-size:1rem;margin:1.5rem 0 .5rem}</style>
+<script>
+var t=document.getElementById('t');
+t.textContent=new Date(t.getAttribute('datetime')).toLocaleString();
+document.querySelectorAll('#mv .slot').forEach(function(b){
+  b.textContent=new Date(b.dataset.start).toLocaleString();
+  b.onclick=function(){
+    document.querySelectorAll('#mv .slot').forEach(function(x){x.setAttribute('aria-pressed','false')});
+    b.setAttribute('aria-pressed','true');
+    document.getElementById('ms').value=b.dataset.start;
+    document.getElementById('me').value=b.dataset.end;
+    document.getElementById('mb').disabled=false;
+  };
+});
+</script>`,
   );
 }
 
