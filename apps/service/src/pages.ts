@@ -298,6 +298,17 @@ export function ownerHome(
 ${notice ? `<p class="ok">${esc(notice)}</p>` : ''}
 ${schedules.length === 0 ? '<p class="muted">No booking pages yet.</p>' : list}
 <div class="card">
+  <h2>Your account</h2>
+  <p class="muted">Deleting removes your account, your booking pages, and every
+    booking on them — including the names and email addresses of people who
+    booked with you. It cannot be undone.</p>
+  <form method="post" action="/app/delete">
+    <label><input type="checkbox" name="confirm" value="yes" required style="width:auto">
+      I understand this deletes everything, permanently</label>
+    <button class="submit" type="submit">Delete my account</button>
+  </form>
+</div>
+<div class="card">
   <h2>New booking page</h2>
   <form method="post" action="/app/schedules">
     <label for="t">Title</label><input id="t" name="title" required placeholder="Intro call">

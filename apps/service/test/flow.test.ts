@@ -407,3 +407,22 @@ test('L3 a management link stops working after the booking is long past', async 
   const cancel = await handle(later, { method: 'POST', path: `/b/${token}/cancel`, ip: '1.1.1.1', form: {} });
   assert.equal(cancel.status, 404);
 });
+
+test('O5 results do not depend on the host timezone', async () => {
+  // The server must never consult its own zone. Rendering the same page under a
+  // host in Auckland and a host in UTC must produce byte-identical output.
+  const original = process.env['TZ'];
+  try {
+    process.env['TZ'] = 'UTC';
+    const a = await get('/intro');
+    process.env['TZ'] = 'Pacific/Auckland';
+    const b = await get('/intro');
+    process.env['TZ'] = 'America/Los_Angeles';
+    const c = await get('/intro');
+    assert.equal(a.body, b.body, 'Auckland and UTC must agree');
+    assert.equal(a.body, c.body, 'Los Angeles and UTC must agree');
+  } finally {
+    if (original === undefined) delete process.env['TZ'];
+    else process.env['TZ'] = original;
+  }
+});

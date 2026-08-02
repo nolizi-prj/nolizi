@@ -175,3 +175,54 @@ test('a duplicate booking link is refused', async () => {
   const clash = await call('POST', '/app/schedules', { cookie: b, form: { title: 'Two', slug: 'taken', duration_minutes: '30' } });
   assert.equal(clash.status, 409);
 });
+
+test('D3 deleting an account removes everything, verified by absence', async () => {
+  const cookie = await makeOwner('INV-1', 'ada@example.invalid');
+  await call('POST', '/app/schedules', { cookie, form: { title: 'Intro', slug: 'intro', duration_minutes: '60' } });
+  const { rows } = await db.query(`SELECT schedule_id FROM schedules WHERE slug='intro'`);
+  await call('POST', `/app/schedules/${String(rows[0]?.['schedule_id'])}/availability`, {
+    cookie, form: { MO_start: '09:00', MO_end: '17:00' },
+  });
+  await call('POST', '/intro/book', {
+    form: { start: '2026-06-01T13:00:00Z', end: '2026-06-01T14:00:00Z',
+            name: 'Booker', email: 'booker@example.invalid' },
+  });
+  assert.equal(Number((await db.query(`SELECT count(*)::int AS c FROM bookings`)).rows[0]?.['c']), 1);
+
+  // A tick box is required; without it nothing happens.
+  const unconfirmed = await call('POST', '/app/delete', { cookie, form: {} });
+  assert.equal(unconfirmed.status, 400);
+  assert.equal(Number((await db.query(`SELECT count(*)::int AS c FROM owners`)).rows[0]?.['c']), 1);
+
+  const done = await call('POST', '/app/delete', { cookie, form: { confirm: 'yes' } });
+  assert.equal(done.status, 303);
+  assert.equal(done.headers['location'], '/login');
+
+  for (const [table, sql] of [
+    ['owners', `SELECT count(*)::int AS c FROM owners`],
+    ['schedules', `SELECT count(*)::int AS c FROM schedules`],
+    ['bookings', `SELECT count(*)::int AS c FROM bookings`],
+    ['availability_rules', `SELECT count(*)::int AS c FROM availability_rules`],
+    ['sessions', `SELECT count(*)::int AS c FROM sessions`],
+  ] as const) {
+    assert.equal(Number((await db.query(sql)).rows[0]?.['c']), 0, `${table} must be empty`);
+  }
+
+  // The booker's details go too. They were given to a person who has left.
+  const leftovers = await db.query(
+    `SELECT count(*)::int AS c FROM bookings WHERE booker_email = 'booker@example.invalid'`,
+  );
+  assert.equal(Number(leftovers.rows[0]?.['c']), 0, 'no orphaned personal data survives');
+
+  // And the public page is gone rather than erroring oddly.
+  assert.equal((await call('GET', '/intro')).status, 404);
+});
+
+test('D3 one owner cannot delete another owner’s account', async () => {
+  const a = await makeOwner('INV-A', 'a@example.invalid');
+  await makeOwner('INV-B', 'b@example.invalid');
+  await call('POST', '/app/delete', { cookie: a, form: { confirm: 'yes' } });
+  const remaining = await db.query(`SELECT email FROM owners`);
+  assert.equal(remaining.rows.length, 1);
+  assert.equal(remaining.rows[0]?.['email'], 'b@example.invalid', 'only the caller’s account went');
+});

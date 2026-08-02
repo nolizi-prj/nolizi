@@ -32,7 +32,7 @@ export async function bootstrapInvite(
     return { code: '', created: false, reason: 'owners_exist' };
   }
 
-  const existing = await sql.query(`SELECT code FROM invites WHERE consumed_by IS NULL LIMIT 1`);
+  const existing = await sql.query(`SELECT code FROM invites WHERE consumed_at IS NULL LIMIT 1`);
   if (existing.rows[0]) return { code: String(existing.rows[0]['code']), created: false };
 
   const code = requested?.trim() || `inv-${randomBytes(9).toString('base64url')}`;

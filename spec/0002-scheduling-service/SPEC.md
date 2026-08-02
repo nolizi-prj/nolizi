@@ -436,16 +436,23 @@ specification that will be believed.*
 **Built and tested** — the booker's path, end to end: F1–F5, B3/B4, L1/L2, M1–M5,
 D1/D2/D8/D9, I5/I6, O1/O3, P1a/P1b/P2a/P2c/P3/P4/P5/P6.
 
-**Declared but NOT implemented.** Each has schema or configuration but no route
-or enforcement, and none of it should be assumed present:
+**Declared but NOT implemented.**
 
 | Clause | Missing |
 |---|---|
-| **D3** | Owner deletion. A booker can delete their own details; an owner cannot delete their account. |
-| **D6/D7** | The subprocessor list and the retention statement are not published. |
-| **O2** | Secret loading is present but no secret is required yet beyond the database URL. |
-| **O4** | Versions are reported on readiness but a mismatch does not refuse startup. |
-| **O5** | Server timezone independence is asserted nowhere. |
+| **O2** | Secret loading is present, but the only secret so far is the database URL. |
+
+Everything else in this specification is built and tested.
+
+**Implemented since — D3, D6, D7, O4, O5 (2026-08-02).** An owner can delete
+their account, removing their bookers' details with it — verified by absence
+across every table. The subprocessor list is **published and enforced**: the
+service refuses to start if configured to send through a host not named in
+`SUBPROCESSORS.md`, so the document is a control rather than a description. The
+retention statement says how far deletion actually reaches, including that sent
+mail cannot be recalled. The service refuses to start on a timezone-transition
+disagreement, and results are asserted identical under three different host
+timezones.
 
 **Implemented since — L3, L4 (2026-08-02).** A management link now expires seven
 days after the booking ends, enforced in the lookup rather than at each call

@@ -10,6 +10,6 @@ export { book, cancel, reschedule, InMemoryBookingStore } from './booking.ts';
 export type { BookingStore, BookingRecord } from './booking.ts';
 export { classifyWallTime, materializeWindow, ownerLocalDate, weekdayOf } from './zone.ts';
 export type { WallTime, MaterializedWindow } from './zone.ts';
-export { PINNED_TZDATA, checkTzdata, runtimeTzdataVersion } from './tzdata.ts';
-export type { TzdataCheck } from './tzdata.ts';
+export { PINNED_TZDATA, checkTzdata, checkTransitions, runtimeTzdataVersion, REQUIRED_TRANSITIONS } from './tzdata.ts';
+export type { TzdataCheck, Transition, TransitionResult } from './tzdata.ts';
 export * from './types.ts';

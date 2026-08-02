@@ -73,9 +73,12 @@ export async function redeemInvite(
         [ownerId, input.email, input.displayName, input.timezone],
       );
 
+      // Spentness is `consumed_at`, not `consumed_by`. The latter is cleared
+      // when an owner deletes their account, and guarding on it would let
+      // leaving mint a fresh way in.
       const claimed = await t.query(
         `UPDATE invites SET consumed_by = $1, consumed_at = now()
-          WHERE code = $2 AND consumed_by IS NULL
+          WHERE code = $2 AND consumed_at IS NULL
           RETURNING code`,
         [ownerId, input.code],
       );

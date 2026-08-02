@@ -86,3 +86,28 @@ test('a requested bootstrap code is honoured when the service is empty', async (
   assert.equal(r.code, 'MY-CODE');
   assert.equal(r.created, true);
 });
+
+test('an invite stays spent after the account that used it is deleted', async () => {
+  const boot = await bootstrapInvite(db);
+  const owner = await redeemInvite(
+    db, db, { code: boot.code, email: 'gone@example.invalid', displayName: 'Gone', timezone: 'UTC' }, 10,
+  );
+  assert.ok(owner.ok);
+  if (!owner.ok) return;
+
+  await db.query(`DELETE FROM owners WHERE owner_id = $1`, [owner.owner.owner_id]);
+
+  // The row survives with its consumer detached -- and must NOT be reusable.
+  const inv = await db.query(`SELECT consumed_by, consumed_at FROM invites WHERE code = $1`, [boot.code]);
+  assert.equal(inv.rows[0]?.['consumed_by'], null, 'the departed account is not named here any more');
+  assert.ok(inv.rows[0]?.['consumed_at'], 'but it is still recorded as spent');
+
+  const reuse = await redeemInvite(
+    db, db, { code: boot.code, email: 'other@example.invalid', displayName: 'Other', timezone: 'UTC' }, 10,
+  );
+  assert.equal(reuse.ok, false, 'leaving must not mint a fresh way in');
+
+  // And bootstrap does not offer it again either.
+  const boot2 = await bootstrapInvite(db);
+  assert.notEqual(boot2.code, boot.code, 'a spent invite is never re-offered');
+});

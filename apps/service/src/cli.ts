@@ -20,7 +20,7 @@ try {
     }
     case 'invites': {
       const { rows } = await db.query(
-        `SELECT code, consumed_by IS NOT NULL AS used FROM invites ORDER BY created_at`,
+        `SELECT code, consumed_at IS NOT NULL AS used FROM invites ORDER BY created_at`,
       );
       for (const r of rows) console.log(`${r['used'] ? 'used  ' : 'unused'}  ${r['code']}`);
       break;

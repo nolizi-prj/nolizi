@@ -311,6 +311,25 @@ export async function handle(
     const owner = await ownerForSession(sql, sessionId, now);
     if (!owner) return { status: 303, headers: { location: '/login' }, body: '' };
 
+    // D3 · deletion removes data, verified by absence rather than a flag. It
+    // reaches the bookers' details too: they gave those to a person who is
+    // leaving, and keeping them would be holding data with no one to hold it
+    // for.
+    if (req.method === 'POST' && parts[1] === 'delete') {
+      if (req.form?.['confirm'] !== 'yes') {
+        return html(400, errorPage(400, 'Deletion needs the confirmation box ticked.'));
+      }
+      await deps.tx.transaction(async (tx) => {
+        await tx.query(`DELETE FROM bookings WHERE owner_id = $1`, [owner.owner_id]);
+        await tx.query(`DELETE FROM owners WHERE owner_id = $1`, [owner.owner_id]);
+      });
+      return {
+        status: 303,
+        headers: { location: '/login', 'set-cookie': clearedCookie(secure) },
+        body: '',
+      };
+    }
+
     if (req.method === 'POST' && parts[1] === 'schedules' && !parts[2]) {
       const f = req.form ?? {};
       const slug = (f['slug'] ?? '').trim().toLowerCase();

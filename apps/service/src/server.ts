@@ -10,8 +10,11 @@ import { createDatabase, type Database } from './driver.ts';
 import { handle, type AppDeps } from './app.ts';
 import { RecordingMail, RetryingMail, type MailPort } from './mail.ts';
 import { FileMail, SmtpMail } from './mail-smtp.ts';
+import { isPermittedMailHost, mailHostOf, PERMITTED_MAIL_HOSTS } from './subprocessors.ts';
 import { seedDemo } from './seed.ts';
 import { bootstrapInvite } from './bootstrap.ts';
+import { checkTransitions, checkTzdata } from '@pumasi/scheduling-core';
+import { classifyWallTime } from '@pumasi/scheduling-core';
 
 export async function start(): Promise<{ close: () => Promise<void>; port: number }> {
   const config = loadConfig();
@@ -19,6 +22,31 @@ export async function start(): Promise<{ close: () => Promise<void>; port: numbe
   // D-001 · refusals are logged, so a setting that did not take effect is
   // visible rather than silently ignored.
   for (const r of refusals()) console.warn(`[config] refused ${r.setting}: ${r.reason}`);
+
+  // O4 · refuse to start on a timezone-data disagreement. A scheduling service
+  // that serves wrong times while reporting itself healthy is worse than one
+  // that does not start: the first is discovered by a person missing a meeting.
+  const transitions = checkTransitions((z, d, tm) => classifyWallTime(z, d, tm));
+  const broken = transitions.filter((x) => !x.ok);
+  if (broken.length > 0) {
+    console.error('');
+    console.error('  REFUSING TO START — the host timezone database disagrees');
+    for (const b of broken) {
+      console.error(`    ${b.zone} ${b.local}: expected ${b.expect}, host says ${b.actual}`);
+      console.error(`      ${b.note}`);
+    }
+    console.error('');
+    console.error('  Every stored time would be computed against rules this build');
+    console.error('  was not verified for. Fix the host, do not start the service.');
+    throw new Error('tzdata transition mismatch');
+  }
+  const tz = checkTzdata();
+  if (!tz.matches) {
+    console.warn(
+      `[tz] finding: pinned ${tz.pinned}, host ${tz.runtime ?? 'unknown'} — ` +
+        `all ${transitions.length} transitions this build depends on were verified and agree`,
+    );
+  }
 
   const db: Database = await createDatabase(config.databaseUrl);
   console.log(`[db] ${db.describe}`);
@@ -50,8 +78,21 @@ export async function start(): Promise<{ close: () => Promise<void>; port: numbe
   // URL rather than a dependency in the tree.
   let inner: MailPort;
   if (config.smtpUrl) {
+    // D6 · a provider that will see people's names, addresses and meeting times
+    // must be named publicly first. Refusing here is what makes the published
+    // list a control rather than a description.
+    const host = mailHostOf(config.smtpUrl);
+    if (!isPermittedMailHost(host)) {
+      console.error('');
+      console.error(`  REFUSING TO START — mail host "${host}" is not a named subprocessor`);
+      console.error('  Add it to SUBPROCESSORS.md and src/subprocessors.ts, together,');
+      console.error('  saying what it will see and why. Currently permitted:');
+      for (const p of PERMITTED_MAIL_HOSTS) console.error(`    ${p.host} — ${p.why}`);
+      console.error('');
+      throw new Error(`unnamed mail subprocessor: ${host}`);
+    }
     inner = new SmtpMail({ url: config.smtpUrl, from: config.mailFrom, baseUrl: config.baseUrl });
-    console.log('[mail] SMTP');
+    console.log(`[mail] SMTP via ${host} (named in SUBPROCESSORS.md)`);
   } else if (config.mailDir) {
     inner = new FileMail(config.mailDir, config.baseUrl);
     console.log(`[mail] writing messages to ${config.mailDir}`);
