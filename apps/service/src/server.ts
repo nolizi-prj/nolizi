@@ -11,6 +11,7 @@ import { handle, type AppDeps } from './app.ts';
 import { RecordingMail, RetryingMail, type MailPort } from './mail.ts';
 import { FileMail, SmtpMail } from './mail-smtp.ts';
 import { seedDemo } from './seed.ts';
+import { bootstrapInvite } from './bootstrap.ts';
 
 export async function start(): Promise<{ close: () => Promise<void>; port: number }> {
   const config = loadConfig();
@@ -28,6 +29,17 @@ export async function start(): Promise<{ close: () => Promise<void>; port: numbe
   let ready = false;
   const applied = await migrate(db);
   console.log(`[db] migrations applied: ${applied.join(', ')}`);
+  // Invite-only needs a first invite, or nobody can ever start.
+  const boot = await bootstrapInvite(db, process.env['BOOTSTRAP_INVITE']);
+  if (boot.reason === 'owners_exist') {
+    console.log('[invite] accounts already exist — no bootstrap invite issued');
+  } else {
+    console.log('');
+    console.log(`  Sign up here:  ${config.baseUrl}/signup?invite=${boot.code}`);
+    console.log(`  Invite code:   ${boot.code}${boot.created ? '' : '  (existing, unused)'}`);
+    console.log('');
+  }
+
   if (process.env['SEED_DEMO'] === 'true') {
     const seeded = await seedDemo(db);
     console.log(`[db] demo data seeded: http://localhost:${config.port}/${seeded.slug}`);

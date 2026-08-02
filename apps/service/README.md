@@ -12,10 +12,25 @@ commitment that self-hosting stays first-class forever.
 ## Run it
 
     npm install
-    npm run dev            # from the repo root
+    npm run build --workspaces
+    node apps/service/dist/server.js
 
-Opens on `http://localhost:8080/demo` with seeded availability. No database, no
-container, no account, no configuration.
+It prints a sign-up link on first start:
+
+    Sign up here:  http://localhost:8080/signup?invite=inv-xxxxxxxx
+
+Follow it and you have an account, a booking page, and availability you can
+edit. Share the page link and someone can book a time.
+
+**The invite appears only while there are no accounts.** Once anyone has signed
+up it stops, even if asked for explicitly — an invite that keeps appearing is a
+back door. After that, mint them deliberately:
+
+    node apps/service/dist/cli.js invite        # prints a sign-up link
+    node apps/service/dist/cli.js invites       # list, used and unused
+
+`npm run dev` adds a seeded demo page at `/demo` if you would rather not create
+one. No database, no container, no configuration for either path.
 
 ## Databases
 
