@@ -41,6 +41,7 @@ const mail = () =>
     url: `smtp://127.0.0.1:${PORT}`,
     from: 'Pumasi <no-reply@example.invalid>',
     baseUrl: 'https://book.example.invalid',
+    quiet: true,
   });
 
 test('M4 the time is rendered in the recipient’s timezone, from the stored UTC', () => {
@@ -103,6 +104,7 @@ test('M3 an unreachable server does not throw past the retrying wrapper', async 
     url: 'smtp://127.0.0.1:1', // nothing listens here
     from: 'x@example.invalid',
     baseUrl: 'https://book.example.invalid',
+    quiet: true,
   });
   const wrapped = new RetryingMail(unreachable);
   await wrapped.send({ kind: 'confirmed', to: 'a@example.invalid', bookingId: 'b1', start: '2026-06-01T13:00:00Z' });

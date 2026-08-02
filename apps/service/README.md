@@ -41,6 +41,30 @@ Anywhere that runs a container or Node 22.
 Set `PORT`, and `DATABASE_URL` for anything that must outlive the process.
 `PGSSL=require` if your provider needs TLS.
 
+## Mail
+
+SMTP, not a provider SDK — every provider speaks it, so the choice is a URL and
+switching costs nothing.
+
+    SMTP_URL=smtp://user:pass@host:587   # real delivery
+    MAIL_DIR=./tmp/mail                  # write messages to files instead
+    # neither set: messages are recorded in memory and discarded, with a warning
+
+**To try real SMTP without an account**, use Ethereal — nodemailer mints a
+throwaway mailbox on demand and gives a URL to read what was sent:
+
+    node -e "require('nodemailer').createTestAccount().then(a=>console.log(
+      'smtp://'+encodeURIComponent(a.user)+':'+encodeURIComponent(a.pass)+
+      '@'+a.smtp.host+':'+a.smtp.port))"
+
+Export that as `SMTP_URL` and the service logs a preview link for every message
+it sends. Note the percent-encoding: an Ethereal username contains `@`, which
+otherwise breaks the URL.
+
+Ethereal **captures rather than delivers**, which is what you want for testing.
+Real delivery to real inboxes needs a real provider, chosen on data-processing
+terms and residency — the same question as `D-105`.
+
 ## What the gates refuse
 
 `PUBLIC_SIGNUP=true` is **refused**, and the account and booking ceilings can be

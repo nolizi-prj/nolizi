@@ -10,7 +10,7 @@
  * Nothing outside this file knows mail exists beyond `MailPort`.
  */
 
-import { createTransport, type Transporter } from 'nodemailer';
+import { createTransport, getTestMessageUrl, type Transporter } from 'nodemailer';
 import { Temporal } from '@js-temporal/polyfill';
 import type { MailMessage, MailPort } from './mail.ts';
 
@@ -20,6 +20,8 @@ export interface SmtpConfig {
   from: string;
   /** Absolute base for management links, e.g. https://book.example.com */
   baseUrl: string;
+  /** Suppress per-message logging. Tests set this; deployments should not. */
+  quiet?: boolean;
 }
 
 /**
@@ -94,12 +96,27 @@ export class SmtpMail implements MailPort {
       throw new Error(`refusing to send to a non-address: ${message.to}`);
     }
     const { subject, text } = renderMessage(message, this.config.baseUrl);
-    await this.#transport.sendMail({
+    const info = (await this.#transport.sendMail({
       from: this.config.from,
       to: message.to,
       subject,
       text,
-    });
+    })) as { messageId?: string; accepted?: unknown[] };
+
+    // Say what was actually accepted, by whom. A mail path that reports nothing
+    // is indistinguishable from one that silently drops messages, and the
+    // difference only shows up when someone is waiting for a confirmation.
+    this.#log(`[mail] sent ${message.kind} to ${message.to} (${info.messageId ?? 'no id'})`);
+
+    // Ethereal captures rather than delivers and exposes a viewable URL. Worth
+    // surfacing: it is the difference between "the call returned" and being
+    // able to read what the recipient would have got.
+    const preview = getTestMessageUrl(info as never);
+    if (preview) this.#log(`[mail] preview: ${preview}`);
+  }
+
+  #log(line: string): void {
+    if (this.config.quiet !== true) console.log(line);
   }
 
   async close(): Promise<void> {
