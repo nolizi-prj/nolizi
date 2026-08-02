@@ -230,6 +230,15 @@ Nothing here implements capacity > 1, and no acceptance case exercises it — se
 against the commit-time clock. A slot that was valid at compute time but now
 violates minimum notice returns `expired`, not `confirmed`.
 
+**The caller supplies the constraints to revalidate against.** This engine holds
+no schedule state — it cannot look up the rules a slot was computed under, and
+inventing them would be worse than asking. So `book` accepts the same constraint
+fields `compute_slots` took, and revalidates against those. **Omitting them means
+revalidating against nothing**, which returns `confirmed` for a slot that should
+have expired. Discovered 2026-08-02 when case B-003 omitted
+`minimum_notice_minutes` and therefore could not distinguish a correct
+implementation from one that never revalidates at all.
+
 **B4 · No partial state.** A non-`confirmed` result leaves no trace that affects
 any later call. Two kinds of state are **deliberate** and out of B4's scope: the
 idempotency record for a key (B1), and the cancellation record for a cancelled

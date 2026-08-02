@@ -765,14 +765,15 @@
     {
       "id": "B-001",
       "clause": "B1",
-      "description": "Idempotency. Replaying the same key returns the original booking_id and creates no second booking.",
+      "description": "Idempotency. Replaying the same key returns the original booking_id and creates no second booking. Corrected 2026-08-02: `now` was absent, which SPEC.md §5.1 requires on every verb.",
       "steps": [
         {
           "call": "book",
           "args": {
             "start": "2026-06-01T13:00:00Z",
             "end": "2026-06-01T14:00:00Z",
-            "idempotency_key": "k1"
+            "idempotency_key": "k1",
+            "now": "2026-06-01T12:00:00Z"
           },
           "expect": {
             "status": "confirmed"
@@ -784,7 +785,8 @@
           "args": {
             "start": "2026-06-01T13:00:00Z",
             "end": "2026-06-01T14:00:00Z",
-            "idempotency_key": "k1"
+            "idempotency_key": "k1",
+            "now": "2026-06-01T12:00:00Z"
           },
           "expect": {
             "status": "confirmed",
@@ -828,17 +830,33 @@
         {
           "assert": "no two confirmed bookings intersect"
         }
-      ]
+      ],
+      "delegated_to": "SPEC-0002 acceptance: P-001 (exclusivity), P-005 (reschedule atomicity), P-009 (concurrent reschedule)",
+      "delegation_reason": "SPEC-0001 is storage-agnostic by contract (§1). Exclusivity under real concurrency is a property of the store, not of these semantics — an in-process check is a time-of-check-to-time-of-use race. The clause stands; its proof lives where a store exists."
     },
     {
       "id": "B-003",
       "clause": "B3",
-      "description": "Revalidation at commit. A slot valid at compute time but now inside the minimum-notice window returns `expired`, not `confirmed`, and leaves no state.",
+      "description": "Revalidation at commit. A slot valid at compute time but now inside the minimum-notice window returns `expired`, not `confirmed`, and leaves no state. Corrected 2026-08-02: the request lacked availability, duration, granularity and query, so it was not runnable. Corrected 2026-08-02: the book step omitted minimum_notice_minutes, so there was no constraint to revalidate and the case could not distinguish a correct implementation from one that never revalidates at all.",
       "steps": [
         {
           "call": "compute_slots",
           "args": {
+            "owner_timezone": "America/New_York",
+            "availability": [
+              {
+                "weekday": "MO",
+                "start": "09:00",
+                "end": "11:00"
+              }
+            ],
+            "duration_minutes": 60,
+            "granularity_minutes": 60,
             "minimum_notice_minutes": 60,
+            "query": {
+              "from": "2026-06-01T00:00:00Z",
+              "to": "2026-06-02T00:00:00Z"
+            },
             "now": "2026-06-01T11:00:00Z"
           },
           "capture": "slot"
@@ -848,7 +866,8 @@
           "args": {
             "slot": "$slot",
             "idempotency_key": "k2",
-            "now": "2026-06-01T12:45:00Z"
+            "now": "2026-06-01T12:45:00Z",
+            "minimum_notice_minutes": 60
           },
           "expect": {
             "status": "expired"
@@ -1195,7 +1214,9 @@
         {
           "assert": "$id10 is never cancelled"
         }
-      ]
+      ],
+      "delegated_to": "SPEC-0002 acceptance: P-001 (exclusivity), P-005 (reschedule atomicity), P-009 (concurrent reschedule)",
+      "delegation_reason": "SPEC-0001 is storage-agnostic by contract (§1). Exclusivity under real concurrency is a property of the store, not of these semantics — an in-process check is a time-of-check-to-time-of-use race. The clause stands; its proof lives where a store exists."
     },
     {
       "id": "B-011",
