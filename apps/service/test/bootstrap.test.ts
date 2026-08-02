@@ -111,3 +111,20 @@ test('an invite stays spent after the account that used it is deleted', async ()
   const boot2 = await bootstrapInvite(db);
   assert.notEqual(boot2.code, boot.code, 'a spent invite is never re-offered');
 });
+
+test('P6 a migration file is applied exactly once, however often we boot', async () => {
+  const { migrate } = await import('../src/db.ts');
+  const first = await migrate(db);
+  assert.equal(first.length, 0, 'already applied by the before() hook');
+
+  const ledger = await db.query(`SELECT count(*)::int AS c FROM schema_migrations`);
+  assert.ok(Number(ledger.rows[0]?.['c']) >= 4, 'every file is recorded');
+
+  // Booting repeatedly must not re-run anything -- 001 rebuilds the exclusion
+  // constraint, which revalidates the table under a lock.
+  for (let i = 0; i < 3; i++) assert.equal((await migrate(db)).length, 0);
+
+  // And concurrent boots claim files rather than racing to apply them.
+  const together = await Promise.all([migrate(db), migrate(db), migrate(db)]);
+  assert.deepEqual(together, [[], [], []]);
+});

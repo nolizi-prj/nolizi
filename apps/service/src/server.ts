@@ -115,10 +115,30 @@ export async function start(): Promise<{ close: () => Promise<void>; port: numbe
     console.log('[http] X-Forwarded-For ignored — set TRUST_PROXY=true only behind a proxy that overwrites it');
   }
 
+  // A form on this service carries a name, an address and two timestamps.
+  // Buffering whatever arrives lets one request exhaust memory, so the cap is
+  // generous for the real thing and useless for that.
+  const MAX_BODY_BYTES = 64 * 1024;
+
   const server = createServer((req, res) => {
     const chunks: Buffer[] = [];
-    req.on('data', (c: Buffer) => chunks.push(c));
+    let size = 0;
+    let tooLarge = false;
+    req.on('data', (c: Buffer) => {
+      size += c.length;
+      if (size > MAX_BODY_BYTES) {
+        if (!tooLarge) {
+          tooLarge = true;
+          res.writeHead(413, { 'content-type': 'text/plain' });
+          res.end('request too large');
+          req.destroy();
+        }
+        return;
+      }
+      chunks.push(c);
+    });
     req.on('end', () => {
+      if (tooLarge) return;
       const raw = Buffer.concat(chunks).toString('utf8');
       const form = Object.fromEntries(new URLSearchParams(raw));
       const url = new URL(req.url ?? '/', 'http://localhost');
