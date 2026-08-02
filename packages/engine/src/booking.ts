@@ -165,7 +165,7 @@ export class InMemoryBookingStore implements BookingStore {
       return { ok: false as const, reason: 'conflict' as const };
     }
     this.#byId.set(bookingId, { booking_id: bookingId, start, end, status: 'confirmed' });
-    this.#byKey.set(key, bookingId);
+    this.#rememberKey(key, bookingId);
     return { ok: true as const };
   }
 
@@ -173,7 +173,7 @@ export class InMemoryBookingStore implements BookingStore {
     const rec = this.#byId.get(bookingId);
     if (!rec) return;
     this.#byId.set(bookingId, { ...rec, status: 'cancelled' });
-    this.#byKey.set(key, bookingId);
+    this.#rememberKey(key, bookingId);
   }
 
   move(bookingId: string, newStart: Instant, newEnd: Instant, key: string) {
@@ -185,7 +185,7 @@ export class InMemoryBookingStore implements BookingStore {
       return { ok: false as const, reason: 'conflict' as const };
     }
     this.#byId.set(bookingId, { ...rec, start: newStart, end: newEnd });
-    this.#byKey.set(key, bookingId);
+    this.#rememberKey(key, bookingId);
     return { ok: true as const };
   }
 
@@ -196,6 +196,18 @@ export class InMemoryBookingStore implements BookingStore {
 
   all(): BookingRecord[] {
     return [...this.#byId.values()];
+  }
+
+  /**
+   * First use of a key wins. Rebinding it would make a later replay report a
+   * DIFFERENT booking than the one the key created, silently breaking B1 and
+   * B5.1 across bookings — a cancel or a move must never steal another
+   * booking's key.
+   */
+  #rememberKey(key: string, bookingId: string): void {
+    const existing = this.#byKey.get(key);
+    if (existing !== undefined && existing !== bookingId) return;
+    this.#byKey.set(key, bookingId);
   }
 
   #intersectsConfirmed(start: Instant, end: Instant, exceptId: string | null): boolean {

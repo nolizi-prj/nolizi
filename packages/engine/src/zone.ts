@@ -35,8 +35,11 @@ export function classifyWallTime(
   if (earlier.epochNanoseconds === later.epochNanoseconds) {
     return { kind: 'normal', instant: earlier.toInstant() };
   }
-  const roundTripped = earlier.toPlainDateTime().toString().slice(11, 16);
-  if (roundTripped === time) {
+  // Compare the WHOLE local date-time, not just the clock face. A zone that
+  // skips an entire calendar day (Pacific/Apia, 2011-12-30) resolves to the
+  // same wall time on a DIFFERENT date, so an HH:MM comparison reads a
+  // nonexistent day as an ambiguous hour and offers slots that never occur.
+  if (earlier.toPlainDateTime().equals(plain)) {
     return {
       kind: 'ambiguous',
       instant: earlier.toInstant(),
@@ -97,10 +100,29 @@ export function materializeWindow(
   }
 
   if (endInstant === null) {
+    // The next local date, for overnight windows. An ambiguous end here has two
+    // occurrences and we want the first one at or after the start, exactly as
+    // on the same day — taking `instant` unconditionally would pick an end
+    // BEFORE the start and yield a silently empty window.
     const nextDate = Temporal.PlainDate.from(date).add({ days: 1 }).toString();
     const next = classifyWallTime(timezone, nextDate, endTime);
-    if (next.kind === 'nonexistent') return { ok: false, reason: 'nonexistent_end' };
-    endInstant = next.instant;
+    if (next.kind !== 'nonexistent') {
+      const candidates = next.kind === 'ambiguous' ? [next.instant, next.second] : [next.instant];
+      for (const c of candidates) {
+        if (Temporal.Instant.compare(c, startInstant) >= 0) {
+          endInstant = c;
+          break;
+        }
+      }
+    }
+    if (endInstant === null) return { ok: false, reason: 'nonexistent_end' };
+  }
+
+  // A window that does not advance is malformed, not empty. Returning it would
+  // produce zero slots with no diagnostic, which is indistinguishable from a
+  // day that is legitimately fully booked.
+  if (Temporal.Instant.compare(endInstant, startInstant) <= 0) {
+    return { ok: false, reason: 'nonexistent_end' };
   }
 
   return {

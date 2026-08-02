@@ -759,6 +759,66 @@
       "expect": {
         "byte_identical_across_runs": true
       }
+    },
+    {
+      "id": "C-022",
+      "clause": "S3",
+      "description": "A zone that skips an ENTIRE CALENDAR DAY. Pacific/Apia had no 2011-12-30 when it crossed the date line. Comparing only the clock face reads this as an ambiguous hour, because the same wall time exists on the adjacent date, and offers slots that never occurred. Added 2026-08-02. Found by adversarial code review of the first implementation, not by this suite — the suite is a floor and this is what it had missed.",
+      "request": {
+        "owner_timezone": "Pacific/Apia",
+        "availability": [
+          {
+            "weekday": "FR",
+            "start": "09:00",
+            "end": "17:00"
+          }
+        ],
+        "duration_minutes": 60,
+        "granularity_minutes": 60,
+        "query": {
+          "from": "2011-12-28T00:00:00Z",
+          "to": "2012-01-01T00:00:00Z"
+        },
+        "now": "2011-12-01T00:00:00Z"
+      },
+      "expect": {
+        "slots": [],
+        "diagnostics": [
+          {
+            "code": "NONEXISTENT_LOCAL_TIME"
+          }
+        ]
+      }
+    },
+    {
+      "id": "C-023",
+      "clause": "S1",
+      "description": "An overnight window whose END is skipped by the spring-forward transition. 23:00-02:30 on 2026-03-07 in America/New_York: 02:30 never occurs on the 8th. The window is malformed and skipped with a diagnostic, NOT silently extended to the 9th and NOT returned as an empty window indistinguishable from a fully booked day. Added 2026-08-02. Found by adversarial code review of the first implementation, not by this suite — the suite is a floor and this is what it had missed.",
+      "request": {
+        "owner_timezone": "America/New_York",
+        "availability": [
+          {
+            "weekday": "SA",
+            "start": "23:00",
+            "end": "02:30"
+          }
+        ],
+        "duration_minutes": 60,
+        "granularity_minutes": 60,
+        "query": {
+          "from": "2026-03-07T00:00:00Z",
+          "to": "2026-03-10T00:00:00Z"
+        },
+        "now": "2026-03-01T00:00:00Z"
+      },
+      "expect": {
+        "slots": [],
+        "diagnostics": [
+          {
+            "code": "NONEXISTENT_LOCAL_TIME"
+          }
+        ]
+      }
     }
   ],
   "booking_cases": [
@@ -1348,6 +1408,66 @@
         },
         {
           "assert": "confirmed_booking_count == 2"
+        }
+      ]
+    },
+    {
+      "id": "B-013",
+      "clause": "B1, B5.1",
+      "description": "An idempotency key belongs to the booking that first used it, and no later operation may steal it. Cancelling booking B while passing booking A's key must not rebind that key: a replay of A's key must still report A. Added 2026-08-02. Found by adversarial code review of the first implementation, not by this suite — the suite is a floor and this is what it had missed.",
+      "steps": [
+        {
+          "call": "book",
+          "args": {
+            "start": "2026-06-15T09:00:00Z",
+            "end": "2026-06-15T10:00:00Z",
+            "idempotency_key": "kA",
+            "now": "2026-06-15T07:00:00Z"
+          },
+          "expect": {
+            "status": "confirmed"
+          },
+          "capture": "idA"
+        },
+        {
+          "call": "book",
+          "args": {
+            "start": "2026-06-15T11:00:00Z",
+            "end": "2026-06-15T12:00:00Z",
+            "idempotency_key": "kB",
+            "now": "2026-06-15T07:00:00Z"
+          },
+          "expect": {
+            "status": "confirmed"
+          },
+          "capture": "idB"
+        },
+        {
+          "call": "cancel",
+          "args": {
+            "booking_id": "$idB",
+            "idempotency_key": "kA",
+            "now": "2026-06-15T07:30:00Z"
+          },
+          "expect": {
+            "status": "cancelled"
+          }
+        },
+        {
+          "call": "book",
+          "args": {
+            "start": "2026-06-15T09:00:00Z",
+            "end": "2026-06-15T10:00:00Z",
+            "idempotency_key": "kA",
+            "now": "2026-06-15T07:40:00Z"
+          },
+          "expect": {
+            "status": "confirmed",
+            "booking_id": "$idA"
+          }
+        },
+        {
+          "assert": "confirmed_booking_count == 1"
         }
       ]
     }

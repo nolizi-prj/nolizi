@@ -133,6 +133,16 @@ materializes to the absolute interval starting at the **earliest** instant on `D
 whose local time is `S`, and ending at the **first instant at or after that start**
 whose local time is `E`.
 
+**The search for `E` is bounded to `D` and the following local date**, which is
+what makes overnight windows (`22:00–02:00`) work without letting a window run
+for days. If `E` does not occur at or after the start within that bound — because
+a transition skipped it — the window is **malformed**, and is skipped with a
+`NONEXISTENT_LOCAL_TIME` diagnostic exactly as a nonexistent start is. An
+unbounded search would silently turn `23:00–02:30` on a spring-forward eve into a
+27-hour window, which is never what a daily availability rule means. *Bound added
+2026-08-02; adversarial review of the first implementation found the clause
+under-specified here and the behaviour therefore accidental.*
+
 **S2 · Spring forward — window spanning the gap.** Follows from S1 without a
 special case. `01:00–04:00` on `2026-03-08` in `America/New_York` materializes to
 `06:00Z–08:00Z` — **two absolute hours, not three.** Local `02:00–03:00` never
