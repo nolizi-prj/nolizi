@@ -441,17 +441,20 @@ or enforcement, and none of it should be assumed present:
 
 | Clause | Missing |
 |---|---|
-| **I1** | Invite redemption. The table and its unique index exist; nothing consumes an invite. |
-| **I2** | The flag fails closed and is refused while D-105 is open, but no signup route consults it. |
-| **I3** | Sessions. Table only — no login, no cookie issued, no logout. |
-| **I4** | The owner application. No owner-scoped route exists, so cross-account denial is untested by absence rather than enforced. |
-| **L3** | Token expiry is never checked. A management link works indefinitely. |
-| **L4** | Reschedule over HTTP. The store implements it and it is tested there; no route reaches it. |
+| **L3** | Token expiry is never checked on management links. A booking link works indefinitely. |
+| **L4** | Reschedule over HTTP. The store implements it and it is proven under contention; no route reaches it. |
 | **D3** | Owner deletion. A booker can delete their own details; an owner cannot delete their account. |
 | **D6/D7** | The subprocessor list and the retention statement are not published. |
-| **O2** | No secret loading, because no real database connection is opened yet. |
+| **O2** | Secret loading is present but no secret is required yet beyond the database URL. |
 | **O4** | Versions are reported on readiness but a mismatch does not refuse startup. |
 | **O5** | Server timezone independence is asserted nowhere. |
+
+**Implemented since — I1, I2, I3, I4 (2026-08-02).** Invites are consumed
+atomically with account creation and proven under 15 rounds of parallel
+redemption; sign-in is passwordless with single-use expiring links; sessions are
+opaque server-side references invalidated on logout; and owner-scoped access is
+filtered **at the query**, verified by reaching for another owner's schedule by
+direct identifier rather than by looking for a button.
 
 **Database drivers — resolved 2026-08-02.** `DATABASE_URL` now selects
 node-postgres with a pooled **connection per transaction**, which is what makes a

@@ -9,7 +9,14 @@ import { randomBytes, randomUUID } from 'node:crypto';
 import { Temporal } from '@js-temporal/polyfill';
 import { PostgresBookingStore, type SqlClient, type Transactor } from './store.ts';
 import { availableSlots, findScheduleBySlug, type Schedule } from './schedules.ts';
-import { bookingPage, confirmedPage, errorPage, managePage } from './pages.ts';
+import {
+  bookingPage, confirmedPage, errorPage, loginPage, managePage, ownerHome, signupPage,
+  type ScheduleSummary,
+} from './pages.ts';
+import {
+  clearedCookie, consumeSignInToken, createSession, destroySession, issueSignInToken,
+  ownerForSession, readCookie, redeemInvite, sessionCookie,
+} from './identity.ts';
 import { RATE_LIMITS, type Config } from './config.ts';
 import type { MailPort } from './mail.ts';
 
@@ -95,11 +102,20 @@ function noticeExpired(startIso: string, nowIso: string, noticeMinutes: number):
 
 export async function handle(
   deps: AppDeps,
-  req: { method: string; path: string; ip: string; form?: Record<string, string> },
+  req: {
+    method: string;
+    path: string;
+    ip: string;
+    form?: Record<string, string>;
+    cookie?: string;
+    query?: Record<string, string>;
+  },
 ): Promise<Reply> {
   const { sql, config, mail } = deps;
   const now = deps.now();
   const parts = req.path.split('/').filter(Boolean);
+  const secure = config.baseUrl.startsWith('https://');
+  const sessionId = readCookie(req.cookie, 'pumasi_session');
 
   // O3 · health means the process is up; readiness means it can actually serve.
   if (req.path === '/healthz') return json(200, { status: 'ok', commit: config.commit });
@@ -172,6 +188,155 @@ export async function handle(
       return html(200, errorPage(200, 'Your booking is cancelled and your details are deleted.'));
     }
     return html(405, errorPage(405, 'Method not allowed.'));
+  }
+
+  // ── owner surfaces (I1–I4) ───────────────────────────────────────────────
+  if (parts[0] === 'signup') {
+    // I2 · public signup stays blocked; an invite is the only way in.
+    if (req.method === 'GET') {
+      return html(200, signupPage(req.query?.['invite'] ?? ''));
+    }
+    const f = req.form ?? {};
+    const result = await redeemInvite(
+      sql, deps.tx,
+      {
+        code: (f['invite'] ?? '').trim(),
+        email: (f['email'] ?? '').trim(),
+        displayName: (f['display_name'] ?? '').trim(),
+        timezone: (f['timezone'] ?? 'UTC').trim(),
+      },
+      config.maxOwnerAccounts,
+    );
+    if (!result.ok) {
+      const message =
+        result.reason === 'ceiling'
+          ? 'This service has reached its account limit and is not taking more.'
+          : result.reason === 'already_registered'
+            ? 'That address already has an account. Sign in instead.'
+            : 'That invite is not valid or has already been used.';
+      return html(400, signupPage((f['invite'] ?? '').trim(), message));
+    }
+    const sid = await createSession(sql, result.owner.owner_id, now, config.sessionTtlHours);
+    return {
+      status: 303,
+      headers: { location: '/app', 'set-cookie': sessionCookie(sid, secure, config.sessionTtlHours) },
+      body: '',
+    };
+  }
+
+  if (parts[0] === 'login') {
+    if (req.method === 'GET') return html(200, loginPage());
+    const email = (req.form?.['email'] ?? '').trim();
+    if (await overLimit(sql, `login:${req.ip}`, RATE_LIMITS.booking_attempts_per_ip_per_minute, 60, now)) {
+      return html(429, errorPage(429, 'Too many attempts. Try again shortly.'));
+    }
+    const { rows } = await sql.query(`SELECT owner_id FROM owners WHERE lower(email) = lower($1)`, [email]);
+    if (rows[0]) {
+      const token = await issueSignInToken(sql, String(rows[0]['owner_id']), now);
+      await mail.send({ kind: 'signin', to: email, bookingId: '', start: now, token });
+    }
+    // The same answer either way: whether an address has an account is not
+    // something an unauthenticated caller gets to learn.
+    return html(200, loginPage(true));
+  }
+
+  if (parts[0] === 'auth' && parts[1]) {
+    const ownerId = await consumeSignInToken(sql, parts[1], now);
+    if (!ownerId) return html(400, errorPage(400, 'That sign-in link has expired or was already used.'));
+    const sid = await createSession(sql, ownerId, now, config.sessionTtlHours);
+    return {
+      status: 303,
+      headers: { location: '/app', 'set-cookie': sessionCookie(sid, secure, config.sessionTtlHours) },
+      body: '',
+    };
+  }
+
+  if (parts[0] === 'logout' && req.method === 'POST') {
+    if (sessionId) await destroySession(sql, sessionId);
+    return { status: 303, headers: { location: '/login', 'set-cookie': clearedCookie(secure) }, body: '' };
+  }
+
+  if (parts[0] === 'app') {
+    const owner = await ownerForSession(sql, sessionId, now);
+    if (!owner) return { status: 303, headers: { location: '/login' }, body: '' };
+
+    if (req.method === 'POST' && parts[1] === 'schedules' && !parts[2]) {
+      const f = req.form ?? {};
+      const slug = (f['slug'] ?? '').trim().toLowerCase();
+      if (!/^[a-z0-9-]{2,40}$/.test(slug)) {
+        return html(400, errorPage(400, 'A link may use lowercase letters, digits and dashes.'));
+      }
+      try {
+        await sql.query(
+          `INSERT INTO schedules (schedule_id, owner_id, slug, title, duration_minutes,
+             granularity_minutes, minimum_notice_minutes, maximum_horizon_days)
+           VALUES ($1, $2, $3, $4, $5, $5, 60, 30)`,
+          [randomUUID(), owner.owner_id, slug, (f['title'] ?? 'Booking').trim(),
+           Number(f['duration_minutes'] ?? 30)],
+        );
+      } catch {
+        return html(409, errorPage(409, 'That link is already taken.'));
+      }
+      return { status: 303, headers: { location: '/app' }, body: '' };
+    }
+
+    if (req.method === 'POST' && parts[1] === 'schedules' && parts[2] && parts[3] === 'availability') {
+      // I4 · scoped AT THE QUERY. Owning the row is a condition of the write,
+      // not something checked separately and then trusted.
+      const upd = await sql.query(
+        `SELECT schedule_id FROM schedules WHERE schedule_id = $1 AND owner_id = $2`,
+        [parts[2], owner.owner_id],
+      );
+      if (!upd.rows[0]) return html(404, errorPage(404, 'No such booking page.'));
+
+      const f = req.form ?? {};
+      await deps.tx.transaction(async (tx) => {
+        await tx.query(`DELETE FROM availability_rules WHERE schedule_id = $1`, [parts[2]]);
+        for (const d of ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU']) {
+          const s = (f[`${d}_start`] ?? '').trim();
+          const e = (f[`${d}_end`] ?? '').trim();
+          if (!/^\d{2}:\d{2}$/.test(s) || !/^\d{2}:\d{2}$/.test(e)) continue;
+          await tx.query(
+            `INSERT INTO availability_rules (schedule_id, weekday, starts_local, ends_local)
+             VALUES ($1, $2, $3, $4)`,
+            [parts[2], d, s, e],
+          );
+        }
+      });
+      return { status: 303, headers: { location: '/app' }, body: '' };
+    }
+
+    // I4 · every owner-scoped read is filtered by the session's account here,
+    // not by hiding controls in the interface.
+    const { rows } = await sql.query(
+      `SELECT s.schedule_id, s.slug, s.title, s.duration_minutes,
+              (SELECT count(*)::int FROM bookings b
+                WHERE b.schedule_id = s.schedule_id AND b.status='confirmed'
+                  AND b.starts_at > now()) AS upcoming
+         FROM schedules s WHERE s.owner_id = $1 ORDER BY s.slug`,
+      [owner.owner_id],
+    );
+    const summaries: ScheduleSummary[] = [];
+    for (const r of rows) {
+      const rules = await sql.query(
+        `SELECT weekday, starts_local, ends_local FROM availability_rules
+          WHERE schedule_id = $1 ORDER BY weekday`,
+        [r['schedule_id']],
+      );
+      summaries.push({
+        schedule_id: String(r['schedule_id']),
+        slug: String(r['slug']),
+        title: String(r['title']),
+        duration_minutes: Number(r['duration_minutes']),
+        upcoming: Number(r['upcoming'] ?? 0),
+        rules: rules.rows.map((x) => ({
+          weekday: String(x['weekday']),
+          start: String(x['starts_local']),
+          end: String(x['ends_local']),
+        })),
+      });
+    }
+    return html(200, ownerHome(owner, summaries, config.baseUrl));
   }
 
   // ── the public booking page ──────────────────────────────────────────────

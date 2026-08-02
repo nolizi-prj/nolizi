@@ -64,6 +64,14 @@ export function renderMessage(m: MailMessage, baseUrl: string): RenderedMail {
         subject: `Cancelled: ${when}`,
         text: `This booking has been cancelled.\n\nIt was: ${when}\n\nThat time is now free for someone else.\n`,
       };
+    case 'signin':
+      return {
+        subject: 'Your sign-in link',
+        text:
+          `Use this link to sign in:\n  ${baseUrl.replace(/\/$/, '')}/auth/${m.token ?? ''}\n\n` +
+          `It works once and expires in 20 minutes.\n\n` +
+          `If you did not ask for it, nothing has happened and you can ignore this.\n`,
+      };
     case 'rescheduled':
       return {
         subject: `Moved: ${when}`,

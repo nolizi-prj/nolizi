@@ -168,3 +168,112 @@ ${
 export function errorPage(code: number, message: string): string {
   return SHELL(String(code), `<h1>${code}</h1><p class="err">${esc(message)}</p>`);
 }
+
+// ── owner surfaces ─────────────────────────────────────────────────────────
+
+export function signupPage(inviteCode: string, error?: string): string {
+  return SHELL(
+    'Create your account',
+    `<h1>Create your account</h1>
+${error ? `<p class="err">${esc(error)}</p>` : ''}
+<form method="post" action="/signup">
+  <input type="hidden" name="invite" value="${esc(inviteCode)}">
+  <label for="e">Email</label><input id="e" name="email" type="email" required autocomplete="email">
+  <label for="n">Your name</label><input id="n" name="display_name" required autocomplete="name">
+  <label for="tz">Your timezone</label><input id="tz" name="timezone" required value="UTC">
+  <p class="notice">Invite-only. Your address is used to sign you in and to tell
+    you about your own bookings, nothing else.</p>
+  <button class="submit" type="submit">Create account</button>
+</form>
+<script>var t=document.getElementById('tz');
+ t.value=Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC';</script>`,
+  );
+}
+
+export function loginPage(sent?: boolean, error?: string): string {
+  return SHELL(
+    'Sign in',
+    `<h1>Sign in</h1>
+${error ? `<p class="err">${esc(error)}</p>` : ''}
+${
+  sent
+    ? `<p class="ok">If that address has an account, a sign-in link is on its way.
+         It works once and expires in 20 minutes.</p>`
+    : `<form method="post" action="/login">
+         <label for="e">Email</label><input id="e" name="email" type="email" required autocomplete="email">
+         <p class="notice">We send a link rather than asking for a password. There
+           is no password on this account to forget or to leak.</p>
+         <button class="submit" type="submit">Send me a link</button>
+       </form>`
+}`,
+  );
+}
+
+export interface ScheduleSummary {
+  schedule_id: string;
+  slug: string;
+  title: string;
+  duration_minutes: number;
+  rules: { weekday: string; start: string; end: string }[];
+  upcoming: number;
+}
+
+const DAYS = ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'] as const;
+
+export function ownerHome(
+  owner: { display_name: string; email: string; timezone: string },
+  schedules: ScheduleSummary[],
+  baseUrl: string,
+  notice?: string,
+): string {
+  const list = schedules
+    .map(
+      (s) => `<div class="card">
+  <h2>${esc(s.title)}</h2>
+  <p class="muted">${s.duration_minutes} min &middot;
+    <a href="${esc(baseUrl)}/${esc(s.slug)}">${esc(baseUrl)}/${esc(s.slug)}</a>
+    &middot; ${s.upcoming} upcoming</p>
+  <form method="post" action="/app/schedules/${esc(s.schedule_id)}/availability">
+    <table class="avail">
+      ${DAYS.map((d) => {
+        const r = s.rules.find((x) => x.weekday === d);
+        return `<tr><th>${d}</th>
+          <td><input name="${d}_start" value="${esc(r?.start ?? '')}" placeholder="09:00" size="5"></td>
+          <td><input name="${d}_end" value="${esc(r?.end ?? '')}" placeholder="17:00" size="5"></td></tr>`;
+      }).join('')}
+    </table>
+    <p class="notice">Times are in your own timezone (${esc(owner.timezone)}).
+      Leave a day blank to be unavailable.</p>
+    <button class="submit" type="submit">Save availability</button>
+  </form>
+</div>`,
+    )
+    .join('');
+
+  return SHELL(
+    'Your schedules',
+    `<h1>Your schedules</h1>
+<p class="muted">${esc(owner.display_name)} &middot; ${esc(owner.email)} &middot; ${esc(owner.timezone)}
+  &middot; <form method="post" action="/logout" style="display:inline">
+    <button type="submit" class="linkish">sign out</button></form></p>
+${notice ? `<p class="ok">${esc(notice)}</p>` : ''}
+${schedules.length === 0 ? '<p class="muted">No booking pages yet.</p>' : list}
+<div class="card">
+  <h2>New booking page</h2>
+  <form method="post" action="/app/schedules">
+    <label for="t">Title</label><input id="t" name="title" required placeholder="Intro call">
+    <label for="sl">Link</label><input id="sl" name="slug" required placeholder="intro"
+      pattern="[a-z0-9-]{2,40}" title="lowercase letters, digits and dashes">
+    <label for="d">Minutes</label><input id="d" name="duration_minutes" type="number" value="30" min="1" required>
+    <button class="submit" type="submit">Create</button>
+  </form>
+</div>
+<style>
+ .card{border:1px solid var(--line);border-radius:.5rem;padding:1rem;margin:1rem 0}
+ .card h2{font-size:1.1rem;margin:0 0 .25rem}
+ table.avail{border-collapse:collapse} table.avail th{text-align:left;padding-right:.5rem;font-weight:600}
+ table.avail td{padding:.15rem .25rem}
+ .linkish{background:none;border:0;color:var(--accent);font:inherit;cursor:pointer;padding:0}
+</style>`,
+  );
+}

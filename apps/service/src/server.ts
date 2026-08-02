@@ -67,7 +67,14 @@ export async function start(): Promise<{ close: () => Promise<void>; port: numbe
       const ip = String(req.headers['x-forwarded-for'] ?? req.socket.remoteAddress ?? 'unknown')
         .split(',')[0]!
         .trim();
-      handle(deps, { method: req.method ?? 'GET', path: url.pathname, ip, form })
+      handle(deps, {
+        method: req.method ?? 'GET',
+        path: url.pathname,
+        ip,
+        form,
+        cookie: req.headers.cookie,
+        query: Object.fromEntries(url.searchParams),
+      })
         .then((reply) => {
           res.writeHead(reply.status, reply.headers);
           res.end(reply.body);
