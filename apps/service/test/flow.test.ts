@@ -295,3 +295,33 @@ test('D1 the booking ceiling is enforced, not merely configured', async () => {
   assert.equal(second.status, 503);
   assert.ok(second.body.includes('booking limit'));
 });
+
+test('a replay never discloses the management token', async () => {
+  // The default idempotency key is derived from slug, start and email -- all of
+  // which an attacker can guess or already knows. Returning the token on replay
+  // would hand a bearer credential that cancels and deletes someone else's
+  // booking to anyone who guesses an email address. Found in adversarial review.
+  await post('/intro/book', {
+    start: '2026-06-01T13:00:00Z', end: '2026-06-01T14:00:00Z',
+    name: 'Ada', email: 'ada@example.com',
+  });
+  const token = mail.sent.find((m) => m.to === 'ada@example.com')!.token!;
+
+  const replay = await post('/intro/book', {
+    start: '2026-06-01T13:00:00Z', end: '2026-06-01T14:00:00Z',
+    name: 'Mallory', email: 'ada@example.com',
+  }, '6.6.6.6');
+
+  assert.equal(replay.status, 200);
+  assert.ok(!replay.body.includes(token), 'the token must not appear in a replay response');
+  assert.ok(!replay.body.includes('/b/'), 'nor a management link of any kind');
+  assert.ok(replay.body.includes('confirmation message'), 'point the real booker at their email instead');
+});
+
+test('the booking page cannot be broken out of by slot data', async () => {
+  // JSON injected raw into a <script> body breaks out on "</script>". The data
+  // now lives in a JSON script tag with "<" escaped.
+  const page = await get('/intro');
+  assert.ok(page.body.includes('type="application/json" id="slots-data"'));
+  assert.ok(!/<script>[^<]*var all = \[/.test(page.body), 'slot data is not inlined into executable script');
+});

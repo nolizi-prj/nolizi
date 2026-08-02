@@ -39,6 +39,27 @@ export async function migrate(sql: SqlClient): Promise<string[]> {
   return applied;
 }
 
+/**
+ * A transaction lock.
+ *
+ * PGlite is ONE connection. Issuing BEGIN/COMMIT as separate statements from
+ * concurrent handlers interleaves them on that single session, so a second
+ * BEGIN lands inside the first transaction and neither is request-scoped. This
+ * serialises whole transactions instead. A real pool takes a client per
+ * transaction and does not need it.
+ */
+export class TxLock {
+  #tail: Promise<unknown> = Promise.resolve();
+  run<T>(fn: () => Promise<T>): Promise<T> {
+    const next = this.#tail.then(fn, fn);
+    this.#tail = next.then(
+      () => undefined,
+      () => undefined,
+    );
+    return next;
+  }
+}
+
 export async function createPglite(): Promise<{ sql: SqlClient; close: () => Promise<void> }> {
   const [{ PGlite }, { btree_gist }] = await Promise.all([
     import('@electric-sql/pglite'),

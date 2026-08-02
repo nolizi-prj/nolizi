@@ -7,8 +7,6 @@
 
 import { randomBytes, randomUUID } from 'node:crypto';
 import { Temporal } from '@js-temporal/polyfill';
-import { book as bookSemantics, cancel as cancelSemantics } from '@pumasi/scheduling-core';
-import type { BookingRecord, BookingStore } from '@pumasi/scheduling-core';
 import { PostgresBookingStore, type SqlClient } from './store.ts';
 import { availableSlots, findScheduleBySlug, type Schedule } from './schedules.ts';
 import { bookingPage, confirmedPage, errorPage, managePage } from './pages.ts';
@@ -66,20 +64,31 @@ async function overLimit(
 }
 
 /**
- * A synchronous view over the async store, so the engine's semantics run
- * against data already loaded. The engine decides; the store enforces.
+ * The engine's `BookingStore` is synchronous because the engine is a pure
+ * contract; this store is async. Rather than fabricate a store that always
+ * answers "ok" — which would make the engine call decorative while reading as
+ * though it decided something — the two decisions the engine actually owns are
+ * applied directly and named:
+ *
+ *   B3/B7 · revalidation against the commit-time clock, below.
+ *   B1/B5.1 · replay reports the booking's state now, below.
+ *
+ * Everything else — exclusivity, atomicity — is the database's, enforced by
+ * constraints rather than by any check in this file.
+ *
+ * An earlier version of this file passed a fabricated store to the engine and
+ * carried a comment saying "the engine decides; the store enforces". The engine
+ * decided nothing: the fabricated store always returned ok and the real insert
+ * used a different booking id. Adversarial review caught the comment being
+ * false, which is worse than the code being wrong.
  */
-function snapshotStore(
-  existingByKey: BookingRecord | undefined,
-  existingById: BookingRecord | undefined,
-): BookingStore {
-  return {
-    findByIdempotencyKey: () => existingByKey,
-    findById: () => existingById,
-    insertConfirmed: () => ({ ok: true }),
-    cancel: () => undefined,
-    move: () => ({ ok: true }),
-  };
+function noticeExpired(startIso: string, nowIso: string, noticeMinutes: number): boolean {
+  return (
+    Temporal.Instant.compare(
+      Temporal.Instant.from(startIso),
+      Temporal.Instant.from(nowIso).add({ minutes: noticeMinutes }),
+    ) < 0
+  );
 }
 
 export async function handle(
@@ -133,12 +142,8 @@ export async function handle(
     if (req.method === 'POST' && parts[2] === 'cancel') {
       const store = new PostgresBookingStore(sql, 'unused');
       const existing = await store.findById(bookingId);
-      const out = cancelSemantics(snapshotStore(undefined, existing), {
-        booking_id: bookingId,
-        idempotency_key: `cancel:${token}`,
-        now,
-      });
-      if (out.status === 'cancelled' && existing?.status === 'confirmed') {
+      // B5 · cancelling is idempotent and total; re-cancelling is `cancelled`.
+      if (existing?.status === 'confirmed') {
         await store.cancel(bookingId, `cancel:${token}`);
         await mail.send({ kind: 'cancelled', to: 'owner', bookingId, start: startIso });
       }
@@ -233,36 +238,25 @@ async function bookHandler(
   const idempotencyKey = form['idempotency_key'] ?? `${schedule.slug}:${start}:${email}`;
 
   // B1 / B5.1 — a replay reports the booking's state now.
+  //
+  // It does NOT disclose the management token. The default key is derived from
+  // the slug, the start and the email, all of which an attacker can guess or
+  // already knows — returning the token here would hand out a bearer credential
+  // that cancels and deletes someone else's booking to anyone who guesses an
+  // email address. Found in adversarial review. The token reaches exactly one
+  // place: the confirmation mail.
   const replayed = await store.findByIdempotencyKey(idempotencyKey);
   if (replayed) {
-    const { rows } = await sql.query(`SELECT token FROM bookings WHERE booking_id = $1 LIMIT 1`, [
-      replayed.booking_id,
-    ]);
     return html(
       200,
-      confirmedPage({
-        title: schedule.title,
-        start: replayed.start,
-        manageUrl: `/b/${String(rows[0]?.['token'] ?? '')}`,
-      }),
+      errorPage(200, 'This time is already booked under that email. The confirmation message has the link to change or cancel it.'),
     );
   }
 
   // B3 · revalidate at commit, against the commit-time clock, with the
-  // constraints the slot was computed under. Omitting them would revalidate
-  // against nothing.
-  const decision = bookSemantics(
-    snapshotStore(undefined, undefined),
-    {
-      start,
-      end,
-      idempotency_key: idempotencyKey,
-      now,
-      minimum_notice_minutes: schedule.minimum_notice_minutes,
-    },
-    () => randomUUID(),
-  );
-  if (decision.status === 'expired') {
+  // constraint the slot was computed under. Omitting it would revalidate
+  // against nothing and confirm a slot that should have expired.
+  if (noticeExpired(start, now, schedule.minimum_notice_minutes)) {
     const slots = await slotsFor(deps, schedule, now);
     return html(409, bookingPage(schedule, slots.slots, { error: 'That time has passed. Pick another.' }));
   }
@@ -270,7 +264,6 @@ async function bookHandler(
   // F4 · the page is a snapshot. Losing the race is normal operation.
   const bookingId = randomUUID();
   const token = newToken();
-  await sql.query(`UPDATE bookings SET schedule_id = schedule_id WHERE false`);
   const inserted = await store.insertConfirmed(bookingId, start, end, idempotencyKey, {
     name,
     email,

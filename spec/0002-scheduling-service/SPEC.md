@@ -397,6 +397,39 @@ the suite it describes — that is [`L-007`](../../lessons/L-007-restating-a-rul
 passed every other case in this suite while permitting a booking to hold two
 intervals at once.
 
+## 8.1 · Implementation status
+
+*Recorded 2026-08-02 after the first implementation and its adversarial review.
+A specification that lists clauses without saying which are built is a
+specification that will be believed.*
+
+**Built and tested** — the booker's path, end to end: F1–F5, B3/B4, L1/L2, M1–M5,
+D1/D2/D8/D9, I5/I6, O1/O3, P1a/P1b/P2a/P2c/P3/P4/P5/P6.
+
+**Declared but NOT implemented.** Each has schema or configuration but no route
+or enforcement, and none of it should be assumed present:
+
+| Clause | Missing |
+|---|---|
+| **I1** | Invite redemption. The table and its unique index exist; nothing consumes an invite. |
+| **I2** | The flag fails closed and is refused while D-105 is open, but no signup route consults it. |
+| **I3** | Sessions. Table only — no login, no cookie issued, no logout. |
+| **I4** | The owner application. No owner-scoped route exists, so cross-account denial is untested by absence rather than enforced. |
+| **L3** | Token expiry is never checked. A management link works indefinitely. |
+| **L4** | Reschedule over HTTP. The store implements it and it is tested there; no route reaches it. |
+| **D3** | Owner deletion. A booker can delete their own details; an owner cannot delete their account. |
+| **D6/D7** | The subprocessor list and the retention statement are not published. |
+| **O2** | No secret loading, because no real database connection is opened yet. |
+| **O4** | Versions are reported on readiness but a mismatch does not refuse startup. |
+| **O5** | Server timezone independence is asserted nowhere. |
+
+**Also not real yet:** `DATABASE_URL` is never opened. The service runs on an
+in-process PGlite, which is genuine PostgreSQL with `btree_gist` — so the
+constraints are real — but nothing survives a restart. Deployment needs a pooled
+driver and a connection per transaction; the single-connection lock in `db.ts`
+exists because BEGIN/COMMIT issued from concurrent handlers onto one session
+interleave and stop being request-scoped.
+
 ## 9 · Human involvement
 
 Under `CHARTER.md` Part 2 the steward does not approve specifications or tests.

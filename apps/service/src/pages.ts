@@ -64,6 +64,7 @@ export function bookingPage(
 <p class="muted">${schedule.duration_minutes} minutes &middot; times shown in <span id="tz"></span></p>
 ${err}${empty}
 <div id="list"><div class="slots">${buttons}</div></div>
+<script type="application/json" id="slots-data">${JSON.stringify(slots).replace(/</g, '\\u003c')}</script>
 <form method="post" action="/${esc(schedule.slug)}/book" id="f">
   <noscript><p class="muted">Times above are shown in UTC. With JavaScript on they
     appear in your own timezone.</p></noscript>
@@ -85,7 +86,7 @@ ${err}${empty}
   var tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
   document.getElementById('tz').textContent = tz;
   document.getElementById('btz').value = tz;
-  var all = ${JSON.stringify(slots)};
+  var all = JSON.parse(document.getElementById('slots-data').textContent);
   var dayFmt = new Intl.DateTimeFormat(undefined,{weekday:'long',month:'long',day:'numeric'});
   var timeFmt = new Intl.DateTimeFormat(undefined,{hour:'numeric',minute:'2-digit'});
   var byDay = {};

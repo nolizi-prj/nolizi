@@ -58,6 +58,15 @@ export class PostgresBookingStore {
   constructor(
     private readonly sql: SqlClient,
     private readonly ownerId: string,
+    /**
+     * Serialises whole transactions. Required when the client is a single
+     * connection, because BEGIN/COMMIT issued as separate statements from
+     * concurrent callers interleave on that one session and stop being
+     * request-scoped. A pooled driver supplies a no-op.
+     */
+    private readonly tx: { run<T>(fn: () => Promise<T>): Promise<T> } = {
+      run: (fn) => fn(),
+    },
   ) {}
 
   async findByIdempotencyKey(key: string): Promise<BookingRecord | undefined> {
@@ -97,6 +106,7 @@ export class PostgresBookingStore {
     key: string,
     booker?: { name: string; email: string; timezone: string; token: string },
   ): Promise<{ ok: true } | { ok: false; reason: 'conflict' }> {
+    return this.tx.run(async () => {
     try {
       await this.sql.query('BEGIN');
       await this.sql.query(
@@ -128,10 +138,12 @@ export class PostgresBookingStore {
       if (isConflict(err)) return { ok: false, reason: 'conflict' };
       throw err;
     }
+    });
   }
 
   /** B5 — cancelling releases the interval immediately. */
   async cancel(bookingId: string, key: string): Promise<void> {
+    return this.tx.run(async () => {
     await this.sql.query('BEGIN');
     try {
       await this.sql.query(
@@ -149,6 +161,7 @@ export class PostgresBookingStore {
       await this.sql.query('ROLLBACK').catch(() => undefined);
       throw err;
     }
+    });
   }
 
   /**
@@ -167,6 +180,7 @@ export class PostgresBookingStore {
     newEnd: string,
     key: string,
   ): Promise<{ ok: true } | { ok: false; reason: 'conflict' }> {
+    return this.tx.run(async () => {
     try {
       await this.sql.query('BEGIN');
 
@@ -206,6 +220,7 @@ export class PostgresBookingStore {
       if (isConflict(err)) return { ok: false, reason: 'conflict' };
       throw err;
     }
+    });
   }
 
   /** Every confirmed booking for this owner, for assertions and for `busy`. */
