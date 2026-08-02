@@ -423,12 +423,24 @@ or enforcement, and none of it should be assumed present:
 | **O4** | Versions are reported on readiness but a mismatch does not refuse startup. |
 | **O5** | Server timezone independence is asserted nowhere. |
 
-**Also not real yet:** `DATABASE_URL` is never opened. The service runs on an
-in-process PGlite, which is genuine PostgreSQL with `btree_gist` — so the
-constraints are real — but nothing survives a restart. Deployment needs a pooled
-driver and a connection per transaction; the single-connection lock in `db.ts`
-exists because BEGIN/COMMIT issued from concurrent handlers onto one session
-interleave and stop being request-scoped.
+**Database drivers — resolved 2026-08-02.** `DATABASE_URL` now selects
+node-postgres with a pooled **connection per transaction**, which is what makes a
+transaction actually request-scoped; without it, `BEGIN` and `COMMIT` issued from
+concurrent handlers onto one session interleave. With no URL the service runs on
+in-process PGlite — genuine PostgreSQL including `btree_gist`, so the constraints
+are real, but nothing survives a restart.
+
+**Host independence is a requirement, not a preference.** `P12` says no special
+protocol is required to participate, and the commercialization foundations make
+self-hosting first-class forever. The service therefore needs a port and
+optionally a database URL, and nothing more. A container image and a compose file
+cover the general case; any provider-specific file in the tree is one convenience
+among several and never a dependency.
+
+*The node-postgres path is implemented and typechecked but has not been exercised
+against a live server — there is no PostgreSQL and no container runtime on the
+development host. That is a gap in evidence rather than in code, and it closes
+the first time it runs against a real instance.*
 
 ## 9 · Human involvement
 

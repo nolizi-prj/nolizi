@@ -8,15 +8,19 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "build:test": "tsc -p tsconfig.test.json",
-    "test": "npm run build:test && node --test .build/test/*.test.js"
+    "test": "npm run build:test && node --test .build/test/*.test.js",
+    "dev": "SEED_DEMO=true npm run build && node dist/server.js",
+    "start": "node dist/server.js"
   },
   "dependencies": {
+    "@js-temporal/polyfill": "^0.5.1",
     "@pumasi/scheduling-core": "*",
-    "@js-temporal/polyfill": "^0.5.1"
+    "pg": "^8.22.0"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.4",
-    "typescript": "^5.7.0",
-    "@types/node": "^22.0.0"
+    "@types/node": "^22.0.0",
+    "@types/pg": "^8.20.3",
+    "typescript": "^5.7.0"
   }
 }

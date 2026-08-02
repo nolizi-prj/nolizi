@@ -14,9 +14,8 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { PGlite } from '@electric-sql/pglite';
-import { btree_gist } from '@electric-sql/pglite/contrib/btree_gist';
 import { PostgresBookingStore, type SqlClient } from '../src/store.ts';
+import { createPgliteDriver, type Database } from '../src/driver.ts';
 
 const here = dirname(fileURLToPath(import.meta.url));
 function migrationSql(): string {
@@ -30,43 +29,38 @@ function migrationSql(): string {
   throw new Error('migration not found');
 }
 
-let db: PGlite;
+let db: Database;
 let sql: SqlClient;
 
 async function fresh(): Promise<PostgresBookingStore> {
-  await db.exec('DROP TABLE IF EXISTS bookings, idempotency_keys CASCADE;');
-  await db.exec(migrationSql());
-  return new PostgresBookingStore(sql, 'owner-1');
+  await sql.exec('DROP TABLE IF EXISTS bookings, idempotency_keys CASCADE;');
+  await sql.exec(migrationSql());
+  return new PostgresBookingStore(sql, 'owner-1', db);
 }
 
 before(async () => {
-  db = await PGlite.create({ extensions: { btree_gist } });
-  sql = {
-    query: (text, params) => db.query(text, params as unknown[]) as never,
-    exec: async (text) => {
-      await db.exec(text);
-    },
-  };
+  db = await createPgliteDriver();
+  sql = db;
 });
 
 // ── P-002 · structural ─────────────────────────────────────────────────────
 test('P-002 both constraints exist in the live schema, and btree_gist is installed', async () => {
   await fresh();
-  const ext = await db.query<{ extname: string }>(
+  const ext = await sql.query(
     `SELECT extname FROM pg_extension WHERE extname = 'btree_gist'`,
   );
   assert.equal(ext.rows.length, 1, 'btree_gist must be installed');
 
-  const con = await db.query<{ conname: string; contype: string }>(
+  const con = await sql.query(
     `SELECT conname, contype FROM pg_constraint WHERE conname = 'bookings_no_overlap'`,
   );
-  assert.equal(con.rows[0]?.contype, 'x', 'P1a must be an EXCLUDE constraint, not a check');
+  assert.equal(con.rows[0]?.['contype'], 'x', 'P1a must be an EXCLUDE constraint, not a check');
 
-  const idx = await db.query<{ indexdef: string }>(
+  const idx = await sql.query(
     `SELECT indexdef FROM pg_indexes WHERE indexname = 'bookings_one_confirmed_per_booking'`,
   );
-  assert.match(idx.rows[0]?.indexdef ?? '', /UNIQUE/);
-  assert.match(idx.rows[0]?.indexdef ?? '', /confirmed/);
+  assert.match(String(idx.rows[0]?.['indexdef'] ?? ''), /UNIQUE/);
+  assert.match(String(idx.rows[0]?.['indexdef'] ?? ''), /confirmed/);
 });
 
 // ── P-001 · exclusivity, enforced by the database ──────────────────────────
@@ -94,7 +88,7 @@ test('P-001 the database refuses overlapping confirmed bookings for one owner', 
 
 test('P-001 a different owner may hold the same interval', async () => {
   const a = await fresh();
-  const b = new PostgresBookingStore(sql, 'owner-2');
+  const b = new PostgresBookingStore(sql, 'owner-2', db);
   assert.equal((await a.insertConfirmed('bk1', '2026-06-01T13:00:00Z', '2026-06-01T14:00:00Z', 'k1')).ok, true);
   assert.equal((await b.insertConfirmed('bk2', '2026-06-01T13:00:00Z', '2026-06-01T14:00:00Z', 'k2')).ok, true);
 });
@@ -126,13 +120,13 @@ test('P-005 P1b makes the two-confirmed-rows state impossible even by direct SQL
   // overlap, so P1a is satisfied and only P1b catches it. Written as raw SQL
   // because no application path should be trusted to prove this.
   await fresh();
-  await db.query(
+  await sql.query(
     `INSERT INTO bookings (booking_id, owner_id, starts_at, ends_at, status)
      VALUES ('bk1','owner-1','2026-06-11T09:00:00Z','2026-06-11T10:00:00Z','confirmed')`,
   );
   await assert.rejects(
     () =>
-      db.query(
+      sql.query(
         `INSERT INTO bookings (booking_id, owner_id, starts_at, ends_at, status)
          VALUES ('bk1','owner-1','2026-06-11T15:00:00Z','2026-06-11T16:00:00Z','confirmed')`,
       ),

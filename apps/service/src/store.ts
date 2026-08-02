@@ -54,20 +54,24 @@ function toRecord(row: Record<string, unknown>): BookingRecord {
  * An async store. The engine's `BookingStore` is synchronous by design — it is
  * a pure contract — so the service calls these directly rather than through it.
  */
+export interface Transactor {
+  /** Runs `fn` inside a transaction, on a connection of its own. */
+  transaction<T>(fn: (tx: SqlClient) => Promise<T>): Promise<T>;
+}
+
 export class PostgresBookingStore {
+  readonly #tx: Transactor;
+
   constructor(
     private readonly sql: SqlClient,
     private readonly ownerId: string,
-    /**
-     * Serialises whole transactions. Required when the client is a single
-     * connection, because BEGIN/COMMIT issued as separate statements from
-     * concurrent callers interleave on that one session and stop being
-     * request-scoped. A pooled driver supplies a no-op.
-     */
-    private readonly tx: { run<T>(fn: () => Promise<T>): Promise<T> } = {
-      run: (fn) => fn(),
-    },
-  ) {}
+    transactor?: Transactor,
+  ) {
+    // Falling back to running the body without a transaction would be silently
+    // unsafe, so the fallback is an explicit single-statement path instead: the
+    // caller gets the same client and no BEGIN is issued at all.
+    this.#tx = transactor ?? { transaction: (fn) => fn(sql) };
+  }
 
   async findByIdempotencyKey(key: string): Promise<BookingRecord | undefined> {
     const { rows } = await this.sql.query(
@@ -106,10 +110,9 @@ export class PostgresBookingStore {
     key: string,
     booker?: { name: string; email: string; timezone: string; token: string },
   ): Promise<{ ok: true } | { ok: false; reason: 'conflict' }> {
-    return this.tx.run(async () => {
-    try {
-      await this.sql.query('BEGIN');
-      await this.sql.query(
+    return this.#tx.transaction(async (tx) => {
+      try {
+      await tx.query(
         `INSERT INTO bookings
            (booking_id, owner_id, starts_at, ends_at, status, booker_name, booker_email, booker_tz, token)
          VALUES ($1, $2, $3, $4, 'confirmed', $5, $6, $7, $8)`,
@@ -126,41 +129,32 @@ export class PostgresBookingStore {
       );
       // B1 — first use of a key wins. ON CONFLICT DO NOTHING rather than an
       // upsert: rebinding would make a later replay report a different booking.
-      await this.sql.query(
+      await tx.query(
         `INSERT INTO idempotency_keys (key, booking_id) VALUES ($1, $2)
            ON CONFLICT (key) DO NOTHING`,
         [key, bookingId],
       );
-      await this.sql.query('COMMIT');
-      return { ok: true };
-    } catch (err) {
-      await this.sql.query('ROLLBACK').catch(() => undefined);
-      if (isConflict(err)) return { ok: false, reason: 'conflict' };
-      throw err;
-    }
+      return { ok: true as const };
+      } catch (err) {
+        if (isConflict(err)) return { ok: false as const, reason: 'conflict' as const };
+        throw err;
+      }
     });
   }
 
   /** B5 — cancelling releases the interval immediately. */
   async cancel(bookingId: string, key: string): Promise<void> {
-    return this.tx.run(async () => {
-    await this.sql.query('BEGIN');
-    try {
-      await this.sql.query(
+    await this.#tx.transaction(async (tx) => {
+      await tx.query(
         `UPDATE bookings SET status = 'cancelled'
           WHERE booking_id = $1 AND status = 'confirmed'`,
         [bookingId],
       );
-      await this.sql.query(
+      await tx.query(
         `INSERT INTO idempotency_keys (key, booking_id) VALUES ($1, $2)
            ON CONFLICT (key) DO NOTHING`,
         [key, bookingId],
       );
-      await this.sql.query('COMMIT');
-    } catch (err) {
-      await this.sql.query('ROLLBACK').catch(() => undefined);
-      throw err;
-    }
     });
   }
 
@@ -180,27 +174,20 @@ export class PostgresBookingStore {
     newEnd: string,
     key: string,
   ): Promise<{ ok: true } | { ok: false; reason: 'conflict' }> {
-    return this.tx.run(async () => {
-    try {
-      await this.sql.query('BEGIN');
-
+    return this.#tx.transaction(async (tx) => {
+      try {
       // P2c — take the row lock before reading, so a concurrent reschedule of
       // this booking waits here rather than racing us.
-      const { rows } = await this.sql.query(
+      const { rows } = await tx.query(
         `SELECT id, booking_id FROM bookings
           WHERE booking_id = $1 AND status = 'confirmed'
           FOR UPDATE`,
         [bookingId],
       );
-      if (!rows[0]) {
-        await this.sql.query('ROLLBACK');
-        return { ok: false, reason: 'conflict' };
-      }
+      if (!rows[0]) return { ok: false as const, reason: 'conflict' as const };
 
-      await this.sql.query(`UPDATE bookings SET status = 'cancelled' WHERE id = $1`, [
-        rows[0]['id'],
-      ]);
-      await this.sql.query(
+      await tx.query(`UPDATE bookings SET status = 'cancelled' WHERE id = $1`, [rows[0]['id']]);
+      await tx.query(
         `INSERT INTO bookings (booking_id, owner_id, starts_at, ends_at, status,
                                booker_name, booker_email, booker_tz, token)
          SELECT $1, owner_id, $2::timestamptz, $3::timestamptz, 'confirmed',
@@ -208,18 +195,16 @@ export class PostgresBookingStore {
            FROM bookings WHERE id = $4`,
         [bookingId, newStart, newEnd, rows[0]['id']],
       );
-      await this.sql.query(
+      await tx.query(
         `INSERT INTO idempotency_keys (key, booking_id) VALUES ($1, $2)
            ON CONFLICT (key) DO NOTHING`,
         [key, bookingId],
       );
-      await this.sql.query('COMMIT');
-      return { ok: true };
-    } catch (err) {
-      await this.sql.query('ROLLBACK').catch(() => undefined);
-      if (isConflict(err)) return { ok: false, reason: 'conflict' };
-      throw err;
-    }
+      return { ok: true as const };
+      } catch (err) {
+        if (isConflict(err)) return { ok: false as const, reason: 'conflict' as const };
+        throw err;
+      }
     });
   }
 

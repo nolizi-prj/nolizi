@@ -1,28 +1,41 @@
 /**
- * Node HTTP binding. Kept thin so `handle` stays testable without a socket.
+ * Process entry point. Host-agnostic: it needs a port and, optionally, a
+ * database URL. Nothing here knows about any particular platform.
  */
 
 import { createServer } from 'node:http';
 import { loadConfig, refusals } from './config.ts';
-import { createPglite, migrate } from './db.ts';
+import { migrate } from './db.ts';
+import { createDatabase, type Database } from './driver.ts';
 import { handle, type AppDeps } from './app.ts';
 import { RecordingMail, RetryingMail } from './mail.ts';
+import { seedDemo } from './seed.ts';
 
-export async function start(): Promise<void> {
+export async function start(): Promise<{ close: () => Promise<void>; port: number }> {
   const config = loadConfig();
 
-  // D-001 · a refusal is logged, so a setting that did not take effect is
+  // D-001 · refusals are logged, so a setting that did not take effect is
   // visible rather than silently ignored.
   for (const r of refusals()) console.warn(`[config] refused ${r.setting}: ${r.reason}`);
 
-  const { sql } = await createPglite();
+  const db: Database = await createDatabase(config.databaseUrl);
+  console.log(`[db] ${db.describe}`);
+  if (db.kind === 'pglite') {
+    console.warn('[db] no DATABASE_URL — using an in-process database. Nothing survives a restart.');
+  }
+
   let ready = false;
-  const applied = await migrate(sql);
-  ready = true; // P6 · migrations complete before anything serves
+  const applied = await migrate(db);
   console.log(`[db] migrations applied: ${applied.join(', ')}`);
+  if (process.env['SEED_DEMO'] === 'true') {
+    const seeded = await seedDemo(db);
+    console.log(`[db] demo data seeded: http://localhost:${config.port}/${seeded.slug}`);
+  }
+  ready = true; // P6 · migrations complete before anything serves
 
   const deps: AppDeps = {
-    sql,
+    sql: db,
+    tx: db,
     config,
     mail: new RetryingMail(new RecordingMail()),
     now: () => new Date().toISOString().replace('.000Z', 'Z'),
@@ -36,12 +49,10 @@ export async function start(): Promise<void> {
       const raw = Buffer.concat(chunks).toString('utf8');
       const form = Object.fromEntries(new URLSearchParams(raw));
       const url = new URL(req.url ?? '/', 'http://localhost');
-      handle(deps, {
-        method: req.method ?? 'GET',
-        path: url.pathname,
-        ip: (req.socket.remoteAddress ?? 'unknown'),
-        form,
-      })
+      const ip = String(req.headers['x-forwarded-for'] ?? req.socket.remoteAddress ?? 'unknown')
+        .split(',')[0]!
+        .trim();
+      handle(deps, { method: req.method ?? 'GET', path: url.pathname, ip, form })
         .then((reply) => {
           res.writeHead(reply.status, reply.headers);
           res.end(reply.body);
@@ -54,10 +65,20 @@ export async function start(): Promise<void> {
     });
   });
 
-  server.listen(config.port, () => console.log(`[http] listening on ${config.port}`));
+  await new Promise<void>((resolve) => server.listen(config.port, resolve));
+  console.log(`[http] listening on ${config.port}`);
+
+  return {
+    port: config.port,
+    close: async () => {
+      await new Promise<void>((resolve) => server.close(() => resolve()));
+      await db.close();
+    },
+  };
 }
 
-if (process.argv[1]?.endsWith('server.js') || process.argv[1]?.endsWith('server.ts')) {
+const invokedDirectly = process.argv[1]?.endsWith('server.js') || process.argv[1]?.endsWith('server.ts');
+if (invokedDirectly) {
   start().catch((e: Error) => {
     console.error(e);
     process.exit(1);

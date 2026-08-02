@@ -8,12 +8,14 @@
 
 import { test, before, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
-import { createPglite, migrate } from '../src/db.ts';
+import { migrate } from '../src/db.ts';
+import { createPgliteDriver, type Database } from '../src/driver.ts';
 import { handle, type AppDeps } from '../src/app.ts';
 import { loadConfig } from '../src/config.ts';
 import { AlwaysFailingMail, RecordingMail, RetryingMail } from '../src/mail.ts';
 import type { SqlClient } from '../src/store.ts';
 
+let db: Database;
 let sql: SqlClient;
 let mail: RecordingMail;
 let deps: AppDeps;
@@ -44,8 +46,8 @@ async function seed(): Promise<void> {
 }
 
 before(async () => {
-  const db = await createPglite();
-  sql = db.sql;
+  db = await createPgliteDriver();
+  sql = db;
   await migrate(sql);
 });
 
@@ -54,6 +56,7 @@ beforeEach(async () => {
   mail = new RecordingMail();
   deps = {
     sql,
+    tx: db,
     config: loadConfig({} as NodeJS.ProcessEnv),
     mail: new RetryingMail(mail),
     now: () => NOW,

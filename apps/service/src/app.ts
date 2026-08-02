@@ -7,7 +7,7 @@
 
 import { randomBytes, randomUUID } from 'node:crypto';
 import { Temporal } from '@js-temporal/polyfill';
-import { PostgresBookingStore, type SqlClient } from './store.ts';
+import { PostgresBookingStore, type SqlClient, type Transactor } from './store.ts';
 import { availableSlots, findScheduleBySlug, type Schedule } from './schedules.ts';
 import { bookingPage, confirmedPage, errorPage, managePage } from './pages.ts';
 import { RATE_LIMITS, type Config } from './config.ts';
@@ -35,6 +35,8 @@ export const newToken = (): string => randomBytes(32).toString('base64url');
 
 export interface AppDeps {
   sql: SqlClient;
+  /** Supplies a connection per transaction (driver.ts). */
+  tx: Transactor;
   config: Config;
   mail: MailPort;
   /** Injected so tests control it and the service never reads an ambient clock. */
@@ -140,7 +142,7 @@ export async function handle(
       return html(200, managePage({ title, start: startIso, token, status: String(r['status']) }));
     }
     if (req.method === 'POST' && parts[2] === 'cancel') {
-      const store = new PostgresBookingStore(sql, 'unused');
+      const store = new PostgresBookingStore(sql, 'unused', deps.tx);
       const existing = await store.findById(bookingId);
       // B5 · cancelling is idempotent and total; re-cancelling is `cancelled`.
       if (existing?.status === 'confirmed') {
@@ -234,7 +236,7 @@ async function bookHandler(
     );
   }
 
-  const store = new PostgresBookingStore(sql, schedule.owner_id);
+  const store = new PostgresBookingStore(sql, schedule.owner_id, deps.tx);
   const idempotencyKey = form['idempotency_key'] ?? `${schedule.slug}:${start}:${email}`;
 
   // B1 / B5.1 — a replay reports the booking's state now.
