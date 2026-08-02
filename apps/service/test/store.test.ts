@@ -41,7 +41,12 @@ async function fresh(): Promise<PostgresBookingStore> {
 
 before(async () => {
   db = await PGlite.create({ extensions: { btree_gist } });
-  sql = { query: (text, params) => db.query(text, params as unknown[]) as never };
+  sql = {
+    query: (text, params) => db.query(text, params as unknown[]) as never,
+    exec: async (text) => {
+      await db.exec(text);
+    },
+  };
 });
 
 // ── P-002 · structural ─────────────────────────────────────────────────────

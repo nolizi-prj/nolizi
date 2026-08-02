@@ -16,6 +16,11 @@ import type { BookingRecord, BookingStore } from '@pumasi/scheduling-core';
 /** The minimum surface a driver must offer. `pg` and PGlite both satisfy it. */
 export interface SqlClient {
   query(sql: string, params?: unknown[]): Promise<{ rows: Record<string, unknown>[] }>;
+  /**
+   * Run a multi-statement script. Separate from `query` because a parameterised
+   * statement can only carry one command — migrations need the other mode.
+   */
+  exec(sql: string): Promise<void>;
 }
 
 /** PostgreSQL SQLSTATE codes we translate rather than propagate. */

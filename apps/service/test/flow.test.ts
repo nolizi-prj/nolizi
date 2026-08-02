@@ -1,0 +1,297 @@
+/**
+ * SPEC-0002 — the booking flow, end to end.
+ *
+ * Real PostgreSQL semantics (PGlite + btree_gist), the real engine, the real
+ * handler. Nothing is stubbed except mail, which is a port precisely so it can
+ * be.
+ */
+
+import { test, before, beforeEach } from 'node:test';
+import assert from 'node:assert/strict';
+import { createPglite, migrate } from '../src/db.ts';
+import { handle, type AppDeps } from '../src/app.ts';
+import { loadConfig } from '../src/config.ts';
+import { AlwaysFailingMail, RecordingMail, RetryingMail } from '../src/mail.ts';
+import type { SqlClient } from '../src/store.ts';
+
+let sql: SqlClient;
+let mail: RecordingMail;
+let deps: AppDeps;
+
+// A Monday, 09:00–17:00 New York. 13:00Z is the first slot.
+const NOW = '2026-06-01T08:00:00Z';
+
+async function seed(): Promise<void> {
+  await sql.query(`DELETE FROM rate_events`);
+  await sql.query(`DELETE FROM idempotency_keys`);
+  await sql.query(`DELETE FROM bookings`);
+  await sql.query(`DELETE FROM availability_rules`);
+  await sql.query(`DELETE FROM schedules`);
+  await sql.query(`DELETE FROM owners`);
+  await sql.query(
+    `INSERT INTO owners (owner_id, email, display_name, timezone)
+     VALUES ('o1','owner@example.com','Owner','America/New_York')`,
+  );
+  await sql.query(
+    `INSERT INTO schedules (schedule_id, owner_id, slug, title, duration_minutes,
+        granularity_minutes, minimum_notice_minutes, maximum_horizon_days)
+     VALUES ('s1','o1','intro','Intro call',60,60,0,30)`,
+  );
+  await sql.query(
+    `INSERT INTO availability_rules (schedule_id, weekday, starts_local, ends_local)
+     VALUES ('s1','MO','09:00','12:00')`,
+  );
+}
+
+before(async () => {
+  const db = await createPglite();
+  sql = db.sql;
+  await migrate(sql);
+});
+
+beforeEach(async () => {
+  await seed();
+  mail = new RecordingMail();
+  deps = {
+    sql,
+    config: loadConfig({} as NodeJS.ProcessEnv),
+    mail: new RetryingMail(mail),
+    now: () => NOW,
+    ready: () => true,
+  };
+});
+
+const get = (path: string, ip = '1.1.1.1') => handle(deps, { method: 'GET', path, ip });
+const post = (path: string, form: Record<string, string>, ip = '1.1.1.1') =>
+  handle(deps, { method: 'POST', path, ip, form });
+
+test('health is up; readiness reports the versions actually in use', async () => {
+  const h = await get('/healthz');
+  assert.equal(h.status, 200);
+
+  const r = await get('/readyz');
+  assert.equal(r.status, 200);
+  const body = JSON.parse(r.body) as { status: string; tzdata: string };
+  assert.equal(body.status, 'ready');
+  assert.ok(body.tzdata && body.tzdata !== 'unknown', 'O4 requires the tzdata version be reported');
+
+  // O3 · not-ready is distinct from unhealthy.
+  const notReady = await handle({ ...deps, ready: () => false }, { method: 'GET', path: '/readyz', ip: '1.1.1.1' });
+  assert.equal(notReady.status, 503);
+});
+
+test('F1 the page offers exactly the slots the engine returned', async () => {
+  const page = await get('/intro');
+  assert.equal(page.status, 200);
+  // 09:00–12:00 New York on Monday 2026-06-01 is 13:00Z–16:00Z: three slots.
+  for (const t of ['2026-06-01T13:00:00Z', '2026-06-01T14:00:00Z', '2026-06-01T15:00:00Z']) {
+    assert.ok(page.body.includes(t), `expected ${t} on the page`);
+  }
+  assert.ok(!page.body.includes('data-start=\"2026-06-01T16:00:00Z\"'), 'no slot STARTS at 16:00Z — S5 forbids spilling past the window');
+});
+
+test('F2 the page sends UTC and converts only for display', async () => {
+  const page = await get('/intro');
+  assert.ok(page.body.includes('data-start="2026-06-01T13:00:00Z"'), 'server emits UTC');
+  assert.ok(page.body.includes('resolvedOptions().timeZone'), 'the browser supplies the display zone');
+  // The submitted field is the server's UTC value, not a formatted string.
+  assert.ok(page.body.includes(`document.getElementById('start').value = s.start`));
+});
+
+test('a booking is confirmed, stored, and removed from the page', async () => {
+  const r = await post('/intro/book', {
+    start: '2026-06-01T13:00:00Z',
+    end: '2026-06-01T14:00:00Z',
+    name: 'Ada',
+    email: 'ada@example.com',
+    booker_tz: 'Europe/London',
+  });
+  assert.equal(r.status, 200);
+  assert.ok(r.body.includes('Booked'));
+
+  const { rows } = await sql.query(`SELECT booker_name, status, schedule_id FROM bookings`);
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0]?.['booker_name'], 'Ada');
+  assert.equal(rows[0]?.['status'], 'confirmed');
+  assert.equal(rows[0]?.['schedule_id'], 's1');
+
+  const page = await get('/intro');
+  assert.ok(!page.body.includes('data-start="2026-06-01T13:00:00Z"'), 'the taken slot is gone');
+  assert.ok(page.body.includes('data-start="2026-06-01T14:00:00Z"'), 'the others remain');
+});
+
+test('F4 a slot taken between render and submit returns conflict with a refreshed list', async () => {
+  await post('/intro/book', {
+    start: '2026-06-01T13:00:00Z', end: '2026-06-01T14:00:00Z',
+    name: 'Ada', email: 'ada@example.com',
+  });
+  const second = await post('/intro/book', {
+    start: '2026-06-01T13:00:00Z', end: '2026-06-01T14:00:00Z',
+    name: 'Grace', email: 'grace@example.com',
+  }, '2.2.2.2');
+  assert.equal(second.status, 409);
+  assert.ok(second.body.includes('Someone just took that time'));
+  assert.ok(second.body.includes('2026-06-01T14:00:00Z'), 'the refreshed list is included');
+
+  const { rows } = await sql.query(`SELECT count(*)::int AS c FROM bookings WHERE status='confirmed'`);
+  assert.equal(Number(rows[0]?.['c']), 1);
+});
+
+test('F5 a double submission creates one booking', async () => {
+  const form = {
+    start: '2026-06-01T13:00:00Z', end: '2026-06-01T14:00:00Z',
+    name: 'Ada', email: 'ada@example.com', idempotency_key: 'k-double',
+  };
+  const a = await post('/intro/book', form);
+  const b = await post('/intro/book', form);
+  assert.equal(a.status, 200);
+  assert.equal(b.status, 200);
+  const { rows } = await sql.query(`SELECT count(*)::int AS c FROM bookings WHERE status='confirmed'`);
+  assert.equal(Number(rows[0]?.['c']), 1, 'users double-click');
+});
+
+test('B3 a slot that has passed the notice window is refused at commit', async () => {
+  await sql.query(`UPDATE schedules SET minimum_notice_minutes = 600 WHERE schedule_id='s1'`);
+  const r = await post('/intro/book', {
+    start: '2026-06-01T13:00:00Z', end: '2026-06-01T14:00:00Z',
+    name: 'Ada', email: 'ada@example.com',
+  });
+  assert.equal(r.status, 409);
+  assert.ok(r.body.includes('That time has passed'));
+  const { rows } = await sql.query(`SELECT count(*)::int AS c FROM bookings`);
+  assert.equal(Number(rows[0]?.['c']), 0, 'B4 — a non-confirmed result leaves no trace');
+});
+
+test('M3 a total mail outage does not invalidate a confirmed booking', async () => {
+  const failing = new RetryingMail(new AlwaysFailingMail());
+  const r = await handle(
+    { ...deps, mail: failing },
+    { method: 'POST', path: '/intro/book', ip: '3.3.3.3',
+      form: { start: '2026-06-01T13:00:00Z', end: '2026-06-01T14:00:00Z',
+              name: 'Ada', email: 'ada@example.com' } },
+  );
+  assert.equal(r.status, 200, 'the booking stands');
+  assert.ok(r.body.includes('Booked'), 'and the page says so');
+  const { rows } = await sql.query(`SELECT count(*)::int AS c FROM bookings WHERE status='confirmed'`);
+  assert.equal(Number(rows[0]?.['c']), 1);
+  assert.equal(failing.failed.length, 2, 'both messages are queued for retry, not lost');
+});
+
+test('M5 both parties are notified, and the booker gets the management link', async () => {
+  await post('/intro/book', {
+    start: '2026-06-01T13:00:00Z', end: '2026-06-01T14:00:00Z',
+    name: 'Ada', email: 'ada@example.com', booker_tz: 'Europe/London',
+  });
+  assert.equal(mail.sent.length, 2);
+  const toBooker = mail.sent.find((m) => m.to === 'ada@example.com');
+  const toOwner = mail.sent.find((m) => m.to === 'owner');
+  assert.ok(toBooker?.token, 'M4 — the booker gets the management link');
+  assert.equal(toBooker?.timezone, 'Europe/London', 'rendered in the recipient’s zone');
+  assert.ok(toOwner, 'the owner learns their calendar changed');
+});
+
+test('L1/L2 the management link works and reveals only its own booking', async () => {
+  await post('/intro/book', {
+    start: '2026-06-01T13:00:00Z', end: '2026-06-01T14:00:00Z',
+    name: 'Ada', email: 'ada@example.com',
+  });
+  const token = mail.sent.find((m) => m.to === 'ada@example.com')?.token;
+  assert.ok(token);
+  assert.ok(token.length >= 22, 'L1 — at least 128 bits, base64url encoded');
+
+  const page = await get(`/b/${token}`);
+  assert.equal(page.status, 200);
+  assert.ok(page.body.includes('Your booking'));
+
+  // L2 · an unknown token is indistinguishable from one that exists but is not
+  // yours — it does not confirm anything about other bookings.
+  const bogus = await get('/b/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
+  assert.equal(bogus.status, 404);
+});
+
+test('B5 cancelling from the link frees the interval immediately', async () => {
+  await post('/intro/book', {
+    start: '2026-06-01T13:00:00Z', end: '2026-06-01T14:00:00Z',
+    name: 'Ada', email: 'ada@example.com',
+  });
+  const token = mail.sent.find((m) => m.to === 'ada@example.com')!.token!;
+  const cancelled = await post(`/b/${token}/cancel`, {});
+  assert.equal(cancelled.status, 200);
+
+  const page = await get('/intro');
+  assert.ok(page.body.includes('data-start="2026-06-01T13:00:00Z"'), 'the slot is bookable again');
+});
+
+test('D8 a bearer link cannot delete personal data in one step', async () => {
+  await post('/intro/book', {
+    start: '2026-06-01T13:00:00Z', end: '2026-06-01T14:00:00Z',
+    name: 'Ada', email: 'ada@example.com',
+  });
+  const token = mail.sent.find((m) => m.to === 'ada@example.com')!.token!;
+
+  const unconfirmed = await post(`/b/${token}/delete`, {});
+  assert.equal(unconfirmed.status, 400);
+  const still = await sql.query(`SELECT booker_email FROM bookings WHERE token = $1`, [token]);
+  assert.equal(still.rows[0]?.['booker_email'], 'ada@example.com', 'nothing deleted without confirmation');
+
+  const confirmed = await post(`/b/${token}/delete`, { confirm: 'yes' });
+  assert.equal(confirmed.status, 200);
+  const gone = await sql.query(`SELECT booker_email, booker_name FROM bookings WHERE token = $1`, [token]);
+  assert.equal(gone.rows[0]?.['booker_email'], null, 'D3 — removed, not flagged');
+  assert.equal(gone.rows[0]?.['booker_name'], null);
+});
+
+test('F3 extra personal fields are not stored', async () => {
+  await post('/intro/book', {
+    start: '2026-06-01T13:00:00Z', end: '2026-06-01T14:00:00Z',
+    name: 'Ada', email: 'ada@example.com',
+    phone: '+15550000', notes: 'private matter', address: '10 Downing St',
+  });
+  const { rows } = await sql.query(`SELECT * FROM bookings LIMIT 1`);
+  const stored = JSON.stringify(rows[0]);
+  assert.ok(!stored.includes('15550000'), 'no phone');
+  assert.ok(!stored.includes('private matter'), 'no notes');
+  assert.ok(!stored.includes('Downing'), 'no address');
+});
+
+test('D9 the booker is told what is stored, next to the field', async () => {
+  const page = await get('/intro');
+  assert.ok(page.body.includes('We store your name, email and the meeting time'));
+  assert.ok(page.body.includes('deletes these details'));
+});
+
+test('I6 the booking surface is rate-limited and sends no mail when limited', async () => {
+  const form = {
+    start: '2026-06-01T15:00:00Z', end: '2026-06-01T16:00:00Z',
+    name: 'X', email: 'x@example.com',
+  };
+  let limited = 0;
+  for (let i = 0; i < 10; i++) {
+    const r = await post('/intro/book', { ...form, idempotency_key: `k${i}` }, '9.9.9.9');
+    if (r.status === 429) limited++;
+  }
+  assert.ok(limited > 0, 'the limit must actually fire');
+  assert.ok(mail.sent.length <= 2, 'rate-limited attempts send no mail');
+});
+
+test('D1 public signup cannot be enabled while D-105 is open', async () => {
+  const cfg = loadConfig({ PUBLIC_SIGNUP: 'true' } as unknown as NodeJS.ProcessEnv);
+  assert.equal(cfg.publicSignup, false, 'an explicit true is refused, not honoured');
+});
+
+test('D1 the ceilings may be lowered but not raised', async () => {
+  const raised = loadConfig({ MAX_BOOKINGS: '99999' } as unknown as NodeJS.ProcessEnv);
+  assert.equal(raised.maxBookingsRetained, 200, 'raising is refused while D-105 is open');
+  const lowered = loadConfig({ MAX_BOOKINGS: '10' } as unknown as NodeJS.ProcessEnv);
+  assert.equal(lowered.maxBookingsRetained, 10, 'lowering is permitted');
+});
+
+test('D1 the booking ceiling is enforced, not merely configured', async () => {
+  const tiny = { ...deps, config: { ...deps.config, maxBookingsRetained: 1 } };
+  await handle(tiny, { method: 'POST', path: '/intro/book', ip: '4.4.4.4',
+    form: { start: '2026-06-01T13:00:00Z', end: '2026-06-01T14:00:00Z', name: 'A', email: 'a@example.com' } });
+  const second = await handle(tiny, { method: 'POST', path: '/intro/book', ip: '5.5.5.5',
+    form: { start: '2026-06-01T14:00:00Z', end: '2026-06-01T15:00:00Z', name: 'B', email: 'b@example.com' } });
+  assert.equal(second.status, 503);
+  assert.ok(second.body.includes('booking limit'));
+});
