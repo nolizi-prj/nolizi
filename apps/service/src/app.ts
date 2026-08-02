@@ -147,7 +147,13 @@ export async function handle(
       // B5 · cancelling is idempotent and total; re-cancelling is `cancelled`.
       if (existing?.status === 'confirmed') {
         await store.cancel(bookingId, `cancel:${token}`);
-        await mail.send({ kind: 'cancelled', to: 'owner', bookingId, start: startIso });
+        const ownerRow = await ownerForBooking(sql, bookingId);
+        if (ownerRow) {
+          await mail.send({
+            kind: 'cancelled', to: ownerRow.email, bookingId,
+            start: startIso, timezone: ownerRow.timezone,
+          });
+        }
       }
       return html(200, managePage({ title, start: startIso, token, status: 'cancelled' }));
     }
@@ -188,6 +194,28 @@ export async function handle(
   }
 
   return html(404, errorPage(404, 'Nothing here.'));
+}
+
+interface Contact {
+  email: string;
+  timezone: string;
+}
+
+async function ownerContact(sql: SqlClient, ownerId: string): Promise<Contact | undefined> {
+  const { rows } = await sql.query(`SELECT email, timezone FROM owners WHERE owner_id = $1`, [ownerId]);
+  const r = rows[0];
+  return r ? { email: String(r['email']), timezone: String(r['timezone']) } : undefined;
+}
+
+async function ownerForBooking(sql: SqlClient, bookingId: string): Promise<Contact | undefined> {
+  const { rows } = await sql.query(
+    `SELECT o.email, o.timezone FROM bookings b
+       JOIN owners o ON o.owner_id = b.owner_id
+      WHERE b.booking_id = $1 LIMIT 1`,
+    [bookingId],
+  );
+  const r = rows[0];
+  return r ? { email: String(r['email']), timezone: String(r['timezone']) } : undefined;
 }
 
 async function slotsFor(deps: AppDeps, schedule: Schedule, now: string) {
@@ -283,8 +311,15 @@ async function bookHandler(
 
   // M2 · after commit, never inside the transaction. M3 · a failure here must
   // not invalidate a confirmed booking.
+  // M5 · both parties. The owner's address is resolved here rather than passed
+  // as a marker -- the SMTP adapter refuses a non-address, which is how the
+  // placeholder was caught.
+  const owner = await ownerContact(sql, schedule.owner_id);
   await mail.send({ kind: 'confirmed', to: email, bookingId, start, token, timezone: bookerTz });
-  await mail.send({ kind: 'confirmed', to: 'owner', bookingId, start, token });
+  if (owner) {
+    // The owner gets no management token: it is the booker's credential.
+    await mail.send({ kind: 'confirmed', to: owner.email, bookingId, start, timezone: owner.timezone });
+  }
 
   return html(200, confirmedPage({ title: schedule.title, start, manageUrl: `/b/${token}` }));
 }

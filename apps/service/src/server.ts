@@ -8,7 +8,8 @@ import { loadConfig, refusals } from './config.ts';
 import { migrate } from './db.ts';
 import { createDatabase, type Database } from './driver.ts';
 import { handle, type AppDeps } from './app.ts';
-import { RecordingMail, RetryingMail } from './mail.ts';
+import { RecordingMail, RetryingMail, type MailPort } from './mail.ts';
+import { FileMail, SmtpMail } from './mail-smtp.ts';
 import { seedDemo } from './seed.ts';
 
 export async function start(): Promise<{ close: () => Promise<void>; port: number }> {
@@ -33,11 +34,25 @@ export async function start(): Promise<{ close: () => Promise<void>; port: numbe
   }
   ready = true; // P6 · migrations complete before anything serves
 
+  // M1 · one adapter behind the port. SMTP is a standard, so the provider is a
+  // URL rather than a dependency in the tree.
+  let inner: MailPort;
+  if (config.smtpUrl) {
+    inner = new SmtpMail({ url: config.smtpUrl, from: config.mailFrom, baseUrl: config.baseUrl });
+    console.log('[mail] SMTP');
+  } else if (config.mailDir) {
+    inner = new FileMail(config.mailDir, config.baseUrl);
+    console.log(`[mail] writing messages to ${config.mailDir}`);
+  } else {
+    inner = new RecordingMail();
+    console.warn('[mail] no SMTP_URL and no MAIL_DIR — messages are recorded in memory and discarded.');
+  }
+
   const deps: AppDeps = {
     sql: db,
     tx: db,
     config,
-    mail: new RetryingMail(new RecordingMail()),
+    mail: new RetryingMail(inner),
     now: () => new Date().toISOString().replace('.000Z', 'Z'),
     ready: () => ready,
   };

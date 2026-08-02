@@ -187,7 +187,7 @@ test('M5 both parties are notified, and the booker gets the management link', as
   });
   assert.equal(mail.sent.length, 2);
   const toBooker = mail.sent.find((m) => m.to === 'ada@example.com');
-  const toOwner = mail.sent.find((m) => m.to === 'owner');
+  const toOwner = mail.sent.find((m) => m.to === 'owner@example.com');
   assert.ok(toBooker?.token, 'M4 — the booker gets the management link');
   assert.equal(toBooker?.timezone, 'Europe/London', 'rendered in the recipient’s zone');
   assert.ok(toOwner, 'the owner learns their calendar changed');

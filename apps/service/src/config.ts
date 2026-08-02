@@ -21,6 +21,13 @@ export interface Config {
   reportingEnabled: boolean;
   sessionTtlHours: number;
   commit: string;
+  /** M1 · SMTP, not a provider SDK. Absent means mail is not sent. */
+  smtpUrl: string | undefined;
+  mailFrom: string;
+  /** Where management links point. Absent in development means localhost. */
+  baseUrl: string;
+  /** Development: write messages here instead of sending them. */
+  mailDir: string | undefined;
 }
 
 export const CEILING_DEFAULTS = { owners: 5, bookings: 200 } as const;
@@ -61,6 +68,10 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     reportingEnabled: bool(env['PUMASI_REPORTING'], true),
     sessionTtlHours: int(env['SESSION_TTL_HOURS'], 24 * 14),
     commit: env['RAILWAY_GIT_COMMIT_SHA'] ?? env['GIT_COMMIT'] ?? 'unknown',
+    smtpUrl: env['SMTP_URL'],
+    mailFrom: env['MAIL_FROM'] ?? 'Pumasi <no-reply@localhost>',
+    baseUrl: (env['BASE_URL'] ?? `http://localhost:${int(env['PORT'], 8080)}`).replace(/\/$/, ''),
+    mailDir: env['MAIL_DIR'],
   };
 }
 

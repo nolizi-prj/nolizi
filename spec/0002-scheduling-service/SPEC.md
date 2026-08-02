@@ -229,10 +229,22 @@ bookable by anyone at once. Rescheduling is atomic (B6) and preserves the
 
 ### 4.5 · Mail — `M`
 
-**M1 · Mail is a port with one adapter.** The service calls a small interface;
-the provider sits behind it. No provider type, field, or error appears outside
-the adapter. The provider is unchosen (`INTENT.md` question 3) and this is what
-makes that safe to defer.
+**M1 · Mail is a port, and the adapter speaks SMTP.** The service calls a small
+interface; the transport sits behind it. No provider type, field, or error
+appears outside the adapter.
+
+**SMTP rather than a provider SDK**, decided 2026-08-02, for the same reason
+`GAP-0004` §2 implements enterprise features from their standards: the standard
+is both the safer and the better source. Every provider speaks it, so the choice
+becomes a URL in configuration and switching costs nothing — no vendor library
+enters the tree, and `INTENT.md` question 3 stops being a blocking decision. Pick
+a provider on data-processing terms and residency when mail must actually leave
+the building, which is the same question as D-105 in different clothing.
+
+Three adapters ship: SMTP for real delivery, a file writer for development so
+messages can be read without a server or an account, and a recorder for tests.
+The file writer is deliberately not a silent no-op — a mail path that appears to
+work and sends nothing is how "we tested it" becomes untrue.
 
 **M2 · Mail is sent after commit, never inside the transaction.** A slow or
 failing provider must not hold a database transaction open or roll back a
