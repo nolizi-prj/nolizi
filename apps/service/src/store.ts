@@ -26,16 +26,79 @@ export interface SqlClient {
 /** PostgreSQL SQLSTATE codes we translate rather than propagate. */
 const UNIQUE_VIOLATION = '23505';
 const EXCLUSION_VIOLATION = '23P01';
+const SERIALIZATION_FAILURE = '40001';
+const DEADLOCK_DETECTED = '40P01';
 
+const sqlstate = (err: unknown): string =>
+  (err as { code?: string })?.code ?? '';
+const messageOf = (err: unknown): string => (err as Error)?.message ?? '';
+
+/** A genuine loser: someone else holds the interval. */
 function isConflict(err: unknown): boolean {
-  const code = (err as { code?: string })?.code;
+  const code = sqlstate(err);
   if (code === UNIQUE_VIOLATION || code === EXCLUSION_VIOLATION) return true;
   // PGlite surfaces the SQLSTATE in the message rather than a `code` field.
-  const message = (err as Error)?.message ?? '';
-  return (
-    message.includes('violates exclusion constraint') ||
-    message.includes('violates unique constraint')
-  );
+  const m = messageOf(err);
+  return m.includes('violates exclusion constraint') || m.includes('violates unique constraint');
+}
+
+/**
+ * NOT a loser — a transaction the database aborted so that others could
+ * proceed, which says nothing about who should hold the interval.
+ *
+ * Concurrent inserts of mutually overlapping ranges under an exclusion
+ * constraint make waiters block on each other, and with three or more the wait
+ * graph can cycle. PostgreSQL breaks the cycle by aborting a victim. Reporting
+ * that victim as `conflict` would be wrong twice over: it may have been the
+ * caller that should have won, and if every contender deadlocks then NOBODY
+ * wins — which breaks SPEC-0001 B2's "exactly one returns confirmed".
+ *
+ * Found by running the store against real PostgreSQL with real parallel
+ * connections. PGlite has one connection, so nothing there could ever race and
+ * this was invisible to every earlier test.
+ */
+function isRetryable(err: unknown): boolean {
+  const code = sqlstate(err);
+  if (code === SERIALIZATION_FAILURE || code === DEADLOCK_DETECTED) return true;
+  const m = messageOf(err);
+  return m.includes('deadlock detected') || m.includes('could not serialize');
+}
+
+const RETRY_ATTEMPTS = 8;
+
+/**
+ * Make contenders for one owner's calendar QUEUE rather than pile onto the
+ * exclusion constraint and form wait cycles.
+ *
+ * Without this, concurrent inserts of overlapping ranges block on each other
+ * inside the constraint's speculative-insertion path, and with enough
+ * contenders the wait graph cycles and PostgreSQL starts aborting victims.
+ * Retrying a deadlock storm is treating the symptom; taking the lock first
+ * turns a cycle-prone free-for-all into a FIFO queue.
+ *
+ * This does NOT move enforcement into application code — the constraint still
+ * decides who holds the interval, which is what SPEC-0002 P1 requires. The lock
+ * only controls the order contenders arrive in. It is transaction-scoped, so it
+ * releases on commit or rollback with no unlock path to forget.
+ */
+async function lockOwner(tx: SqlClient, ownerId: string): Promise<void> {
+  await tx.query(`SELECT pg_advisory_xact_lock(hashtext($1))`, [ownerId]);
+}
+
+/** Bounded retry with jittered backoff, so contenders do not re-collide in step. */
+async function withRetry<T>(fn: () => Promise<T>): Promise<T> {
+  let lastError: unknown;
+  for (let attempt = 0; attempt < RETRY_ATTEMPTS; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      if (!isRetryable(err)) throw err;
+      lastError = err;
+      const backoff = Math.min(2 ** attempt, 32) * (1 + Math.random());
+      await new Promise((r) => setTimeout(r, backoff));
+    }
+  }
+  throw lastError;
 }
 
 const iso = (v: unknown): string =>
@@ -110,8 +173,10 @@ export class PostgresBookingStore {
     key: string,
     booker?: { name: string; email: string; timezone: string; token: string },
   ): Promise<{ ok: true } | { ok: false; reason: 'conflict' }> {
-    return this.#tx.transaction(async (tx) => {
+    return withRetry(() =>
+      this.#tx.transaction(async (tx) => {
       try {
+      await lockOwner(tx, this.ownerId);
       await tx.query(
         `INSERT INTO bookings
            (booking_id, owner_id, starts_at, ends_at, status, booker_name, booker_email, booker_tz, token)
@@ -139,12 +204,14 @@ export class PostgresBookingStore {
         if (isConflict(err)) return { ok: false as const, reason: 'conflict' as const };
         throw err;
       }
-    });
+      }),
+    );
   }
 
   /** B5 — cancelling releases the interval immediately. */
   async cancel(bookingId: string, key: string): Promise<void> {
-    await this.#tx.transaction(async (tx) => {
+    await withRetry(() =>
+      this.#tx.transaction(async (tx) => {
       await tx.query(
         `UPDATE bookings SET status = 'cancelled'
           WHERE booking_id = $1 AND status = 'confirmed'`,
@@ -155,7 +222,8 @@ export class PostgresBookingStore {
            ON CONFLICT (key) DO NOTHING`,
         [key, bookingId],
       );
-    });
+      }),
+    );
   }
 
   /**
@@ -174,8 +242,10 @@ export class PostgresBookingStore {
     newEnd: string,
     key: string,
   ): Promise<{ ok: true } | { ok: false; reason: 'conflict' }> {
-    return this.#tx.transaction(async (tx) => {
+    return withRetry(() =>
+      this.#tx.transaction(async (tx) => {
       try {
+      await lockOwner(tx, this.ownerId);
       // P2c — take the row lock before reading, so a concurrent reschedule of
       // this booking waits here rather than racing us.
       const { rows } = await tx.query(
@@ -205,7 +275,8 @@ export class PostgresBookingStore {
         if (isConflict(err)) return { ok: false as const, reason: 'conflict' as const };
         throw err;
       }
-    });
+      }),
+    );
   }
 
   /** Every confirmed booking for this owner, for assertions and for `busy`. */

@@ -134,17 +134,35 @@ is no observable moment in which a booking holds two intervals or none.
 A violation of either constraint surfaces as an integrity error, which is caught
 and returned as `conflict`.
 
-**P2c · Two reschedules of the same booking are serialised, and the loser is
-defined.** A reschedule takes a row-level lock on the booking's current confirmed
-row and demotes *that* row — not the row it read earlier. Under concurrent
-reschedules of one `booking_id`, **exactly one succeeds**; the other returns
-`conflict` and the booking remains at whichever interval the winner set.
+**P2c · Two reschedules of the same booking are serialised, and the outcome is
+defined.** A reschedule takes a per-owner advisory lock and then a row lock on
+the booking's current confirmed row, demoting *that* row — not the row it read
+earlier. Whatever the interleaving, all of the following hold:
 
-P1b makes the two-confirmed-row state impossible, but impossibility is not a
-policy: without this clause the second writer either aborts with an integrity
-error the caller cannot interpret, or silently last-writer-wins. Neither is
-`conflict`, and SPEC-0001 B6 requires a losing reschedule to be a defined,
-non-destructive outcome.
+- the booking ends with **exactly one** confirmed interval — never two, never
+  none;
+- that interval is one that some caller actually asked for;
+- a caller that does not get its way returns **`conflict`**, not an integrity
+  error it cannot interpret;
+- the booking is **never left cancelled** by a failed move.
+
+**It does not say "exactly one succeeds", and an earlier draft did.** That
+wording assumed the writers race and one reads stale state. Once they are
+properly serialised, two reschedules carrying *different idempotency keys* are
+two genuine intents applied in order: the first moves the booking, the second
+moves it again, both succeed, and the booking ends where the second asked. That
+is correct, not a violation — a double-submit is what B1's idempotency key
+exists to collapse, and these are not double-submits.
+
+*Corrected 2026-08-02, when the implementation was first run against real
+PostgreSQL with genuinely parallel connections. The clause had been written
+against a mental model of racing rather than of queuing, and the test faithfully
+asserted the wrong thing.*
+
+P1b still makes the two-confirmed-row state impossible, but impossibility is not
+a policy: without this clause a second writer could abort with an integrity error
+the caller cannot interpret, and SPEC-0001 B6 requires a losing reschedule to be
+a defined, non-destructive outcome.
 
 **P2b · The engine stays pure across the boundary.** `now` is supplied by this
 service on every call. The engine is never given access to a clock, a connection,
@@ -437,10 +455,25 @@ optionally a database URL, and nothing more. A container image and a compose fil
 cover the general case; any provider-specific file in the tree is one convenience
 among several and never a dependency.
 
-*The node-postgres path is implemented and typechecked but has not been exercised
-against a live server — there is no PostgreSQL and no container runtime on the
-development host. That is a gap in evidence rather than in code, and it closes
-the first time it runs against a real instance.*
+**Closed 2026-08-02.** PostgreSQL 18 now runs as a **user process** — no root, no
+container — so the pooled path and genuine parallel connections are part of the
+ordinary suite rather than something only CI can reach. That immediately found
+two things nothing else could:
+
+- **Deadlocks under contention.** Concurrent inserts of overlapping ranges block
+  on each other inside the exclusion constraint, and with enough contenders the
+  wait graph cycles and PostgreSQL aborts victims. The store rethrew those, so
+  under load *nobody* won — breaking SPEC-0001 B2's "exactly one returns
+  confirmed". Contenders for one owner now take a per-owner advisory lock and
+  **queue**, so the constraint still decides who holds the interval while the
+  free-for-all that produced cycles is gone. A bounded retry remains as a
+  backstop.
+- **P2c said the wrong thing**, and its test faithfully asserted it. See P2c.
+
+PGlite is still the default and is still genuine PostgreSQL, but it has one
+connection: nothing there can interleave, so no race is ever run. Both are kept —
+PGlite for a zero-configuration start, a real server for anything about
+concurrency.
 
 ## 9 · Human involvement
 
