@@ -119,17 +119,14 @@ ${err}${empty}
   );
 }
 
-export function confirmedPage(opts: {
-  title: string;
-  start: string;
-  manageUrl: string;
-}): string {
+export function confirmedPage(opts: { title: string; start: string }): string {
   return SHELL(
     'Booked',
     `<h1>Booked</h1>
 <p class="ok">${esc(opts.title)} is confirmed for <time datetime="${esc(opts.start)}" id="t">${esc(opts.start)}</time>.</p>
-<p class="muted">A confirmation is on its way. To cancel or move it, use
-  <a href="${esc(opts.manageUrl)}">this link</a> — keep it, it is the only way back in.</p>
+<p class="muted">A confirmation is on its way. It contains the link for changing
+  or cancelling this booking — that link is deliberately not shown here, so that
+  only whoever holds the mailbox can act on it.</p>
 <script>var t=document.getElementById('t');
  t.textContent=new Date(t.getAttribute('datetime')).toLocaleString();</script>`,
   );

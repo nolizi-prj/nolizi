@@ -62,6 +62,15 @@ export async function redeemInvite(
       const count = await t.query(`SELECT count(*)::int AS c FROM owners`);
       if (Number(count.rows[0]?.['c'] ?? 0) >= maxOwnerAccounts) throw new Refused('ceiling');
 
+      // Claim the invite FIRST. Checking the address before proving the caller
+      // holds a valid invite let anyone probe which addresses have accounts,
+      // one request at a time, without ever spending anything.
+      const claimable = await t.query(
+        `SELECT code FROM invites WHERE code = $1 AND consumed_at IS NULL`,
+        [input.code],
+      );
+      if (!claimable.rows[0]) throw new Refused('invalid_invite');
+
       const existing = await t.query(`SELECT owner_id FROM owners WHERE lower(email) = lower($1)`, [
         input.email,
       ]);

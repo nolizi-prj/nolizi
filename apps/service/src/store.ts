@@ -64,6 +64,9 @@ function isRetryable(err: unknown): boolean {
   return m.includes('deadlock detected') || m.includes('could not serialize');
 }
 
+/** Raised when another booking already owns the idempotency key (B1). */
+class KeyTaken extends Error {}
+
 const RETRY_ATTEMPTS = 8;
 
 /**
@@ -192,16 +195,24 @@ export class PostgresBookingStore {
           booker?.token ?? null,
         ],
       );
-      // B1 — first use of a key wins. ON CONFLICT DO NOTHING rather than an
-      // upsert: rebinding would make a later replay report a different booking.
-      await tx.query(
+      // B1 — first use of a key wins. Claiming the key must be a CONDITION of
+      // the insert, not a side effect of it: with DO NOTHING alone, two
+      // concurrent requests carrying one key both proceed and produce two
+      // confirmed bookings sharing a single key, which breaks B1 and F5 under
+      // exactly the load they exist for. RETURNING tells us whether we claimed
+      // it, and losing means someone else's booking owns it.
+      const claimed = await tx.query(
         `INSERT INTO idempotency_keys (key, booking_id) VALUES ($1, $2)
-           ON CONFLICT (key) DO NOTHING`,
+           ON CONFLICT (key) DO NOTHING
+         RETURNING key`,
         [key, bookingId],
       );
+      if (!claimed.rows[0]) throw new KeyTaken();
       return { ok: true as const };
       } catch (err) {
-        if (isConflict(err)) return { ok: false as const, reason: 'conflict' as const };
+        if (err instanceof KeyTaken || isConflict(err)) {
+          return { ok: false as const, reason: 'conflict' as const };
+        }
         throw err;
       }
       }),

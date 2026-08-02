@@ -187,9 +187,19 @@ loses bookings.
 
 ### 4.3 · Booking flow — `F`
 
-**F1 · The page shows what the engine returned.** Slots come from
+**F1 · The engine decides what may be booked, not the form.** Slots come from
 `compute_slots`, unmodified. The page may format and filter for display; it may
 not add, shift, or extend.
+
+**And a submitted interval is checked against a fresh computation before it is
+accepted** — booking and rescheduling alike. Added 2026-08-02 after a
+pre-handover review found the service trusting hidden form fields: it took
+whatever `start` and `end` were posted, and the database only forbids *overlap*,
+so a request for a night, a whole week, the wrong duration, or a day with no
+availability at all would have been confirmed and would have locked a real
+person's calendar. This is what §1 meant by every "may this booking be made"
+question going to the engine, and it was the largest defect found in that
+review.
 
 **F2 · Times are converted for display only, at the edge.** The engine returns
 UTC (SPEC-0001 §2). Rendering converts to the viewer's timezone in one place,

@@ -148,7 +148,7 @@ export async function handle(
     const { rows } = await sql.query(
       `SELECT b.booking_id, b.starts_at, b.ends_at, b.status, b.schedule_id, b.owner_id, s.title
          FROM bookings b LEFT JOIN schedules s ON s.schedule_id = b.schedule_id
-        WHERE b.token = $1 AND b.ends_at > $2
+        WHERE b.token = $1 AND b.ends_at > $2 AND b.status = 'confirmed'
         ORDER BY (b.status='confirmed') DESC, b.id DESC LIMIT 1`,
       [token, graceCutoff],
     );
@@ -187,6 +187,13 @@ export async function handle(
       if (!newStart || !newEnd) {
         return html(400, managePage({ title, start: startIso, token, status,
           slots: await moveOptions(), error: 'Pick a time to move to.' }));
+      }
+      // F1 · the same rule as booking. A token holder may move the meeting, but
+      // only to a time the engine offers.
+      const options = await moveOptions();
+      if (!offeredSlot(options, newStart, newEnd)) {
+        return html(409, managePage({ title, start: startIso, token, status,
+          slots: options, error: 'That time is not available. Here are the times that are.' }));
       }
       const store = new PostgresBookingStore(sql, String(r['owner_id']), deps.tx);
       const moved = await store.move(bookingId, newStart, newEnd, `move:${token}:${newStart}`);
@@ -445,6 +452,23 @@ async function ownerContact(sql: SqlClient, ownerId: string): Promise<Contact | 
 /** L3 · how long a management link outlives the meeting it manages. */
 export const L3_GRACE_DAYS = 7;
 
+/**
+ * F1 · The interval must be one the ENGINE offered.
+ *
+ * Without this the service accepts whatever interval a form posts: a night, a
+ * week, the wrong duration, a time outside every availability rule. The
+ * database only forbids OVERLAP, so an attacker could park a booking anywhere
+ * and lock a real calendar, and nothing in the booking path would object.
+ *
+ * SPEC-0002 §1 says every question of the form "may this booking be made" is
+ * answered by calling the engine. This is that call. Its absence was the
+ * largest defect found in the pre-handover review — the service was trusting a
+ * hidden form field.
+ */
+function offeredSlot(slots: Slot[], start: string, end: string): boolean {
+  return slots.some((s) => s.start === start && s.end === end);
+}
+
 async function bookerFor(sql: SqlClient, bookingId: string): Promise<Contact | undefined> {
   const { rows } = await sql.query(
     `SELECT booker_email AS email, coalesce(booker_tz, 'UTC') AS timezone
@@ -532,6 +556,18 @@ async function bookHandler(
     );
   }
 
+  // F1 · the interval must be one the engine actually offered, checked against
+  // a fresh computation rather than against whatever the form claimed.
+  const offered = await slotsFor(deps, schedule, now);
+  if (!offeredSlot(offered.slots, start, end)) {
+    return html(
+      409,
+      bookingPage(schedule, offered.slots, {
+        error: 'That time is not available. Here are the times that are.',
+      }),
+    );
+  }
+
   // B3 · revalidate at commit, against the commit-time clock, with the
   // constraint the slot was computed under. Omitting it would revalidate
   // against nothing and confirm a slot that should have expired.
@@ -570,5 +606,9 @@ async function bookHandler(
     await mail.send({ kind: 'confirmed', to: owner.email, bookingId, start, timezone: owner.timezone });
   }
 
-  return html(200, confirmedPage({ title: schedule.title, start, manageUrl: `/b/${token}` }));
+  // The management token reaches exactly one place: the confirmation mail.
+  // Putting it on the response page would let anyone who books using someone
+  // else's address walk away holding a credential over that booking, and would
+  // leave it in browser history and on shared screens.
+  return html(200, confirmedPage({ title: schedule.title, start }));
 }

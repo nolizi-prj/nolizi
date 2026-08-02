@@ -110,6 +110,11 @@ export async function start(): Promise<{ close: () => Promise<void>; port: numbe
     ready: () => ready,
   };
 
+  const trustProxy = process.env['TRUST_PROXY'] === 'true';
+  if (!trustProxy) {
+    console.log('[http] X-Forwarded-For ignored — set TRUST_PROXY=true only behind a proxy that overwrites it');
+  }
+
   const server = createServer((req, res) => {
     const chunks: Buffer[] = [];
     req.on('data', (c: Buffer) => chunks.push(c));
@@ -117,9 +122,13 @@ export async function start(): Promise<{ close: () => Promise<void>; port: numbe
       const raw = Buffer.concat(chunks).toString('utf8');
       const form = Object.fromEntries(new URLSearchParams(raw));
       const url = new URL(req.url ?? '/', 'http://localhost');
-      const ip = String(req.headers['x-forwarded-for'] ?? req.socket.remoteAddress ?? 'unknown')
-        .split(',')[0]!
-        .trim();
+      // I6 · X-Forwarded-For is set by the client unless something in front is
+      // trusted to overwrite it. Honouring it by default lets an attacker
+      // rotate the header and make every rate limit meaningless, which is worse
+      // than having none because it reads as protection.
+      const ip = trustProxy
+        ? String(req.headers['x-forwarded-for'] ?? req.socket.remoteAddress ?? 'unknown').split(',')[0]!.trim()
+        : (req.socket.remoteAddress ?? 'unknown');
       handle(deps, {
         method: req.method ?? 'GET',
         path: url.pathname,

@@ -85,10 +85,12 @@ export async function createPostgresDriver(databaseUrl: string): Promise<Databas
   const pool = new pg.default.Pool({
     connectionString: databaseUrl,
     max: 10,
-    // Managed providers commonly require TLS but present certificates the
-    // default trust store does not carry. Opt in explicitly rather than
-    // disabling verification everywhere.
-    ...(process.env['PGSSL'] === 'require' ? { ssl: { rejectUnauthorized: false } } : {}),
+    // PGSSL=require asks for TLS and STILL VERIFIES the certificate. Skipping
+    // verification is a separate, uglier opt-in, because an unverified TLS
+    // connection to the database that holds every booker's address is a
+    // man-in-the-middle away from being no protection at all.
+    ...(process.env['PGSSL'] === 'require' ? { ssl: { rejectUnauthorized: true } } : {}),
+    ...(process.env['PGSSL'] === 'no-verify' ? { ssl: { rejectUnauthorized: false } } : {}),
   });
 
   const asClient = (c: {

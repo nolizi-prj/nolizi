@@ -10,6 +10,7 @@
  * Nothing outside this file knows mail exists beyond `MailPort`.
  */
 
+import { randomUUID } from 'node:crypto';
 import { createTransport, getTestMessageUrl, type Transporter } from 'nodemailer';
 import { Temporal } from '@js-temporal/polyfill';
 import type { MailMessage, MailPort } from './mail.ts';
@@ -29,6 +30,13 @@ export interface SmtpConfig {
  * send from the stored UTC value. One conversion, in one place, from the one
  * representation the system keeps.
  */
+/** `ada@example.com` -> `a***@example.com`. Traceable, not harvestable. */
+export function redactAddress(address: string): string {
+  const at = address.indexOf('@');
+  if (at <= 0) return '***';
+  return `${address[0]}***${address.slice(at)}`;
+}
+
 export function renderTime(instantIso: string, timezone: string): string {
   const zoned = Temporal.Instant.from(instantIso).toZonedDateTimeISO(timezone);
   const date = zoned.toPlainDate().toString();
@@ -106,7 +114,9 @@ export class SmtpMail implements MailPort {
     // Say what was actually accepted, by whom. A mail path that reports nothing
     // is indistinguishable from one that silently drops messages, and the
     // difference only shows up when someone is waiting for a confirmation.
-    this.#log(`[mail] sent ${message.kind} to ${message.to} (${info.messageId ?? 'no id'})`);
+    // D4 · a booker's address never appears in a log line. Enough to trace a
+    // message, not enough to harvest one.
+    this.#log(`[mail] sent ${message.kind} to ${redactAddress(message.to)} (${info.messageId ?? 'no id'})`);
 
     // Ethereal captures rather than delivers and exposes a viewable URL. Worth
     // surfacing: it is the difference between "the call returned" and being
@@ -141,7 +151,8 @@ export class FileMail implements MailPort {
     const { resolve } = await import('node:path');
     await mkdir(this.dir, { recursive: true });
     const { subject, text } = renderMessage(message, this.baseUrl);
-    const name = `${Date.now()}-${message.kind}-${message.to.replace(/[^\w.@-]/g, '_')}.txt`;
+    // D4 · not in the filename either — a directory listing is a log.
+    const name = `${Date.now()}-${message.kind}-${randomUUID().slice(0, 8)}.txt`;
     await writeFile(
       resolve(this.dir, name),
       `To: ${message.to}\nSubject: ${subject}\n\n${text}`,

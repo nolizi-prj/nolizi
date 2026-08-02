@@ -133,7 +133,10 @@ test('F4 a slot taken between render and submit returns conflict with a refreshe
     name: 'Grace', email: 'grace@example.com',
   }, '2.2.2.2');
   assert.equal(second.status, 409);
-  assert.ok(second.body.includes('Someone just took that time'));
+  // The engine no longer offers the taken slot, so F1 refuses it before the
+  // database is asked. Either way the outcome is the one that matters: refused,
+  // with the times that ARE available.
+  assert.match(second.body, /not available|just took that time/);
   assert.ok(second.body.includes('2026-06-01T14:00:00Z'), 'the refreshed list is included');
 
   const { rows } = await sql.query(`SELECT count(*)::int AS c FROM bookings WHERE status='confirmed'`);
@@ -160,7 +163,10 @@ test('B3 a slot that has passed the notice window is refused at commit', async (
     name: 'Ada', email: 'ada@example.com',
   });
   assert.equal(r.status, 409);
-  assert.ok(r.body.includes('That time has passed'));
+  // F1 recomputes at commit time, so a slot inside the notice window is not
+  // offered any more and is refused there. B3's guarantee holds either way:
+  // nothing is confirmed, and nothing is left behind.
+  assert.match(r.body, /not available|That time has passed/);
   const { rows } = await sql.query(`SELECT count(*)::int AS c FROM bookings`);
   assert.equal(Number(rows[0]?.['c']), 0, 'B4 — a non-confirmed result leaves no trace');
 });
@@ -375,7 +381,7 @@ test('L4 a move into a taken slot conflicts and leaves the booking unmoved', asy
     start: '2026-06-01T15:00:00Z', end: '2026-06-01T16:00:00Z',
   });
   assert.equal(clash.status, 409);
-  assert.ok(clash.body.includes('Someone just took that time'));
+  assert.match(clash.body, /not available|just took that time/);
 
   const { rows } = await sql.query(
     `SELECT starts_at FROM bookings WHERE status='confirmed' ORDER BY starts_at`,
@@ -425,4 +431,49 @@ test('O5 results do not depend on the host timezone', async () => {
     if (original === undefined) delete process.env['TZ'];
     else process.env['TZ'] = original;
   }
+});
+
+test('F1 an interval the engine never offered is refused', async () => {
+  // The whole point: the form is not trusted. Each of these is a perfectly
+  // well-formed request that the database alone would have accepted, because
+  // it only forbids OVERLAP -- so without this check an attacker could park a
+  // booking anywhere on a real person's calendar.
+  const attacks = [
+    { name: 'the middle of the night', start: '2026-06-02T03:00:00Z', end: '2026-06-02T04:00:00Z' },
+    { name: 'an entire week', start: '2026-06-01T13:00:00Z', end: '2026-06-08T13:00:00Z' },
+    { name: 'the wrong duration', start: '2026-06-01T13:00:00Z', end: '2026-06-01T13:07:00Z' },
+    { name: 'a time outside every rule', start: '2026-06-06T13:00:00Z', end: '2026-06-06T14:00:00Z' },
+    { name: 'an off-grid start', start: '2026-06-01T13:17:00Z', end: '2026-06-01T14:17:00Z' },
+  ];
+  for (const a of attacks) {
+    const r = await post('/intro/book', {
+      start: a.start, end: a.end, name: 'M', email: 'm@example.com',
+      idempotency_key: `atk-${a.start}`,
+    }, '7.7.7.7');
+    assert.equal(r.status, 409, `${a.name} must be refused`);
+  }
+  const { rows } = await sql.query(`SELECT count(*)::int AS c FROM bookings`);
+  assert.equal(Number(rows[0]?.['c']), 0, 'not one of them created a booking');
+});
+
+test('the confirmation page does not carry the management token', async () => {
+  const r = await post('/intro/book', {
+    start: '2026-06-01T13:00:00Z', end: '2026-06-01T14:00:00Z',
+    name: 'Ada', email: 'ada@example.com',
+  });
+  assert.equal(r.status, 200);
+  const token = mail.sent.find((m) => m.to === 'ada@example.com')!.token!;
+  assert.ok(!r.body.includes(token), 'the token belongs in the mailbox, not on a screen');
+  assert.ok(!r.body.includes('/b/'), 'nor a management link of any kind');
+});
+
+test('L3 a cancelled booking’s link stops working immediately', async () => {
+  await post('/intro/book', {
+    start: '2026-06-01T13:00:00Z', end: '2026-06-01T14:00:00Z',
+    name: 'Ada', email: 'ada@example.com',
+  });
+  const token = mail.sent.find((m) => m.to === 'ada@example.com')!.token!;
+  await post(`/b/${token}/cancel`, {});
+  const after = await get(`/b/${token}`);
+  assert.equal(after.status, 404, 'a cancelled booking’s link is spent');
 });
