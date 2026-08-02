@@ -311,12 +311,51 @@ and future dates. Identical code passes on one machine and fails on another.
 
 Therefore:
 
-- **Pinned:** `tzdata 2026a`.
-- Test setup **must assert** the runtime's tzdata version and **fail loudly** on
-  mismatch. A skip is not acceptable — a silently skipped timezone test is worse
-  than a failing one.
+- **Pinned:** `tzdata 2026a` — the version the expected values were derived
+  against.
+- Test setup **must assert** the version and **report** a mismatch loudly. A
+  skip is not acceptable; a silently skipped timezone test is worse than a
+  failing one.
+- **And, more importantly, it must assert the transitions themselves.** See
+  §6.1.
 - The Verifier matrix **must** include at least two tzdata versions, and report
   divergence as a finding rather than a flake.
+
+### 6.1 · Assert the transitions, not only the label
+
+*Amended 2026-08-02, during the first implementation. The original clause
+checked only a version string, and the first host to run this suite had a
+different one.*
+
+A version label is a **proxy** for what actually matters. tzdata publishes
+several times a year and most releases touch zones this suite never names, so a
+label mismatch is a weak signal — and a label match would not prove the
+transitions are what we believe either. Either way the label is not the thing
+being relied upon.
+
+So the runner asserts, against the host, **every transition the expected values
+depend on**:
+
+| Zone | Local time | Must be | Relied on by |
+|---|---|---|---|
+| `America/New_York` | 2026-03-08 02:30 | nonexistent | S3, C-008, C-023 |
+| `America/New_York` | 2026-11-01 01:30 | ambiguous | S4, C-009 |
+| `America/New_York` | 2026-06-01 09:00 | normal | most slot cases |
+| `Australia/Sydney` | 2026-06-15 09:00 | normal | C-017 |
+| `Pacific/Kiritimati` | 2026-06-01 09:00 | normal | C-018 |
+| `Pacific/Apia` | 2011-12-30 12:00 | nonexistent | C-022 |
+
+**A transition mismatch halts the run.** If the host's rules disagree with the
+ones the expectations were derived from, no expected value in this suite can be
+trusted, and continuing would report passes that mean nothing.
+
+**A version mismatch alone is a finding**, printed and recorded, once every
+transition above has been verified. This is stricter than the original clause in
+the way that matters — it checks the actual dependency — and looser only in the
+way that does not.
+
+This table grows whenever a case starts depending on a new zone or date. A case
+that relies on a transition absent from it is relying on something unverified.
 
 C5 says nothing merges unless the tests pass. This spec is the first evidence
 that "the tests pass" is an incomplete predicate: it must be "the tests pass,

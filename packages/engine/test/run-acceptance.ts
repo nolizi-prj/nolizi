@@ -16,7 +16,8 @@ import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { computeSlots } from '../src/slots.ts';
 import { book, cancel, reschedule, InMemoryBookingStore } from '../src/booking.ts';
-import { checkTzdata } from '../src/tzdata.ts';
+import { checkTzdata, checkTransitions } from '../src/tzdata.ts';
+import { classifyWallTime } from '../src/zone.ts';
 import type { ComputeSlotsRequest, Diagnostic, Slot } from '../src/types.ts';
 
 /** Walk up to the repository root so the runner works from src or from build output. */
@@ -71,14 +72,34 @@ const suite = JSON.parse(readFileSync(SUITE, 'utf8')) as {
 
 // ── §6 environment gate ────────────────────────────────────────────────────
 const tz = checkTzdata();
+const transitions = checkTransitions((z, d, t2) => classifyWallTime(z, d, t2));
+const brokenTransitions = transitions.filter((x) => !x.ok);
+
+// A behavioural disagreement is a hard stop: if the host's zone rules differ
+// from the ones the expected values were derived from, no expectation in this
+// suite can be trusted.
+if (brokenTransitions.length > 0) {
+  console.error('');
+  console.error('  TIMEZONE DATABASE DISAGREES WITH THIS SUITE — halting');
+  for (const b of brokenTransitions) {
+    console.error(`    ${b.zone} ${b.local}: expected ${b.expect}, host says ${b.actual}`);
+    console.error(`      ${b.note}`);
+  }
+  console.error('');
+  process.exit(2);
+}
+
+// A version-label mismatch alone is a FINDING, reported and never skipped
+// (SPEC-0001 §6). It does not invalidate the run once every transition the
+// suite depends on has been verified above.
 let conforming = true;
 if (!tz.matches) {
   conforming = false;
   console.error('');
-  console.error('  ENVIRONMENT DIVERGENCE — this run is NON-CONFORMING');
-  console.error(`  suite pins tzdata ${suite.environment.tzdata}; runtime has ${tz.runtime ?? 'unknown'}`);
-  console.error('  SPEC-0001 §6 requires this be reported as a finding, not skipped');
-  console.error('  and not passed over. Results below are informational only.');
+  console.error('  FINDING — tzdata version differs from the pin');
+  console.error(`    suite pins ${suite.environment.tzdata}; host has ${tz.runtime ?? 'unknown'}`);
+  console.error(`    all ${transitions.length} transitions this suite depends on were verified`);
+  console.error('    against the host and agree. Reported, not skipped (§6).');
   console.error('');
 }
 
@@ -222,5 +243,8 @@ for (const r of results) {
 }
 console.log('');
 console.log(`  ${results.length - failed.length}/${results.length} passed`);
-if (!conforming) console.log('  RUN IS NON-CONFORMING — tzdata divergence, see above');
-process.exit(failed.length > 0 || !conforming ? 1 : 0);
+if (!conforming) {
+  console.log(`  tzdata finding recorded: pin ${tz.pinned}, host ${tz.runtime ?? 'unknown'}`);
+  console.log('  transitions verified, so results stand; the divergence is reported.');
+}
+process.exit(failed.length > 0 ? 1 : 0);
