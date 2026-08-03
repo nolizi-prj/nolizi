@@ -30,7 +30,7 @@ non-deterministic acceptance test cannot be the sole truth that C5 says it is.
 
 ## 2 · Non-goals
 
-UI · calendar-provider integration (GAP-0002) · notifications · payments ·
+UI · calendar-provider integration ([GAP-0002](../../gap/0002-calendar-integration.md)) · notifications · payments ·
 round-robin or team pooling · persistence · **requester-timezone presentation** ·
 **seats per slot** · the limit classes in §2.1.
 

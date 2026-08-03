@@ -35,7 +35,7 @@ here.
 
 ## 2 · Non-goals
 
-Calendar-provider sync (`GAP-0002`) · teams, round-robin, pooled or multi-attendee
+Calendar-provider sync ([`GAP-0002`](../../gap/0002-calendar-integration.md), **promoted to next**) · teams, round-robin, pooled or multi-attendee
 bookings · payments · AI suggestions · weekly/monthly/duration limits · recurring
 bookings · SMS · a native mobile app.
 
