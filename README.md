@@ -221,7 +221,7 @@ never for sale · no open-core, no dual licensing, no license switch, no metered
 reads, no advertising, no hosted-exclusive features · anyone may leave and take
 everything with them.
 
-Full text: [`governance/CHARTER.md`](governance/CHARTER.md) Part 1.
+Full text: [`CHARTER.md` Part 1](https://github.com/pumasi-ai/governance/blob/main/governance/CHARTER.md).
 
 ---
 
