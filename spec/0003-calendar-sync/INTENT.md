@@ -107,10 +107,9 @@ You will not be asked to read the specification or the tests.
 
 | | |
 |---|---|
-| **Steward** | *pending signature* |
-| **This deserves to exist** | *pending* |
-| **This page is correct** | *pending* |
-| **May touch a can-hurt surface** | *pending* — holds credentials that read a person's calendar |
+| **This deserves to exist** | authorised — `MANDATE.md` item 3, 2026-08-27 |
+| **May touch a can-hurt surface** | authorised by the same mandate entry — holds credentials that read a person's calendar |
+| **This page** | published 2026-08-03 · **veto window closes 2026-08-29** (`DECISIONS.md` Q-001, charter v0.4) — on silence, the recommendations above are the decisions |
 
 *The steward is also the sponsor of this item. That conflict is recorded in the
 debt register rather than hidden; the control against it is that the tests are

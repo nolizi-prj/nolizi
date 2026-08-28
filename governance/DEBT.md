@@ -23,6 +23,7 @@ responsive but has not performed an independent review.
 | **Rule affected** | CHARTER §2 — deciding what deserves to exist is meant to be an independent judgment. |
 | **Why** | One human. The person choosing what to build, sponsoring it, and authorising it is the same person. This check is real against *agent* error; it is not independent of *steward* preference. |
 | **Narrowed 2026-08-01** | The steward no longer reviews specs, tests, or diffs (WP 2 assigns specification to agents). The conflict now covers four decisions per item — authorisation, **confirming the intent statement**, can-hurt surface authorisation, and release sign-off — rather than a judgment on every feature. Smaller surface, same conflict. |
+| **Narrowed again 2026-08-27 (v0.4)** | The four decisions became one standing mandate plus a veto. The conflict is unchanged in kind — the person holding the veto is still the sponsor — but its surface is now: what enters `MANDATE.md`, and what goes unvetoed. |
 | **Residual, stated plainly** | Adversarial review (2026-08-01) held that a one-page intent statement is *narrower* accountability than reviewing what gets built, and it is right. Three specific gaps remain open by choice: an intent statement can be accurate on the happy path while burying a hard case in "not building"; nothing re-confirms intent when scope expands mid-spec; and open questions can be resolved inside the spec without returning to the steward. The steward confirming the page is also the person who sponsored the item. These are the price of removing per-feature human review, and they are recorded rather than argued away. |
 | **Compensating controls** | Specs are reviewed by a **different model family** than authored them, and acceptance tests are frozen before implementation — so the standard is fixed before anyone knows whether the code will meet it. That freeze is the control that survives at any population size. Every authorisation is published with both roles named. |
 | **Clears when** | A second accountable party exists, or 2028-01-28 — whichever is first. A second human also resolves the residual above, since confirming an intent statement and sponsoring the item would no longer be the same person. |
@@ -79,6 +80,16 @@ responsive but has not performed an independent review.
 | **Clears when** | For `spec/0001`: a decision is taken to resolve it; no automatic trigger was set. For `spec/0002`: it must be answered — what is collected, on what basis, how someone deletes it, where it lives — **before any account exists that is not the steward's.** |
 | **The one thing that is not deferred** | **Any release note for an item that reports must state this entry's status.** Release sign-off is a human decision (CHARTER §2, decision 4), and this ensures the question is in front of the person making it rather than resolved by inattention. That is not a gate — release is not blocked — and it does not reopen the deferral. It only prevents the risk being shipped by someone who did not know they were shipping it. Writing a risk down must not become a way of authorising it, and a debt entry nobody encounters at the moment of decision is exactly that. |
 | **Opened** | 2026-08-01 |
+
+### D-106 · Work can proceed on silence — the veto model's residual
+| | |
+|---|---|
+| **Severity** | DEGRADING |
+| **Rule affected** | CHARTER §2 (v0.4) — accountability by veto assumes the steward reads what is published within the window. |
+| **Why** | v0.4 replaced blocking signatures with veto windows because the recorded evidence was 24 days of stall behind self-addressed signature boxes. The cost of the fix, stated plainly: an intent statement or a can-hurt release note that nobody reads proceeds anyway. The human confirmation L-005 argued for is now optional in practice. |
+| **Compensating controls** | Open questions in intent statements must state the default the agents will assume (§2.1), so silence selects a named outcome, never an unnamed one. Can-hurt releases keep the 7-day window, the two-extra-family gate, staged ceilings, and the D-105 rule that the note must state open debt — the risk is in front of whoever chooses not to read. `DIGEST.md` makes silence informed rather than blind. |
+| **Clears when** | A second accountable party exists (two vetoes are a quorum, one is a hope), **or** a veto-window release causes harm an affirmative signature would have caught — in which case the affirmative sign-off returns for can-hurt releases and this entry records why. |
+| **Opened** | 2026-08-27 |
 
 ---
 

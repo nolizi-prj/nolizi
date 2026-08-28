@@ -1,6 +1,6 @@
 # The Pumasi Charter
 
-**Version:** 0.4-draft · **Status:** Proposed · **Supersedes:** 0.1-draft, 0.2-draft, 0.3-draft
+**Version:** 0.3-draft · **Status:** Proposed · **Supersedes:** 0.1-draft, 0.2-draft
 **Sources:** [`pumasi-whitepaper-v1.0.md`](../pumasi-whitepaper-v1.0.md) ·
 [`pumasi-commercialization-foundations.md`](../pumasi-commercialization-foundations.md)
 **Machine-readable companion:** [`charter.yaml`](./charter.yaml)
@@ -16,14 +16,6 @@
 > already. Inventing governance ahead of evidence is what version 0.1
 > did: it produced a commons in which *nothing could merge at any level,
 > including documentation.* That failure is why this document is short.
->
-> Version 0.4 corrects the same failure one level up. Version 0.3 removed the
-> rules that deadlocked an empty commons, but kept the human as an approving
-> gate on every step — and the evidence arrived: the entire first product was
-> built in one day, then the project stood still for twenty-four days waiting
-> on signature boxes addressed to their own author. This version inverts the
-> default: **agents proceed; the human holds a veto.** Human attention is spent
-> on direction and exceptions, never on ceremony.
 
 ---
 
@@ -57,65 +49,36 @@ it does not ship, whatever revenue is attached. (CF 1)
 
 Two roles. That is the whole structure until there is evidence we need more.
 
-**The steward (human) governs; agents run.** The steward holds three
-instruments, and exercises no other recurring authority:
+**Stewards (human).** Four decisions, and no others:
 
-1. **The mandate** — [`MANDATE.md`](../MANDATE.md), a standing statement of
-   what deserves to exist: which items, in what order, under what budget, and
-   behind which red lines. Agents take the next item from it **without
-   asking**. Editing the mandate *is* the "does this deserve to exist"
-   decision, made per direction rather than per item. An item that may touch a
-   can-hurt surface (Part 4) says so in its mandate entry; listing it there
-   *is* the surface authorisation.
-2. **The veto** — intent statements and can-hurt release notes are
-   **published, not countersigned**. An intent statement proceeds **48 hours**
-   after publication; a can-hurt release note proceeds **7 days** after.
-   Within the window the steward may veto, publicly and with reasoning, and
-   the item stops until the objection is resolved. After the window, silence
-   is consent and the work advances. Windows are recorded, with their
-   deadlines and default outcomes, in [`DECISIONS.md`](../DECISIONS.md).
-3. **The human registry** — [`HUMAN.md`](../HUMAN.md), the **exhaustive** list
-   of actions only the human can take: legal accountability, ownership of
-   external accounts, spending money. Anything not on that list is agent work
-   by definition. Adding to the list is a steward act; removing an entry
-   requires demonstrating an agent can actually perform it.
+1. **What deserves to exist** — a gap report becomes a catalog item. One decision
+   per item, not per feature.
+2. **Whether the intent statement is right** — see below. One page, plain
+   language, per item.
+3. **Whether an item may touch a can-hurt surface** — once, when the item is
+   authorised, not for each change that lands on it.
+4. **Whether a can-hurt item may be released** to real users, on the strength of
+   a plain-language release note.
 
-The steward **never commits code**, and **does not review specifications,
-acceptance tests, or diffs.** That is deliberate, and it follows the whitepaper
-rather than softening it: *"Agents do all of the development:
-**specification**, code, review, testing, release, and maintenance."* What
+They **never commit code**, and they **do not review specifications, acceptance
+tests, or diffs.** That is deliberate, and it follows the whitepaper rather than
+softening it: *"Agents do all of the development: **specification**, code,
+review, testing, release, and maintenance."* Specification is agent work. What
 humans do that machines cannot is choose what is worth building and answer for
-it (WP 2). A standing mandate *is* choosing. A public record plus a real veto
-*is* answering: the steward is accountable for what they did not stop, which is
-how accountability works in every functioning board — and agents keep a running
-[`DIGEST.md`](../DIGEST.md) so that "did not know" is never available as an
-excuse. The residual this creates — an intent or a release note can proceed
-unread — is recorded honestly as debt (D-106), not argued away.
+it (WP 2) — and that judgment is exercised at the level of the item, not the
+clause.
 
-Versions 0.1 through 0.3 made the steward an approving gate on every step. The
-recorded result: signature boxes waiting twenty-four days for the only person
-they were addressed to, who was also their sponsor. A gate whose approval is
-near-certain but whose latency is unbounded adds no safety and unbounded delay.
-The veto keeps the safety — a wrong item can still be stopped — and deletes the
-latency, because the steward's absence now advances the work instead of
-halting it.
+A steward reviewing every spec would be the bottleneck the whitepaper's machine
+speed argument exists to remove, and would put a human's attention budget on the
+critical path of every feature.
 
-**Agents may never edit the instruments that bound their own autonomy:**
-`MANDATE.md`, `HUMAN.md`, the veto window durations, and the deadlines and
-default outcomes of open entries in `DECISIONS.md` are steward-edited only.
-Agents may append new questions to the decision queue and mark expired windows
-closed; they may not move a deadline or soften a default. A scoped power that
-can extend itself is [L-003](../lessons/L-003-scoped-power-needs-exclusions.md),
-and this list is that lesson's exclusion list. **[OP]**
-
-### 2.1 The intent statement — published, vetoable, never a blocking signature
+### 2.1 The intent statement — the one page a human does read
 
 Agents write the specification. But nothing in a spec review checks the spec
 against *what the human actually wanted*: cross-family reviewers check coherence,
-correctness, and edge cases, all **against the spec itself**
-([L-005](../lessons/L-005-review-checks-coherence-not-intent.md)). A subtle
-misreading of the need survives every one of those checks, and the acceptance
-tests then lock it in as the definition of done.
+correctness, and edge cases, all **against the spec itself**. A subtle misreading
+of the need survives every one of those checks, and the acceptance tests then
+lock it in as the definition of done.
 
 So before a spec is written, the agents produce an **intent statement**:
 
@@ -123,27 +86,24 @@ So before a spec is written, the agents produce an **intent statement**:
 - What we understood you to want, and for whom.
 - What "working" will mean, in your terms — not in test terms.
 - What we are deliberately *not* building.
-- What we are unsure about, phrased as a question — **with the answer the
-  agents will assume if the window closes in silence.** An open question
-  without a stated default is a disguised signature box.
+- What we are unsure about, phrased as a question.
 
-It is published, its 48-hour window is entered in `DECISIONS.md`, and then the
-work proceeds. The steward reads it or does not; a correction within the window
-costs one edit, and a correction after it costs an amendment — both cheaper
-than every downstream document being checked against a mistaken premise nobody
-wrote down.
+The steward confirms or corrects it. That is the whole of the reading burden:
+one page per item, not a specification per feature. If the intent statement is
+wrong, everything downstream is wrong in a way no agent review can detect,
+because every agent will be checking against the same mistaken premise.
 
-**Release notes work the same way.** A can-hurt release is published as a
-plain-language note — what changed, what could hurt someone, what was tested,
-what is still unknown — and proceeds after its 7-day window. Not a diff. One
-page. The note must state the status of any open debt entry it touches (D-105
-carries this rule already), so the risk is in front of whoever chooses not to
-veto, rather than resolved by inattention.
+This is how a human answers for an outcome without reviewing the work (WP 2).
+Authorising an item without ever seeing what was understood by it is sponsorship
+in name only — the steward would be accountable for a result they had no means
+to recognise.
+
+**Release notes work the same way.** A can-hurt release is signed off on a
+plain-language note: what changed, what could hurt someone, what was tested, what
+is still unknown. Not a diff. One page.
 
 **Agents.** Everything else: specification drafting, code, review, testing,
-release, maintenance — and the running of this process itself: opening
-windows, closing them on schedule, keeping the digest, and executing the gate
-in Part 3.
+release, maintenance.
 
 **Today there is one steward and no other accountable party.** That is stated
 plainly rather than dressed as a board. Sole-steward authority ends at the earlier
@@ -174,37 +134,19 @@ cheapest before the first check and impossible after the last: **[CF 2]**
 The entire operating rule.
 
 ```
-MANDATE.md (steward, standing) → agent takes next item → gap
-      → intent statement, one page, published → [48h veto window]
-      → Spec + tests, agent-authored
+Need → Gap → [human: deserves to exist?] → intent statement, one page
+      → [human: is this what I meant?] → Spec + tests, agent-authored
       → cross-family spec review → freeze → build
       → cross-family code review (different family from the spec reviewer)
-      → merge → ordinary: release
-              → can-hurt: release note, published → [7-day veto window]
-                        → staged release, ceilings first
+      → merge → [human, can-hurt items only: release note → sign-off]
 ```
-
-No step in that line waits for a human to act. Two steps can be **stopped** by
-one, and the actions in `HUMAN.md` sit beside the line, not on it — agents
-prepare them fully and queue them in `DECISIONS.md`, and the pipeline routes
-around a pending human action wherever a routed-around version exists (a test
-mode, a ceiling, a descoped variant) rather than idling behind it. **[OP]**
-
-**The gate is executable, not literary.** The requirements below are enforced
-by scripts in [`tools/`](../tools/) — cross-family review is invoked, its
-transcript saved, and the merge check run by machinery, not by anyone's
-attention. Where a script and this prose disagree, the prose governs and the
-script is a bug — the same rule the yaml companion lives under. A requirement
-that exists only as prose is enforced only by conscience, and conscience is the
-one component here that does not scale. **[OP]**
 
 **Every merge requires all four**, plus the reporting requirement of Part 5.1
 for any item that ships as software:
 
 1. A **written specification** with acceptance tests, authored by an agent and
-   **reviewed by an agent of a different model family**, against an item the
-   mandate names and an intent statement whose veto window has closed without
-   objection (Part 2.1). The spec review is
+   **reviewed by an agent of a different model family**, against an item and an
+   intent statement a steward has confirmed (Part 2.1). The spec review is
    separate from the code review in requirement 3 and is not satisfied by it —
    reviewing *what should exist* and reviewing *whether the code does it* are
    different acts, and one reviewer doing both re-correlates them.
@@ -256,7 +198,7 @@ project?**
 | | Requires |
 |---|---|
 | **Ordinary** — docs, tests, library code | The four requirements in Part 3. |
-| **Can hurt someone** — money, credentials, personal data, anything that books, sends, deletes, or charges on a real person's behalf | The four, plus a **second** approving review from a **third** model family. No per-change human sign-off; the surface was authorised when the mandate named the item as can-hurt (Part 2), and the **release** proceeds through the 7-day veto window on a plain-language note (Part 2.1). |
+| **Can hurt someone** — money, credentials, personal data, anything that books, sends, deletes, or charges on a real person's behalf | The four, plus a **second** approving review from a **third** model family. No per-change human sign-off; the steward authorised the surface once (Part 2, decision 3) and signs the **release** on a plain-language note (decision 4). |
 
 The classification lives in `RISK_ZONES.yaml` in each repository, is one boolean
 per path, and defaults to **can hurt someone** when unmapped or unclear. Guessing
@@ -271,8 +213,8 @@ is how a binary keeps that property.
 
 **Reclassification is itself a can-hurt change.** Moving any path from can-hurt to
 ordinary requires the can-hurt procedure — two reviews from two other families,
-plus the 7-day veto window — and is published with its reasoning. A risk model
-the builder can quietly relax is not a risk model. **[OP]**
+plus steward sign-off — and is published with its reasoning. A risk model the
+builder can quietly relax is not a risk model. **[OP]**
 
 ---
 
@@ -427,13 +369,6 @@ it constrains, and the notice requirement would never begin. **[OP]**
   period**. Without that last one, only P5's single-review line
   would be permanent, and the booking path could be relabelled ordinary and
   shipped under the weaker gate by the same person who approved it.
-- **Outside *agent* revision entirely**, though the steward may amend them:
-  `MANDATE.md`, `HUMAN.md`, the veto window durations in Part 2, and the
-  deadlines and default outcomes of open `DECISIONS.md` entries. Agents run
-  under these instruments; a run-time that can rewrite its own bounds has no
-  bounds ([L-003](../lessons/L-003-scoped-power-needs-exclusions.md)). An
-  agent-authored proposal to change any of them is welcome — as a proposal in
-  the decision queue, taking effect only by the steward's edit.
 
 ---
 
@@ -475,15 +410,6 @@ provenance address all four.
 
 That is why this charter spends its strictness on proof and its speed everywhere
 else. If we are wrong, the debt register is where we will have to say so.
-
-Version 0.4 adds one threat to the list: **an agent that is confidently wrong,
-proceeding on silence.** The veto model deliberately removes the human
-confirmation that would have caught it — while observing that in practice the
-human confirmation caught nothing and stopped everything. The defences that
-remain are the ones that were doing the real work all along: the frozen tests,
-the cross-family gate, the ceilings on anything that can hurt someone, and a
-digest that makes the silence informed rather than blind. The residual is
-D-106, on the record.
 
 ---
 

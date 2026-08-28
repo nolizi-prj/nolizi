@@ -2,8 +2,8 @@
 # CHARTER.md is normative. Where prose and this file disagree, the prose governs
 # and this file is a bug — file it as a defect.
 
-charter_version: "0.4-draft"
-supersedes: ["0.1-draft", "0.2-draft", "0.3-draft"]
+charter_version: "0.3-draft"
+supersedes: ["0.1-draft", "0.2-draft"]
 sources: [pumasi-whitepaper-v1.0.md, pumasi-commercialization-foundations.md]
 
 # ─────────────────────────────────────────────────────────────────────
@@ -37,33 +37,17 @@ permanent:
 roles:
   steward:
     human: true
-    instruments:                               # v0.4: governs, does not gate
-      mandate:                                 # MANDATE.md — standing direction
-        file: MANDATE.md
-        is_the_decision: item_deserves_to_exist
-        can_hurt_surface_authorised_by: mandate_entry_naming_item_can_hurt
-        edited_by: steward_only
-      veto:                                    # published, not countersigned
-        intent_statement_window_hours: 48
-        can_hurt_release_window_days: 7
-        silence_is: consent
-        veto_requires: published_reasoning
-        windows_recorded_in: DECISIONS.md
-      human_registry:                          # HUMAN.md — exhaustive
-        file: HUMAN.md
-        anything_not_listed_is: agent_work
-        add_entry: steward_only
-        remove_entry: requires_demonstrating_agent_can_do_it
-    reads: [digest, intent_statement, release_note]   # none of them blocking
+    decides: [item_deserves_to_exist,          # one per catalog item
+              intent_statement_is_correct,     # the one page they DO read
+              item_may_touch_can_hurt_surface, # once, at authorisation
+              can_hurt_item_may_be_released]   # on a plain-language release note
+    reads: [intent_statement, release_note]    # one page each
     reviews: none                              # not specs, not tests, not diffs
     commits_code: false
-    rationale: "WP 2 — a standing mandate is choosing; a public record plus a
-                real veto is answering for it. Residual recorded as D-106."
+    rationale: "WP 2 assigns specification to agents; humans choose what is worth
+                building and answer for it, at item level not clause level"
   agent:
-    does: [specify, build, review, test, release, maintain,
-           run_the_process, keep_digest, open_and_close_windows]
-    may_never_edit: [MANDATE.md, HUMAN.md, veto_window_durations,
-                     open_decision_deadlines_and_defaults]   # L-003
+    does: [specify, build, review, test, release, maintain]
 
 sole_steward_authority:
   ends_at_earliest_of: [second_accountable_party, "2028-01-28"]
@@ -90,9 +74,8 @@ intent_statement:                              # CHARTER Part 2.1
   max_length: one_page
   plain_language: true
   states: [what_was_understood, what_working_means_in_user_terms,
-           what_is_not_being_built, open_questions_with_stated_defaults]
-  published_with_veto_window_hours: 48         # v0.4: published, not countersigned
-  proceeds_on: window_closed_without_veto
+           what_is_not_being_built, open_questions]
+  confirmed_by: steward
   rationale: "cross-family review checks the spec against itself; only this
               checks the spec against what the human wanted"
 
@@ -100,14 +83,11 @@ release_note:                                  # CHARTER Part 2.1
   required_for: can_hurt_items
   max_length: one_page
   plain_language: true
-  states: [what_changed, what_could_hurt_someone, what_was_tested, what_is_unknown,
-           status_of_open_debt_entries_touched]
-  published_with_veto_window_days: 7           # v0.4: published, not countersigned
-  proceeds_on: window_closed_without_veto
+  states: [what_changed, what_could_hurt_someone, what_was_tested, what_is_unknown]
+  signed_off_by: steward
 
 merge_gate:
-  item_named_in_mandate: true                  # per item, not per change
-  gate_is_executable: tools/                   # scripts enforce; prose governs on conflict
+  item_authorised_by_steward: true             # per item, not per change
   spec_authored_by: agent
   spec_reviewed_by_non_author_family: 1        # distinct from the code review
   spec_reviewer_not_among_code_reviewer_families: when_3plus_families_available
@@ -139,10 +119,9 @@ risk:
   can_hurt:
     min_reviews_from_non_builder_family: 2  # from two DIFFERENT other families
     distinct_model_families_total: 3        # builder + two reviewers
-    steward_signoff_per_change: false       # surface authorised by mandate entry
-    surface_authorised_by: mandate_entry
-    release_proceeds_via: 7_day_veto_window # on a published plain-language note
-    release_staged: ceilings_first
+    steward_signoff_per_change: false       # authorised once; released with sign-off
+    steward_authorises_surface_once: true
+    steward_signs_release: true
   inherited_by_dependencies: true           # substrate of a can-hurt path is can-hurt
   reclassification_to_ordinary: can_hurt_procedure
   assignment_file: RISK_ZONES.yaml
@@ -216,11 +195,6 @@ amendment:
     - risk.can_hurt                         # incl. the reclassification rule
     - draft_ends_at_earliest_of              # else "still a draft" is a permanent exemption
     - this_may_not_touch_list
-  agents_may_not_touch:                     # steward-amendable, agent-untouchable (L-003)
-    - MANDATE.md
-    - HUMAN.md
-    - veto_window_durations
-    - open_decision_deadlines_and_defaults
 
 # ─────────────────────────────────────────────────────────────────────
 # Part 8 — Deliberately absent. Add on evidence, not in anticipation.
