@@ -182,6 +182,33 @@ Items do **not** vendor the governance files. Their merge gate reads
 `charter.yaml` from the governance repository, so there is one source of truth
 rather than a copy per repository that drifts.
 
+### One repository per product, and no shared libraries yet
+
+More products are coming — a CRM, a signing tool, others. Each gets its own
+repository, and each will **rebuild** accounts, sessions, mail, storage, rate
+limiting and the charter-required reporting rather than importing them from a
+shared package.
+
+That duplication is deliberate, and it is the only place this project permits
+any. Extracting shared foundations from a single example means guessing the
+interface, and **a wrong shared interface is harder to remove than the
+duplication it was meant to prevent** — machinery ahead of evidence, which is
+[`L-001`](https://github.com/pumasi-ai/governance/blob/main/lessons/L-001-governance-ahead-of-evidence.md)
+and has already been paid for once here.
+
+**The trigger: analyse for extraction when the third product exists.** Two is
+enough to see a pattern and not enough to distinguish a pattern from a
+coincidence.
+
+**What makes that analysis possible:** every product records what it copied, and
+from where, in its own `COPIED.md`. Without that, "modularise later" becomes
+archaeology on diffs six months after anyone remembers which parts were copied
+and which were written fresh — and "later" quietly becomes "never".
+
+Splitting an engine out of a product is judged the same way: only where the core
+is genuinely reusable alone. The test is whether anyone would fork it *without*
+the service. Scheduling earned that; a CRM probably will not.
+
 ---
 
 ## Why the rules look like this

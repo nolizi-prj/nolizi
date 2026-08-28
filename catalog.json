@@ -19,9 +19,21 @@
       "spec": "https://github.com/pumasi-ai/scheduling-core/blob/main/spec/SPEC.md",
       "acceptance": "https://github.com/pumasi-ai/scheduling-core/blob/main/spec/acceptance/cases.json",
       "summary": "Availability computation and booking. A pure function: no clock, no I/O, no ambient state.",
-      "solves": ["availability", "booking", "scheduling", "timezone", "dst", "slots", "calendar arithmetic"],
+      "solves": [
+        "availability",
+        "booking",
+        "scheduling",
+        "timezone",
+        "dst",
+        "slots",
+        "calendar arithmetic"
+      ],
       "maturity": "seed",
-      "tests": { "acceptance": 36, "unit": 12, "passing": true },
+      "tests": {
+        "acceptance": 36,
+        "unit": 12,
+        "passing": true
+      },
       "published_to_registry": false,
       "runtime": "node>=22",
       "depends_on": []
@@ -32,11 +44,21 @@
       "spec": "https://github.com/pumasi-ai/scheduling-service/blob/main/spec/0002/SPEC.md",
       "acceptance": "https://github.com/pumasi-ai/scheduling-service/blob/main/spec/0002/acceptance/cases.json",
       "summary": "A deployable scheduling service: accounts, public booking pages, confirmation mail, management links.",
-      "solves": ["booking page", "appointment scheduling", "meeting links", "calendly alternative"],
+      "solves": [
+        "booking page",
+        "appointment scheduling",
+        "meeting links",
+        "calendly alternative"
+      ],
       "maturity": "seed",
-      "tests": { "service": 80, "passing": true },
+      "tests": {
+        "service": 80,
+        "passing": true
+      },
       "runtime": "node>=22, PostgreSQL optional",
-      "depends_on": ["@pumasi/scheduling-core"],
+      "depends_on": [
+        "@pumasi/scheduling-core"
+      ],
       "known_limitations": [
         "Cannot read the owner's real calendar, so it will offer a time they are already busy. See gap/0002.",
         "No settled lawful basis for third-party personal data; capped at 5 accounts and 200 bookings."
@@ -44,13 +66,33 @@
     }
   ],
   "gaps": [
-    { "id": "GAP-0001", "file": "gap/0001-scheduling.md", "status": "converted", "became": "scheduling-core" },
-    { "id": "GAP-0002", "file": "gap/0002-calendar-integration.md", "status": "open", "priority": "next",
-      "summary": "Connect Google and Microsoft calendars so real commitments block times." },
-    { "id": "GAP-0003", "file": "gap/0003-defect-reporting.md", "status": "open", "priority": "deferred",
-      "summary": "Make defect reports useful without relaxing the privacy limits. Unbuilt on purpose: no users yet." },
-    { "id": "GAP-0004", "file": "gap/0004-feature-parity.md", "status": "open", "priority": "roadmap",
-      "summary": "Feature parity with Cal.com and Calendly, sequenced by dependency." }
+    {
+      "id": "GAP-0001",
+      "file": "gap/0001-scheduling.md",
+      "status": "converted",
+      "became": "scheduling-core"
+    },
+    {
+      "id": "GAP-0002",
+      "file": "gap/0002-calendar-integration.md",
+      "status": "open",
+      "priority": "next",
+      "summary": "Connect Google and Microsoft calendars so real commitments block times."
+    },
+    {
+      "id": "GAP-0003",
+      "file": "gap/0003-defect-reporting.md",
+      "status": "open",
+      "priority": "deferred",
+      "summary": "Make defect reports useful without relaxing the privacy limits. Unbuilt on purpose: no users yet."
+    },
+    {
+      "id": "GAP-0004",
+      "file": "gap/0004-feature-parity.md",
+      "status": "open",
+      "priority": "roadmap",
+      "summary": "Feature parity with Cal.com and Calendly, sequenced by dependency."
+    }
   ],
   "contributing": {
     "merge_gate": [
@@ -67,5 +109,20 @@
       "Read the lessons. If your work resembles one, say so rather than rediscovering it.",
       "Never copy incompatibly licensed code. Features may be matched; implementations may not."
     ]
+  },
+  "structure": {
+    "$comment": "How repositories are organised, and the one rule about when that changes.",
+    "shape": "One repository per product. No shared libraries yet, by decision.",
+    "decided": "2026-08-28",
+    "rationale": "Extracting shared foundations from a single example means guessing the interface, and a wrong shared interface is harder to remove than the duplication it was meant to prevent. That is L-001 -- machinery ahead of evidence -- which this project has already paid for once.",
+    "expect_duplication": true,
+    "duplication_is_deliberate_here": "Accounts, sessions, mail, storage, rate limiting, HTML rendering and charter-required reporting will be rebuilt per product until there is enough evidence to extract them well. This is the ONE place duplication is permitted, and only because the alternative is a worse abstraction.",
+    "extraction_trigger": "Analyse for extraction once THREE products exist. Two is enough to see a pattern and not enough to tell a pattern from a coincidence.",
+    "what_makes_that_analysis_possible": "Every product records what it copied from an existing product, and from where, in its own COPIED.md. Without that the later analysis is archaeology on diffs, and the parts that were copied become indistinguishable from the parts that were written fresh.",
+    "split_engine_from_product": "Only where the core is genuinely reusable on its own -- the test is whether anyone would fork it without the service. Scheduling earned that split; a CRM likely will not. Judged per product, never by convention.",
+    "naming": {
+      "-core": "pure, embeddable, no I/O",
+      "-service": "deployable product"
+    }
   }
 }
