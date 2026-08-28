@@ -1,0 +1,23 @@
+# Editor artifacts
+.~lock.*#
+*~
+.DS_Store
+
+# Secrets — never committed. Railway and GitHub hold these.
+.env
+.env.*
+!.env.example
+
+# Build and dependency output
+node_modules/
+dist/
+build/
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Local tooling
+.railway/
+.build/
+dist/
