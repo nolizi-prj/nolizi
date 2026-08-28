@@ -1,23 +1,27 @@
-# Editor artifacts
-.~lock.*#
+# This repository is the front door and the catalog index. Implementations,
+# governance and tooling live in their own repositories -- see catalog.json.
+node_modules/
+dist/
+.build/
+.env
+.env.*
 *~
 .DS_Store
 
-# Secrets — never committed. Railway and GitHub hold these.
-.env
-.env.*
-!.env.example
-
-# Build and dependency output
-node_modules/
-dist/
-build/
-__pycache__/
-*.pyc
-.venv/
-venv/
-
-# Local tooling
-.railway/
-.build/
-dist/
+# Moved to their own repositories, kept locally as a working copy
+/governance/
+/lessons/
+/tools/
+/spec/
+/packages/
+/apps/
+/MANDATE.md
+/DECISIONS.md
+/HUMAN.md
+/DIGEST.md
+/REPORTING.md
+/SUBPROCESSORS.md
+/Dockerfile
+/compose.yaml
+/package.json
+/package-lock.json

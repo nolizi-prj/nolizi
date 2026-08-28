@@ -21,11 +21,16 @@ account — forever.
 
 | You are | Go to |
 |---|---|
-| **An agent, here to work** | [Working here](#working-here) — the contract, in full |
+| **An agent, here to work** | [`catalog.json`](catalog.json) first — then [Working here](#working-here) |
 | **A person, evaluating this** | [What actually exists](#what-actually-exists) |
-| **Looking for the scheduling engine** | [`packages/engine`](packages/engine) — Apache-2.0, embeddable |
-| **Wondering how it is governed** | [`governance/CHARTER.md`](governance/CHARTER.md) — one page of rules |
-| **Wondering what went wrong** | [`lessons/`](lessons/) — seven, each one paid for |
+| **Looking for the scheduling engine** | [`scheduling-core`](https://github.com/pumasi-ai/scheduling-core) — Apache-2.0, embeddable |
+| **Looking for a booking service** | [`scheduling-service`](https://github.com/pumasi-ai/scheduling-service) |
+| **Wondering how it is governed** | [`governance`](https://github.com/pumasi-ai/governance) — one page of actual rules |
+| **Wondering what went wrong** | [`lessons/`](https://github.com/pumasi-ai/governance/tree/main/lessons) — seven, each one paid for |
+
+**Agents: start with [`catalog.json`](catalog.json).** It answers what exists,
+what it solves, where it lives, and what the merge gate requires — in one fetch,
+without exploring. This README is the same information for people.
 
 ---
 
@@ -33,7 +38,7 @@ account — forever.
 
 Two things, and an honest account of what they do not do.
 
-### The engine — `packages/engine`
+### The engine — [`scheduling-core`](https://github.com/pumasi-ai/scheduling-core)
 
 Availability computation and booking. A **pure function**: no clock of its own,
 no I/O, no ambient state. Same inputs, byte-identical output.
@@ -52,7 +57,7 @@ It is deliberately hard where scheduling software is usually wrong:
 Both category leaders have open bugs in the last two today. `36` acceptance
 cases plus `12` unit tests hold these.
 
-### The service — `apps/service`
+### The service — [`scheduling-service`](https://github.com/pumasi-ai/scheduling-service)
 
 Accounts, a public booking page, confirmation mail, and management links.
 Deployed anywhere that runs a container or Node 22 — it needs a port and,
@@ -67,7 +72,8 @@ today. This is [`GAP-0002`](gap/0002-calendar-integration.md), promoted to next,
 and it is the difference between a demonstration and a product.
 
 **No lawful basis has been established for holding third-party personal data.**
-[`DEBT.md`](governance/DEBT.md) D-105 says so plainly, caps the service at five
+[`DEBT.md`](https://github.com/pumasi-ai/governance/blob/main/governance/DEBT.md)
+D-105 says so plainly, caps the service at five
 accounts and two hundred bookings, and refuses to raise those ceilings while the
 entry is open.
 
@@ -76,9 +82,9 @@ entry is open.
 ## Run it
 
 ```bash
-npm install
-npm run build --workspaces
-node apps/service/dist/server.js
+git clone https://github.com/pumasi-ai/scheduling-service
+cd scheduling-service && npm install && npm run build
+node dist/server.js
 ```
 
 It prints a sign-up link on first start. Follow it and you have an account, a
@@ -87,11 +93,11 @@ configuration — it runs a real PostgreSQL in-process, so the constraints are
 genuinely enforced, but nothing survives a restart.
 
 ```bash
-npm test --workspaces        # 128 tests
+npm test        # 80 service tests; the engine carries another 48
 ```
 
-For real email and a persistent database, see
-[`apps/service/README.md`](apps/service/README.md).
+For real email and a persistent database, see the
+[service README](https://github.com/pumasi-ai/scheduling-service#readme).
 
 ---
 
@@ -145,38 +151,36 @@ two other families, plus a human sign-off on release. Unmapped paths default to
 
 | Question | Answer lives in |
 |---|---|
-| What must this do? | `spec/*/SPEC.md` — prose, normative |
+| What exists already? | [`catalog.json`](catalog.json) — **check before building anything** |
+| What must this do? | `spec/*/SPEC.md` in the item's repo — prose, normative |
 | Is it done? | `spec/*/acceptance/cases.json` — **executable, and the arbiter** |
 | What was the human asked to confirm? | `spec/*/INTENT.md` — one page, plain language |
-| What may I work on without asking? | [`MANDATE.md`](MANDATE.md) |
-| What needs a human? | [`HUMAN.md`](HUMAN.md) — exhaustive; anything absent is agent work |
-| What is open for objection? | [`DECISIONS.md`](DECISIONS.md) — with deadlines and defaults |
-| What are we running below? | [`governance/DEBT.md`](governance/DEBT.md) |
+| What may I work on without asking? | [`MANDATE.md`](https://github.com/pumasi-ai/governance/blob/main/MANDATE.md) |
+| What needs a human? | [`HUMAN.md`](https://github.com/pumasi-ai/governance/blob/main/HUMAN.md) — exhaustive; anything absent is agent work |
+| What is open for objection? | [`DECISIONS.md`](https://github.com/pumasi-ai/governance/blob/main/DECISIONS.md) — with deadlines and defaults |
+| What are we running below? | [`DEBT.md`](https://github.com/pumasi-ai/governance/blob/main/governance/DEBT.md) |
 
 **Where prose and code disagree, the prose governs and the code is a defect.**
 Where a specification and its tests disagree, that is a finding, not a choice.
 
 ---
 
-## Repository map
+## How the repositories are arranged
 
-```
-governance/     The charter, its machine-readable companion, and the debt
-                register — every rule this project runs below, with what
-                compensates for it and what turns it back on.
-lessons/        What went wrong, what it cost, what to do instead.
-spec/           Specifications and their executable acceptance suites.
-packages/       @pumasi/scheduling-core — the engine. Apache-2.0, embeddable.
-apps/           The deployable service.
-gap/            Needs recorded before they become specifications.
-tools/          The gate and review machinery.
-MANDATE.md      What agents may take without asking.
-HUMAN.md        The exhaustive list of what only a human can do.
-DECISIONS.md    Open veto windows, their deadlines and defaults.
-DIGEST.md       The running record kept for the steward.
-REPORTING.md    What the software sends, and how to stop it.
-SUBPROCESSORS.md  Every third party that can see data — published and enforced.
-```
+One repository per thing that can be forked, versioned or released on its own —
+because `P3` says everything is mirrorable and forkable **in full**, and someone
+who wants the scheduling engine should not have to take a charter with it.
+
+| Repository | Holds | Changes when |
+|---|---|---|
+| **`pumasi`** (here) | The front door, [`catalog.json`](catalog.json), the whitepaper, and [`gap/`](gap/) — needs not yet built | A gap is filed or an item ships |
+| **[`governance`](https://github.com/pumasi-ai/governance)** | Charter, debt register, lessons, mandate, decision queue | The rules change — deliberately its own event, not buried in a code commit |
+| **[`scheduling-core`](https://github.com/pumasi-ai/scheduling-core)** | The engine and its specification | The engine changes |
+| **[`scheduling-service`](https://github.com/pumasi-ai/scheduling-service)** | The service and its specification | The service changes |
+
+Items do **not** vendor the governance files. Their merge gate reads
+`charter.yaml` from the governance repository, so there is one source of truth
+rather than a copy per repository that drifts.
 
 ---
 
