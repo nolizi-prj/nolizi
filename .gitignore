@@ -25,3 +25,6 @@ dist/
 /compose.yaml
 /package.json
 /package-lock.json
+
+# Claude Code worktrees and session state
+.claude/
