@@ -26,7 +26,7 @@ account — forever.
 | **Looking for a booking tool** | [**Pumasi Booking**](https://github.com/pumasi-ai/pumasi-booking) |
 | **Looking for just the scheduling engine** | [`core/`](https://github.com/pumasi-ai/pumasi-booking/tree/main/core) inside it — Apache-2.0, takeable alone |
 | **Wondering how it is governed** | [`governance`](https://github.com/pumasi-ai/governance) — one page of actual rules |
-| **Wondering what went wrong** | [`lessons/`](https://github.com/pumasi-ai/governance/tree/main/lessons) — seven, each one paid for |
+| **Wondering what went wrong** | [`lessons/`](https://github.com/pumasi-ai/governance/tree/main/lessons) — each one paid for |
 
 **Agents: start with [`catalog.json`](catalog.json).** It answers what exists,
 what it solves, where it lives, and what the merge gate requires — in one fetch,
@@ -37,70 +37,18 @@ without exploring. This README is the same information for people.
 ## What actually exists
 
 [**Pumasi Booking**](https://github.com/pumasi-ai/pumasi-booking) — a booking
-page people can send someone to pick a time on. One repository, two workspaces,
-and below is an honest account of what it does not yet do.
+page people can send someone to pick a time on. Accounts, a public booking
+page, confirmation mail, and management links; inside it, in
+[`core/`](https://github.com/pumasi-ai/pumasi-booking/tree/main/core), a pure
+availability engine that is takeable without the service.
 
-### The engine — [`core/`](https://github.com/pumasi-ai/pumasi-booking/tree/main/core)
-
-Availability computation and booking. A **pure function**: no clock of its own,
-no I/O, no ambient state. Same inputs, byte-identical output.
-
-It is deliberately hard where scheduling software is usually wrong:
-
-- A window spanning the spring-forward gap yields **two absolute hours, not
-  three.**
-- A local time that never occurs is **skipped loudly**, with a diagnostic —
-  never silently shifted to the next valid time.
-- A window containing the repeated fall-back hour yields **three hours, not
-  two**, and both occurrences are bookable.
-- A daily cap counts on the **owner's** local date. Not UTC's. Not the
-  requester's.
-
-Both category leaders have open bugs in the last two today. `36` acceptance
-cases plus `12` unit tests hold these.
-
-### The service — [`service/`](https://github.com/pumasi-ai/pumasi-booking/tree/main/service)
-
-**This is Pumasi Booking as you would run it.** Accounts, a public booking page,
-confirmation mail, and management links.
-Deployed anywhere that runs a container or Node 22 — it needs a port and,
-optionally, a PostgreSQL URL. Nothing in it knows about a particular host.
-
-### What it does not do yet
-
-**It cannot see your real calendar.** The service knows only about bookings made
-inside it, so it will offer a time you are already busy and confirm a booking on
-top of it. Double-booking against your own calendar is the *expected* behaviour
-today. This is [`GAP-0002`](gap/0002-calendar-integration.md), promoted to next,
-and it is the difference between a demonstration and a product.
-
-**No lawful basis has been established for holding third-party personal data.**
-[`DEBT.md`](https://github.com/pumasi-ai/governance/blob/main/governance/DEBT.md)
-D-105 says so plainly, caps the service at five
-accounts and two hundred bookings, and refuses to raise those ceilings while the
-entry is open.
-
----
-
-## Run Pumasi Booking
-
-```bash
-git clone https://github.com/pumasi-ai/pumasi-booking
-cd pumasi-booking && npm install && npm run build
-node service/dist/server.js
-```
-
-It prints a sign-up link on first start. Follow it and you have an account, a
-booking page, and availability you can edit. No database, no container, no
-configuration — it runs a real PostgreSQL in-process, so the constraints are
-genuinely enforced, but nothing survives a restart.
-
-```bash
-npm test        # 128: 36 engine acceptance, 12 engine unit, 80 service
-```
-
-For real email and a persistent database, see the
-[Pumasi Booking README](https://github.com/pumasi-ai/pumasi-booking#readme).
+Everything else about it lives in
+[its own README](https://github.com/pumasi-ai/pumasi-booking#readme) — what it
+deliberately gets right that scheduling software is usually wrong about, an
+honest account of what it does **not** do yet, and how to run it. One click
+away, and never stale here: a fact restated across repositories forks and
+drifts, so each repository documents what it owns. The needs it has not yet
+met are tracked in [`gap/`](gap/).
 
 ---
 
@@ -140,7 +88,7 @@ two other families, plus a human sign-off on release. Unmapped paths default to
 - **Reuse, do not reimplement.** Recurrence goes through an RFC 5545 library.
   Timezone arithmetic goes through Temporal. A hand-rolled RRULE expander is
   grounds for rejection at the gate.
-- **Read [`lessons/`](https://github.com/pumasi-ai/governance/tree/main/lessons).** Seven entries, each one paid for. If your work
+- **Read [`lessons/`](https://github.com/pumasi-ai/governance/tree/main/lessons).** Every entry is paid for. If your work
   resembles one, say so explicitly rather than rediscovering it.
 - **Never copy incompatibly licensed code.** Features and behaviour are not
   copyrightable and may be matched freely; implementations may not. Where a

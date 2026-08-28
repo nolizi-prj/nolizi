@@ -170,7 +170,7 @@
             "reason": "Reads as poo-king to English speakers, particularly in British and Commonwealth usage. A naming accident that is invisible on the page and unmissable when said aloud."
           }
         ],
-        "booking_not_scheduling": "'Book a time' is the user's own verb and the commercial name of the category. 'Scheduling' additionally collides with job schedulers and project scheduling. Repositories still use 'scheduling' because it describes the function precisely; both words are listed under `solves` so either search finds it."
+        "booking_not_scheduling": "'Book a time' is the user's own verb and the commercial name of the category. 'Scheduling' additionally collides with job schedulers and project scheduling. Since the 2026-08-28 merge nothing current is named 'scheduling' -- only the archived former repositories were; both words are listed under `solves` so either search finds it."
       }
     }
   }
