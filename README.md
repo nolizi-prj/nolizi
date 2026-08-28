@@ -32,7 +32,7 @@ source of truth rather than a copy per repository.
 | [`DECISIONS.md`](DECISIONS.md) | Open veto windows, with deadlines and defaults. Silence is a decision. |
 | [`DIGEST.md`](DIGEST.md) | The running record kept for the steward. Reading it blocks nothing. |
 | [`REPORTING.md`](REPORTING.md) | What the software sends, and how to turn it off. Disclosure, not terms of use. |
-| [Subprocessor list](https://github.com/pumasi-ai/scheduling-service/blob/main/SUBPROCESSORS.md) | Every third party that can see data. Lives with the service that enforces it — starting with an unnamed mail host is refused. |
+| [Subprocessor list](https://github.com/pumasi-ai/pumasi-booking/blob/main/SUBPROCESSORS.md) | Every third party that can see data. Lives with the product that enforces it — starting with an unnamed mail host is refused. |
 | [`tools/`](tools/) | The gate and review machinery. |
 
 ---

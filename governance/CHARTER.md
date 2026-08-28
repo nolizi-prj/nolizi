@@ -1,8 +1,8 @@
 # The Pumasi Charter
 
 **Version:** 0.4-draft · **Status:** Proposed · **Supersedes:** 0.1-draft, 0.2-draft, 0.3-draft
-**Sources:** [`pumasi-whitepaper-v1.0.md`](../pumasi-whitepaper-v1.0.md) ·
-[`pumasi-commercialization-foundations.md`](../pumasi-commercialization-foundations.md)
+**Sources:** [`pumasi-whitepaper-v1.0.md`](https://github.com/pumasi-ai/pumasi/blob/main/pumasi-whitepaper-v1.0.md) ·
+[`pumasi-commercialization-foundations.md`](https://github.com/pumasi-ai/pumasi/blob/main/pumasi-commercialization-foundations.md)
 **Machine-readable companion:** [`charter.yaml`](./charter.yaml)
 
 > The whitepaper says what Pumasi is. The commercialization foundations say what

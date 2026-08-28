@@ -94,7 +94,7 @@ A report looks like this. This is the whole shape — there is no other payload.
 
 ```json
 {
-  "item": "scheduling-core",
+  "item": "pumasi-booking",
   "version": "0.1.0",
   "suite": "acceptance/cases.json",
   "results": { "passed": 32, "failed": 1, "skipped": 0 },
@@ -273,7 +273,7 @@ not require registering with anyone.
 automatic report tells us whether the suite passed in your environment, not what
 went wrong for you specifically. Making defect reports genuinely useful without
 relaxing those limits is filed as
-[`GAP-0003`](gap/0003-defect-reporting.md), deliberately unbuilt until there
+[`GAP-0003`](https://github.com/pumasi-ai/pumasi/blob/main/gap/0003-defect-reporting.md), deliberately unbuilt until there
 are users to build it for.
 
 ---

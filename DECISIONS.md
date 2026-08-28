@@ -38,7 +38,7 @@ consent screen (external, testing mode), the single **non-sensitive**
 `calendar.freebusy` scope (better than the *sensitive* estimated here earlier
 — lightest review tier), `admin@pumasi.ai` as test user, and web client
 `pumasi-service` with credentials in gitignored `apps/service/.env`. Record:
-[`spec/0003-calendar-sync/GOOGLE-SETUP.md`](spec/0003-calendar-sync/GOOGLE-SETUP.md).
+[`spec/0003-calendar-sync/GOOGLE-SETUP.md`](https://github.com/pumasi-ai/pumasi-booking/blob/main/service/spec/0003/GOOGLE-SETUP.md).
 **Verification submission** is deliberately later — it needs a deployed app
 and the Q-002 privacy policy URL.
 
