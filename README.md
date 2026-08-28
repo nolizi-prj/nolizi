@@ -23,8 +23,8 @@ account — forever.
 |---|---|
 | **An agent, here to work** | [`catalog.json`](catalog.json) first — then [Working here](#working-here) |
 | **A person, evaluating this** | [What actually exists](#what-actually-exists) |
-| **Looking for the scheduling engine** | [`scheduling-core`](https://github.com/pumasi-ai/scheduling-core) — Apache-2.0, embeddable |
-| **Looking for a booking service** | [`scheduling-service`](https://github.com/pumasi-ai/scheduling-service) |
+| **Looking for a booking tool** | **Pumasi Booking** — [`scheduling-service`](https://github.com/pumasi-ai/scheduling-service) |
+| **Looking for just the scheduling engine** | [`scheduling-core`](https://github.com/pumasi-ai/scheduling-core) — Apache-2.0, embeddable |
 | **Wondering how it is governed** | [`governance`](https://github.com/pumasi-ai/governance) — one page of actual rules |
 | **Wondering what went wrong** | [`lessons/`](https://github.com/pumasi-ai/governance/tree/main/lessons) — seven, each one paid for |
 
@@ -36,7 +36,13 @@ without exploring. This README is the same information for people.
 
 ## What actually exists
 
-Two things, and an honest account of what they do not do.
+**Pumasi Booking** — a booking page people can send someone to pick a time on.
+It is built from two repositories, and below is an honest account of what it
+does not yet do.
+
+*The repositories keep functional names. A repository says what it holds; a
+product says what you use. Renaming code to follow branding breaks every clone
+and fork for no gain.*
 
 ### The engine — [`scheduling-core`](https://github.com/pumasi-ai/scheduling-core)
 
@@ -59,7 +65,8 @@ cases plus `12` unit tests hold these.
 
 ### The service — [`scheduling-service`](https://github.com/pumasi-ai/scheduling-service)
 
-Accounts, a public booking page, confirmation mail, and management links.
+**This is Pumasi Booking as you would run it.** Accounts, a public booking page,
+confirmation mail, and management links.
 Deployed anywhere that runs a container or Node 22 — it needs a port and,
 optionally, a PostgreSQL URL. Nothing in it knows about a particular host.
 
@@ -79,7 +86,7 @@ entry is open.
 
 ---
 
-## Run it
+## Run Pumasi Booking
 
 ```bash
 git clone https://github.com/pumasi-ai/scheduling-service
@@ -175,8 +182,8 @@ who wants the scheduling engine should not have to take a charter with it.
 |---|---|---|
 | **`pumasi`** (here) | The front door, [`catalog.json`](catalog.json), the whitepaper, and [`gap/`](gap/) — needs not yet built | A gap is filed or an item ships |
 | **[`governance`](https://github.com/pumasi-ai/governance)** | Charter, debt register, lessons, mandate, decision queue | The rules change — deliberately its own event, not buried in a code commit |
-| **[`scheduling-core`](https://github.com/pumasi-ai/scheduling-core)** | The engine and its specification | The engine changes |
-| **[`scheduling-service`](https://github.com/pumasi-ai/scheduling-service)** | The service and its specification | The service changes |
+| **[`scheduling-core`](https://github.com/pumasi-ai/scheduling-core)** | The engine and its specification — used by Pumasi Booking, forkable without it | The engine changes |
+| **[`scheduling-service`](https://github.com/pumasi-ai/scheduling-service)** | **Pumasi Booking** — the service and its specification | The service changes |
 
 Items do **not** vendor the governance files. Their merge gate reads
 `charter.yaml` from the governance repository, so there is one source of truth
@@ -208,6 +215,24 @@ and which were written fresh — and "later" quietly becomes "never".
 Splitting an engine out of a product is judged the same way: only where the core
 is genuinely reusable alone. The test is whether anyone would fork it *without*
 the service. Scheduling earned that; a CRM probably will not.
+
+### How things are named
+
+**Products** are `Pumasi` plus a plain category noun — **Pumasi Booking**, and
+the same shape for the ones that follow. It forms a family without a naming
+exercise and a trademark clearance per product, and each name is searchable by
+the thing it does.
+
+**Repositories** are named for what they contain, never for branding, and are
+not renamed when a product is named. `-core` is pure and embeddable; `-service`
+is the deployable product.
+
+Rejected for Pumasi Booking, recorded in [`catalog.json`](catalog.json) so it is
+not relitigated: `pumasi-cal` (Cal® and Cal.com® are registered marks in this
+exact category), `Palendar` (one letter away, same category), and
+`pumasi-calendar` — which misdescribes the thing. **This is not a calendar. It
+is a booking link that connects to your calendar**, and the distinction is the
+whole product.
 
 ---
 
