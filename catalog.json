@@ -13,7 +13,7 @@
   },
   "products": [
     {
-      "$comment": "A product is what a person installs and uses. An item below is a repository. One product may span several repositories -- see `repositories`.",
+      "$comment": "A product is what a person installs and uses. Today each product is exactly one repository with the same name, and `items` below describes that repository in full.",
       "name": "Pumasi Booking",
       "category": "booking pages and appointment scheduling",
       "compare_to": [
@@ -21,22 +21,39 @@
         "Cal.com"
       ],
       "repositories": [
-        "scheduling-core",
-        "scheduling-service"
+        "pumasi-booking"
       ],
       "status": "seed",
-      "note": "The repositories keep functional names and are NOT renamed to match the product. A repository describes what it contains; a product name describes what someone uses. Renaming repositories to follow branding breaks clones and forks for no gain."
+      "note": "One product, one repository. The engine and the service are workspaces inside it, not separate repositories -- see structure.one_repository_per_product. The repository is named for the product because they are now the same thing."
     }
   ],
   "items": [
     {
-      "name": "scheduling-core",
-      "package": "@pumasi/scheduling-core",
-      "repository": "https://github.com/pumasi-ai/scheduling-core",
-      "spec": "https://github.com/pumasi-ai/scheduling-core/blob/main/spec/SPEC.md",
-      "acceptance": "https://github.com/pumasi-ai/scheduling-core/blob/main/spec/acceptance/cases.json",
-      "summary": "Availability computation and booking. A pure function: no clock, no I/O, no ambient state.",
+      "name": "pumasi-booking",
+      "product": "Pumasi Booking",
+      "repository": "https://github.com/pumasi-ai/pumasi-booking",
+      "summary": "A booking page people can send someone to pick a time on: accounts, public booking pages, confirmation mail, management links. Contains the availability engine it runs on.",
+      "workspaces": {
+        "core": {
+          "package": "@pumasi/booking-core",
+          "what": "Availability computation and booking. A pure function: no clock, no I/O, no ambient state.",
+          "spec": "https://github.com/pumasi-ai/pumasi-booking/blob/main/core/spec/SPEC.md",
+          "acceptance": "https://github.com/pumasi-ai/pumasi-booking/blob/main/core/spec/acceptance/cases.json",
+          "reusable_alone": true,
+          "how_to_take_it_alone": "git subtree split --prefix=core -- yields the engine with its full history, no server, no database, no charter. P3 is satisfied by being able to take it, not by keeping a repository open for it in advance."
+        },
+        "service": {
+          "package": "@pumasi/booking-service",
+          "what": "Everything that touches the world: HTTP, PostgreSQL, mail, sessions.",
+          "spec": "https://github.com/pumasi-ai/pumasi-booking/blob/main/service/spec/0002/SPEC.md",
+          "acceptance": "https://github.com/pumasi-ai/pumasi-booking/blob/main/service/spec/0002/acceptance/cases.json"
+        }
+      },
       "solves": [
+        "booking page",
+        "appointment scheduling",
+        "meeting links",
+        "calendly alternative",
         "availability",
         "booking",
         "scheduling",
@@ -47,40 +64,26 @@
       ],
       "maturity": "seed",
       "tests": {
-        "acceptance": 36,
-        "unit": 12,
-        "passing": true
-      },
-      "published_to_registry": false,
-      "runtime": "node>=22",
-      "depends_on": []
-    },
-    {
-      "name": "scheduling-service",
-      "product": "Pumasi Booking",
-      "repository": "https://github.com/pumasi-ai/scheduling-service",
-      "spec": "https://github.com/pumasi-ai/scheduling-service/blob/main/spec/0002/SPEC.md",
-      "acceptance": "https://github.com/pumasi-ai/scheduling-service/blob/main/spec/0002/acceptance/cases.json",
-      "summary": "A deployable scheduling service: accounts, public booking pages, confirmation mail, management links.",
-      "solves": [
-        "booking page",
-        "appointment scheduling",
-        "meeting links",
-        "calendly alternative"
-      ],
-      "maturity": "seed",
-      "tests": {
+        "acceptance_engine": 36,
+        "unit_engine": 12,
         "service": 80,
         "passing": true
       },
+      "published_to_registry": false,
       "runtime": "node>=22, PostgreSQL optional",
-      "depends_on": [
-        "@pumasi/scheduling-core"
-      ],
+      "depends_on": [],
       "known_limitations": [
         "Cannot read the owner's real calendar, so it will offer a time they are already busy. See gap/0002.",
         "No settled lawful basis for third-party personal data; capped at 5 accounts and 200 bookings."
-      ]
+      ],
+      "formerly": {
+        "repositories": [
+          "pumasi-ai/scheduling-core (archived)",
+          "pumasi-ai/scheduling-service (renamed)"
+        ],
+        "merged": "2026-08-28",
+        "why": "Two repositories for one product cost two merge gates, two spec trees and an unpinned git dependency, in exchange for a reusability nobody had asked for. Same error as L-001."
+      }
     }
   ],
   "gaps": [
@@ -88,7 +91,7 @@
       "id": "GAP-0001",
       "file": "gap/0001-scheduling.md",
       "status": "converted",
-      "became": "scheduling-core"
+      "became": "pumasi-booking"
     },
     {
       "id": "GAP-0002",
@@ -137,12 +140,13 @@
     "duplication_is_deliberate_here": "Accounts, sessions, mail, storage, rate limiting, HTML rendering and charter-required reporting will be rebuilt per product until there is enough evidence to extract them well. This is the ONE place duplication is permitted, and only because the alternative is a worse abstraction.",
     "extraction_trigger": "Analyse for extraction once THREE products exist. Two is enough to see a pattern and not enough to tell a pattern from a coincidence.",
     "what_makes_that_analysis_possible": "Every product records what it copied from an existing product, and from where, in its own COPIED.md. Without that the later analysis is archaeology on diffs, and the parts that were copied become indistinguishable from the parts that were written fresh.",
-    "split_engine_from_product": "Only where the core is genuinely reusable on its own -- the test is whether anyone would fork it without the service. Scheduling earned that split; a CRM likely will not. Judged per product, never by convention.",
+    "split_engine_from_product": "Do NOT split by default, and do not split on the argument that a core is reusable in principle. That was tried here: the scheduling engine was given its own repository because someone might want it alone, nobody did, and the split cost two merge gates, two spec trees and an unpinned git dependency until it was merged back on 2026-08-28. Split only when a real consumer outside the product exists and asks. Until then the boundary lives in the code -- purity, its own spec, its own acceptance suite -- and `git subtree split` extracts it with full history on the day it is actually wanted. This is the same rule as extraction_trigger, applied to cores.",
     "naming": {
       "repositories": {
-        "$comment": "Repositories are named for what they contain, never for branding.",
-        "-core": "pure, embeddable, no I/O",
-        "-service": "deployable product"
+        "$comment": "One repository per product, named for the product. The -core/-service suffixes are WORKSPACE names inside a repository, not repository names -- they described repositories until 2026-08-28.",
+        "repository": "the product name, lowercased and hyphenated -- e.g. pumasi-booking",
+        "core": "workspace: pure, embeddable, no I/O",
+        "service": "workspace: everything that touches the world"
       },
       "products": {
         "$comment": "Settled 2026-08-28. Recorded with the rejected candidates so this is not relitigated.",

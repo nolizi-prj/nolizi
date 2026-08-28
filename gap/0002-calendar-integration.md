@@ -2,7 +2,7 @@
 
 **Filed:** 2026-08-03 · **Status:** open, **promoted to next** by the steward
 **Reserved since:** 2026-07-28, referenced by `GAP-0001` §5 and both specs
-**Intent:** [`spec/0003-calendar-sync/INTENT.md`](../spec/0003-calendar-sync/INTENT.md)
+**Intent:** [`spec/0003-calendar-sync/INTENT.md`](https://github.com/pumasi-ai/pumasi-booking/blob/main/service/spec/0003/INTENT.md)
 
 ---
 

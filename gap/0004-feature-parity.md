@@ -2,16 +2,16 @@
 
 **Filed:** 2026-08-01 · **Status:** open, roadmap — **not converted to a spec**
 **Signed:** *(single identity; the steward is also the sponsor — `governance/DEBT.md` D-101)*
-**Related:** `spec/0001-scheduling-core` (the engine, in progress) ·
+**Related:** SPEC-0001 ([`core/spec`](https://github.com/pumasi-ai/pumasi-booking/tree/main/core/spec)) (the engine, in progress) ·
 `GAP-0002` *(calendar integration — reserved, unwritten)* ·
-`spec/0001-scheduling-core/DUPLICATION.md`
+[`core/spec/DUPLICATION.md`](https://github.com/pumasi-ai/pumasi-booking/blob/main/core/spec/DUPLICATION.md)
 
 ---
 
 ## 1 · The direction
 
 The steward's instruction, recorded verbatim in
-`spec/0001-scheduling-core/INTENT.md`:
+[`core/spec/INTENT.md`](https://github.com/pumasi-ai/pumasi-booking/blob/main/core/spec/INTENT.md):
 
 > We will not copy Cal.com, but we will review them carefully and implement all
 > the features and UX if needed in a similar or same way. In addition, we will
@@ -108,7 +108,7 @@ achieved by having more features than Cal.com.
 The steward's requirement is that these items be implementable later **without
 rework**. That is not the same as building for them now, and the difference
 matters: building the abstraction before the requirement is
-[`L-001`](../lessons/L-001-governance-ahead-of-evidence.md), which is the failure
+[`L-001`](https://github.com/pumasi-ai/governance/blob/main/lessons/L-001-governance-ahead-of-evidence.md), which is the failure
 this project has already paid for once.
 
 **The line: name the seams, do not build them.**
@@ -133,7 +133,7 @@ budget readiness should get before there is an implementation to learn from.
 
 Ten specs written now would be ten specifications written against zero users, no
 implementation experience, and an engine that does not exist yet — which is
-[`L-001`](../lessons/L-001-governance-ahead-of-evidence.md).
+[`L-001`](https://github.com/pumasi-ai/governance/blob/main/lessons/L-001-governance-ahead-of-evidence.md).
 
 **Item 1b is being specified now, in parallel with item 1**, at the steward's
 direction and against the recommendation to sequence it. The risk accepted is

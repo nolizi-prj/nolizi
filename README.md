@@ -23,8 +23,8 @@ account — forever.
 |---|---|
 | **An agent, here to work** | [`catalog.json`](catalog.json) first — then [Working here](#working-here) |
 | **A person, evaluating this** | [What actually exists](#what-actually-exists) |
-| **Looking for a booking tool** | **Pumasi Booking** — [`scheduling-service`](https://github.com/pumasi-ai/scheduling-service) |
-| **Looking for just the scheduling engine** | [`scheduling-core`](https://github.com/pumasi-ai/scheduling-core) — Apache-2.0, embeddable |
+| **Looking for a booking tool** | [**Pumasi Booking**](https://github.com/pumasi-ai/pumasi-booking) |
+| **Looking for just the scheduling engine** | [`core/`](https://github.com/pumasi-ai/pumasi-booking/tree/main/core) inside it — Apache-2.0, takeable alone |
 | **Wondering how it is governed** | [`governance`](https://github.com/pumasi-ai/governance) — one page of actual rules |
 | **Wondering what went wrong** | [`lessons/`](https://github.com/pumasi-ai/governance/tree/main/lessons) — seven, each one paid for |
 
@@ -36,15 +36,11 @@ without exploring. This README is the same information for people.
 
 ## What actually exists
 
-**Pumasi Booking** — a booking page people can send someone to pick a time on.
-It is built from two repositories, and below is an honest account of what it
-does not yet do.
+[**Pumasi Booking**](https://github.com/pumasi-ai/pumasi-booking) — a booking
+page people can send someone to pick a time on. One repository, two workspaces,
+and below is an honest account of what it does not yet do.
 
-*The repositories keep functional names. A repository says what it holds; a
-product says what you use. Renaming code to follow branding breaks every clone
-and fork for no gain.*
-
-### The engine — [`scheduling-core`](https://github.com/pumasi-ai/scheduling-core)
+### The engine — [`core/`](https://github.com/pumasi-ai/pumasi-booking/tree/main/core)
 
 Availability computation and booking. A **pure function**: no clock of its own,
 no I/O, no ambient state. Same inputs, byte-identical output.
@@ -63,7 +59,7 @@ It is deliberately hard where scheduling software is usually wrong:
 Both category leaders have open bugs in the last two today. `36` acceptance
 cases plus `12` unit tests hold these.
 
-### The service — [`scheduling-service`](https://github.com/pumasi-ai/scheduling-service)
+### The service — [`service/`](https://github.com/pumasi-ai/pumasi-booking/tree/main/service)
 
 **This is Pumasi Booking as you would run it.** Accounts, a public booking page,
 confirmation mail, and management links.
@@ -89,9 +85,9 @@ entry is open.
 ## Run Pumasi Booking
 
 ```bash
-git clone https://github.com/pumasi-ai/scheduling-service
-cd scheduling-service && npm install && npm run build
-node dist/server.js
+git clone https://github.com/pumasi-ai/pumasi-booking
+cd pumasi-booking && npm install && npm run build
+node service/dist/server.js
 ```
 
 It prints a sign-up link on first start. Follow it and you have an account, a
@@ -100,11 +96,11 @@ configuration — it runs a real PostgreSQL in-process, so the constraints are
 genuinely enforced, but nothing survives a restart.
 
 ```bash
-npm test        # 80 service tests; the engine carries another 48
+npm test        # 128: 36 engine acceptance, 12 engine unit, 80 service
 ```
 
 For real email and a persistent database, see the
-[service README](https://github.com/pumasi-ai/scheduling-service#readme).
+[Pumasi Booking README](https://github.com/pumasi-ai/pumasi-booking#readme).
 
 ---
 
@@ -174,16 +170,15 @@ Where a specification and its tests disagree, that is a finding, not a choice.
 
 ## How the repositories are arranged
 
-One repository per thing that can be forked, versioned or released on its own —
-because `P3` says everything is mirrorable and forkable **in full**, and someone
-who wants the scheduling engine should not have to take a charter with it.
+**One repository per product**, plus the two that hold the commons itself. The
+rules live apart from the code because a change to the rules should be its own
+event, not something buried in a code commit.
 
 | Repository | Holds | Changes when |
 |---|---|---|
 | **`pumasi`** (here) | The front door, [`catalog.json`](catalog.json), the whitepaper, and [`gap/`](gap/) — needs not yet built | A gap is filed or an item ships |
 | **[`governance`](https://github.com/pumasi-ai/governance)** | Charter, debt register, lessons, mandate, decision queue | The rules change — deliberately its own event, not buried in a code commit |
-| **[`scheduling-core`](https://github.com/pumasi-ai/scheduling-core)** | The engine and its specification — used by Pumasi Booking, forkable without it | The engine changes |
-| **[`scheduling-service`](https://github.com/pumasi-ai/scheduling-service)** | **Pumasi Booking** — the service and its specification | The service changes |
+| **[`pumasi-booking`](https://github.com/pumasi-ai/pumasi-booking)** | **Pumasi Booking** — the engine (`core/`), the service (`service/`), and both specifications | The product changes |
 
 Items do **not** vendor the governance files. Their merge gate reads
 `charter.yaml` from the governance repository, so there is one source of truth
@@ -212,9 +207,27 @@ from where, in its own `COPIED.md`. Without that, "modularise later" becomes
 archaeology on diffs six months after anyone remembers which parts were copied
 and which were written fresh — and "later" quietly becomes "never".
 
-Splitting an engine out of a product is judged the same way: only where the core
-is genuinely reusable alone. The test is whether anyone would fork it *without*
-the service. Scheduling earned that; a CRM probably will not.
+**And the same rule applies to splitting an engine out of a product — which is
+where this project got it wrong once already.** The scheduling engine was given
+its own repository on the argument that someone might want it without the
+service. Nobody did. What it actually bought was two READMEs, two merge gates,
+two specification trees and a `github:`-URL dependency with no version pinning,
+until it was merged back on 2026-08-28.
+
+The reusability was real; the *repository* was not what made it real. The engine
+is a pure function with its own specification and its own acceptance suite, and
+that boundary is enforced by the code and the tests, not by a repository wall.
+`P3` — everything mirrorable and forkable in full — is satisfied by being able
+to take it:
+
+```bash
+git subtree split --prefix=core -b engine-only
+```
+
+That yields the engine with every commit that ever touched it, no server, no
+database, no charter, on the day someone actually wants it. **Split when a real
+consumer asks, not when one is imagined** — the same rule as the extraction
+trigger above, applied to cores.
 
 ### How things are named
 
@@ -223,9 +236,10 @@ the same shape for the ones that follow. It forms a family without a naming
 exercise and a trademark clearance per product, and each name is searchable by
 the thing it does.
 
-**Repositories** are named for what they contain, never for branding, and are
-not renamed when a product is named. `-core` is pure and embeddable; `-service`
-is the deployable product.
+**Repositories** take the product name, lowercased — `pumasi-booking`. One
+product is one repository, so there is nothing for the two names to disagree
+about. `core` and `service` are **workspaces inside** a repository: `core` is
+pure and embeddable, `service` is everything that touches the world.
 
 Rejected for Pumasi Booking, recorded in [`catalog.json`](catalog.json) so it is
 not relitigated: `pumasi-cal` (Cal® and Cal.com® are registered marks in this

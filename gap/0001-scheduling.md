@@ -1,6 +1,6 @@
 # GAP-0001 — Availability computation and booking
 
-**Office:** Scout · **Filed:** 2026-07-28 · **Status:** converted to `spec/0001-scheduling-core`
+**Office:** Scout · **Filed:** 2026-07-28 · **Status:** converted to SPEC-0001 ([`core/spec`](https://github.com/pumasi-ai/pumasi-booking/tree/main/core/spec))
 **Signed:** *(single identity; the steward is also the sponsor — `governance/DEBT.md` D-101)*
 **Updated 2026-08-01:** rewritten against charter v0.3, which replaced graded risk
 zones with one question and removed the phase and credit machinery.
@@ -78,7 +78,7 @@ rather than merely a useful first product:
    real person, which is real-world harm, not a code-quality issue).
 3. **A strong incumbent.** Cal.com exists and is excellent. The Curator's
    duplication finding is therefore a real adjudication with a real possible
-   answer of "don't build this" — see `spec/0001-scheduling-core/DUPLICATION.md`.
+   answer of "don't build this" — see [`core/spec/DUPLICATION.md`](https://github.com/pumasi-ai/pumasi-booking/blob/main/core/spec/DUPLICATION.md).
 4. **Known-hard for agents.** Timezone and DST correctness is a domain where
    plausible-looking generated code is routinely wrong, which stress-tests the
    claim that specification-plus-tests beats trusted authorship.

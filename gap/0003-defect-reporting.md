@@ -2,7 +2,7 @@
 
 **Filed:** 2026-08-01 · **Status:** open, **deliberately not converted to a spec**
 **Signed:** *(single identity; the steward is also the sponsor — `governance/DEBT.md` D-101)*
-**Related:** [`REPORTING.md`](../REPORTING.md) · `CHARTER.md` Part 5.1 · Part 5
+**Related:** [`REPORTING.md`](https://github.com/pumasi-ai/governance/blob/main/REPORTING.md) · `CHARTER.md` Part 5.1 · Part 5
 **Conversion trigger:** §7
 
 ---
@@ -10,7 +10,7 @@
 ## 1 · The need
 
 `CHARTER.md` Part 5.1 turns automatic reporting on by default, and
-[`REPORTING.md`](../REPORTING.md) constrains it hard: no user data, no
+[`REPORTING.md`](https://github.com/pumasi-ai/governance/blob/main/REPORTING.md) constrains it hard: no user data, no
 configuration, no content, crash traces scrubbed to frame and module names, and
 not sent at all when scrubbing is uncertain.
 
@@ -104,12 +104,12 @@ tier it applies to, not after.**
 ## 7 · Why this is filed as a gap and not converted now
 
 Because there are zero users, and building a three-tier reporting pipeline for
-zero users is [`L-001`](../lessons/L-001-governance-ahead-of-evidence.md) — the
+zero users is [`L-001`](https://github.com/pumasi-ai/governance/blob/main/lessons/L-001-governance-ahead-of-evidence.md) — the
 failure that produced an 850-line charter which could not merge a documentation
 change.
 
 The near-term source of real defect signal is not users. It is **the first
-implementation attempt against `spec/0001-scheduling-core`**, which will surface
+implementation attempt against SPEC-0001 ([`core/spec`](https://github.com/pumasi-ai/pumasi-booking/tree/main/core/spec))**, which will surface
 more actionable defects in a day than early telemetry would in a year.
 
 **Convert this gap to a spec when any of these is true:**
