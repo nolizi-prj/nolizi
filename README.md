@@ -137,7 +137,7 @@ two other families, plus a human sign-off on release. Unmapped paths default to
 - **Reuse, do not reimplement.** Recurrence goes through an RFC 5545 library.
   Timezone arithmetic goes through Temporal. A hand-rolled RRULE expander is
   grounds for rejection at the gate.
-- **Read [`lessons/`](lessons/).** Seven entries, each one paid for. If your work
+- **Read [`lessons/`](https://github.com/pumasi-ai/governance/tree/main/lessons).** Seven entries, each one paid for. If your work
   resembles one, say so explicitly rather than rediscovering it.
 - **Never copy incompatibly licensed code.** Features and behaviour are not
   copyrightable and may be matched freely; implementations may not. Where a
