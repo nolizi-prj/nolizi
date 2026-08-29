@@ -143,7 +143,12 @@ risk:
     surface_authorised_by: mandate_entry
     release_proceeds_via: 7_day_veto_window # on a published plain-language note
     release_staged: ceilings_first
-  inherited_by_dependencies: true           # substrate of a can-hurt path is can-hurt
+  inherited_by: handling_path               # a component that reads, stores, transmits
+                                            # or decides on the data is can-hurt
+  inherited_by_whole_dependency_graph: false  # a formatter, a logger that never sees a
+                                            # field, a build tool, a dependency bump
+                                            # are ordinary — Part 4
+  unclear_whether_data_reaches: can_hurt    # the Part 4 default still applies
   reclassification_to_ordinary: can_hurt_procedure
   assignment_file: RISK_ZONES.yaml
 
@@ -157,14 +162,16 @@ open_contributions:
 
 reporting_requirement:                        # CHARTER Part 5.1
   binds: builders                             # never users
-  every_catalog_item_must_implement: true
+  applies_to: software_items_with_network_egress
+  out_of_scope: [documentation, schemas, specifications, libraries_without_egress]
   must_implement_working_opt_out: true
-  enforced_at: merge_gate
+  enforced_at: release_gate                   # not merge; merge proves correctness,
+                                              # release is where a person is exposed
   gate_checks: [reporting_path_exists, opt_out_stops_egress,
                 opt_out_behaviour_parity, payload_inspectable,
                 first_run_notice_present]
-  item_without_reporting_path: cannot_merge
-  item_with_broken_opt_out: cannot_merge
+  item_without_reporting_path: cannot_release # may merge
+  item_with_broken_opt_out: cannot_release
   user_obliged_to_submit: false               # CF 1 — never less free for non-payers
   use_conditioned_on_submission: false
 
@@ -173,15 +180,32 @@ automatic_reporting:                          # CHARTER Part 5.2
   opt_out:
     available: true
     steps: 1
+    covers: [published, held]                 # one setting, both tiers
     degrades_function: false
     signal_transmitted: false                 # choice held locally; nothing sent
     absence_treated_as_signal: false
   applies_to: running_software_only           # never reading — P2 stays unauthenticated
-  collects: [test_outcomes, environment_facts]
+  purpose: [operating_the_software, improving_the_software]
+  tiers:                                      # collecting and publishing are different acts
+    published:
+      carries: [conformance_results, environment_facts, signature]
+      permanent: true                         # mirrorable, unrecallable — P3
+      signed: true
+    held:
+      carries: [feature_usage, timings, error_detail, crash_detail,
+                configuration_shape, reduced_defect_reproductions]
+      published: false
+      signed: false
+      retention: published_schedule
+      deletable_on_request: true
   crash_traces:
-    scrubbed_to: [frame_names, module_names]
-    unscrubbable_sent_by_default: false       # offered for deliberate send instead
-  never_collects: [user_content, configuration, surrounding_code, user_data]
+    scrubbed_of: [literal_values, arguments, paths]
+    unscrubbable_sent_by_default: true        # to the HELD tier only
+    unscrubbable_may_be_published: false
+  never_collects: [user_content, user_data, credentials, connection_strings,
+                   customer_records, surrounding_code]
+  # The line: how our software behaved is ours to learn from; what the user put
+  # into it is theirs. Structure, shape, timing and counts cross it; contents do not.
   # NOT claimed: "no personal data". Reports are signed (P9), so a report
   # identifies its sender — personal data when that sender is a person.
   # The obligation is plain disclosure + a real opt-out, not a claim of anonymity.
@@ -189,8 +213,9 @@ automatic_reporting:                          # CHARTER Part 5.2
   claims_anonymity: false
   inspectable_before_send: true
   documented_in_repository: true
-  input_to_ranking_or_commerce: false         # P6
-  published_not_collected: true               # enters the public record, P2/P3
+  input_to_ranking_or_commerce: false         # P6 — both tiers
+  sold_rented_or_shared_for_marketing: false  # both tiers; condition of the broader collection
+  published_not_collected: published_tier_only # P2/P3; held tier is collected, not published
   attributed: [agent, model, sponsor]         # P9 — reports are signed, not anonymous
   user_facing_statement: REPORTING.md
   use_conditioned_on_agreement: false         # disclosure, not terms of use
