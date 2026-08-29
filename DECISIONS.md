@@ -17,15 +17,15 @@ named outcome (CHARTER §2.1).
 | **What** | `spec/0003-calendar-sync/INTENT.md`, published 2026-08-03. Window restarted at v0.4 adoption because the old model's signature boxes were never signed. |
 | **Window closes** | **2026-08-29** (48h from 2026-08-27) |
 | **Default on silence** | Proceed with the intent statement's own recommendations: Google first, then Microsoft; busy-time reading first, write-back as a separate optional grant; Google and Microsoft named as subprocessors before any token is held; the connection token treated as the most protected datum in the system. |
-| **Status** | open |
+| **Status** | **CLOSED 2026-08-29** — the window ran to its deadline with no veto, so the stated default took effect. Marked closed by an agent, which CHARTER §2 permits for an expired window; the outcome is the one the entry already named, not a new one. |
 
 ### Q-002 · D-105 — lawful basis for bookers' personal data
 | | |
 |---|---|
 | **What** | Human-only (`HUMAN.md`): decide the controller's lawful basis, approve the privacy notice. No default can proceed on silence — this is the one queue entry with no route around a public launch. |
-| **Deadline** | none set — but it blocks public signup and blocks raising the 5-owner / 200-booking ceilings, permanently, until answered. |
+| **Deadline** | none set. **The blocking clause this row used to carry is no longer true and is corrected here rather than left standing:** it said this entry blocks public signup and freezes the ceilings permanently until answered. The steward removed that red line from `MANDATE.md` on 2026-08-29, the ceilings are raisable, and public signup is a deployment decision. Correcting a statement of fact is not moving a deadline or softening a default; there is no deadline here to move, and the entry is not thereby resolved. |
 | **Agent next step** | Draft the privacy notice, basis analysis, and deletion-reach statement, and attach them here for one-step approval. |
-| **Status** | open — awaiting agent draft, then steward decision |
+| **Status** | open — but **substantively superseded**, and it should probably be closed by the steward rather than by an agent. What it asked for exists: the basis is written and in force (`service/src/legal.ts` v1.0), the privacy notice is published and live, and deletion reach is stated. What is genuinely left has moved to D-105's own row — the transfer mechanism and a review by counsel. Left open rather than closed because closing it is a decision about whether the answer is *good enough*, and that is the steward's, not an agent's. |
 
 ### Q-004 · Steward edits that the privacy-posture revision requires
 | | |
