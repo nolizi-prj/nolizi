@@ -2,7 +2,7 @@
 
 **Filed:** 2026-08-01 · **Status:** open, **deliberately not converted to a spec**
 **Signed:** *(single identity; the steward is also the sponsor — `governance/DEBT.md` D-101)*
-**Related:** [`REPORTING.md`](https://github.com/pumasi-ai/governance/blob/main/REPORTING.md) · `CHARTER.md` Part 5.1 · Part 5
+**Related:** [`REPORTING.md`](../REPORTING.md) · `CHARTER.md` Part 5.1 · Part 5
 **Conversion trigger:** §7
 
 ---
@@ -10,7 +10,7 @@
 ## 1 · The need
 
 `CHARTER.md` Part 5.1 turns automatic reporting on by default, and
-[`REPORTING.md`](https://github.com/pumasi-ai/governance/blob/main/REPORTING.md) constrains it hard: no user data, no
+[`REPORTING.md`](../REPORTING.md) constrains it hard: no user data, no
 configuration, no content, crash traces scrubbed to frame and module names, and
 not sent at all when scrubbing is uncertain.
 
@@ -124,7 +124,7 @@ tier it applies to, not after.**
 ## 7 · Why this is filed as a gap and not converted now
 
 Because there are zero users, and building a three-tier reporting pipeline for
-zero users is [`L-001`](https://github.com/pumasi-ai/governance/blob/main/lessons/L-001-governance-ahead-of-evidence.md) — the
+zero users is [`L-001`](../lessons/L-001-governance-ahead-of-evidence.md) — the
 failure that produced an 850-line charter which could not merge a documentation
 change.
 
@@ -135,7 +135,7 @@ more actionable defects in a day than early telemetry would in a year.
 **One conversion trigger has been removed, 2026-08-29.** This gap was blocked on
 a constraint as well as on evidence; the constraint is gone and the evidence
 requirement stands unchanged. Do not read the lifting as a reason to build it —
-[`L-001`](https://github.com/pumasi-ai/governance/blob/main/lessons/L-001-governance-ahead-of-evidence.md)
+[`L-001`](../lessons/L-001-governance-ahead-of-evidence.md)
 applies exactly as it did, and there are still zero users.
 
 **Convert this gap to a spec when any of these is true:**

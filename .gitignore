@@ -23,3 +23,9 @@ dist/
 
 # Claude Code worktrees and session state
 .claude/
+
+# Vendored dependency tree that was committed to the governance repository
+# before it merged here. Removed from tracking in the same commit; ignored so
+# it cannot come back.
+tools/operator/node_modules/
+node_modules/

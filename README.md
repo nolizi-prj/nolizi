@@ -25,8 +25,8 @@ account — forever.
 | **A person, evaluating this** | [What actually exists](#what-actually-exists) |
 | **Looking for a booking tool** | [**Pumasi Booking**](https://github.com/pumasi-ai/pumasi-booking) |
 | **Looking for just the scheduling engine** | [`core/`](https://github.com/pumasi-ai/pumasi-booking/tree/main/core) inside it — Apache-2.0, takeable alone |
-| **Wondering how it is governed** | [`governance`](https://github.com/pumasi-ai/governance) — one page of actual rules |
-| **Wondering what went wrong** | [`lessons/`](https://github.com/pumasi-ai/governance/tree/main/lessons) — seven, each one paid for |
+| **Wondering how it is governed** | [`governance`](README.md) — one page of actual rules |
+| **Wondering what went wrong** | [`lessons/`](lessons) — seven, each one paid for |
 
 **Agents: start with [`catalog.json`](catalog.json).** It answers what exists,
 what it solves, where it lives, and what the merge gate requires — in one fetch,
@@ -77,7 +77,7 @@ running service: performance of the contract plus legitimate interest for
 account holders, and the account holder's legitimate interest, with the service
 as their processor, for the people who book. What remains genuinely unresolved
 is narrower and is
-[`DEBT.md` D-105](https://github.com/pumasi-ai/governance/blob/main/governance/DEBT.md),
+[`DEBT.md` D-105](governance/DEBT.md),
 open at **DEGRADING**: the international transfer position — the service is
 operated from the United States, data is processed there, and no standard
 contractual clauses are in place — and the review by counsel itself.
@@ -147,7 +147,7 @@ two other families, plus a human sign-off on release. Unmapped paths default to
 - **Reuse, do not reimplement.** Recurrence goes through an RFC 5545 library.
   Timezone arithmetic goes through Temporal. A hand-rolled RRULE expander is
   grounds for rejection at the gate.
-- **Read [`lessons/`](https://github.com/pumasi-ai/governance/tree/main/lessons).** Seven entries, each one paid for. If your work
+- **Read [`lessons/`](lessons).** Each one paid for. If your work
   resembles one, say so explicitly rather than rediscovering it.
 - **Never copy incompatibly licensed code.** Features and behaviour are not
   copyrightable and may be matched freely; implementations may not. Where a
@@ -166,9 +166,9 @@ two other families, plus a human sign-off on release. Unmapped paths default to
 | Is it done? | `spec/*/acceptance/cases.json` — **executable, and the arbiter** |
 | What was the human asked to confirm? | `spec/*/INTENT.md` — one page, plain language |
 | What may I work on without asking? | The product's own roadmap — for Pumasi Booking, [`roadmap/`](https://github.com/pumasi-ai/pumasi-booking/tree/main/roadmap) |
-| What needs a human? | [`HUMAN.md`](https://github.com/pumasi-ai/governance/blob/main/HUMAN.md) — three rules; anything absent is agent work |
-| What is open for objection? | [`DECISIONS.md`](https://github.com/pumasi-ai/governance/blob/main/DECISIONS.md) — with deadlines and defaults |
-| What are we running below? | [`DEBT.md`](https://github.com/pumasi-ai/governance/blob/main/governance/DEBT.md) |
+| What needs a human? | [`HUMAN.md`](HUMAN.md) — three rules; anything absent is agent work |
+| What is open for objection? | [`DECISIONS.md`](DECISIONS.md) — with deadlines and defaults |
+| What are we running below? | [`DEBT.md`](governance/DEBT.md) |
 
 **Where prose and code disagree, the prose governs and the code is a defect.**
 Where a specification and its tests disagree, that is a finding, not a choice.
@@ -184,7 +184,7 @@ event, not something buried in a code commit.
 | Repository | Holds | Changes when |
 |---|---|---|
 | **`pumasi`** (here) | The front door, [`catalog.json`](catalog.json), the whitepaper, and [`gap/`](gap/) — needs not yet built | A gap is filed or an item ships |
-| **[`governance`](https://github.com/pumasi-ai/governance)** | Charter, debt register, lessons, mandate, decision queue | The rules change — deliberately its own event, not buried in a code commit |
+| **[`governance`](README.md)** | Charter, debt register, lessons, mandate, decision queue | The rules change — deliberately its own event, not buried in a code commit |
 | **[`pumasi-booking`](https://github.com/pumasi-ai/pumasi-booking)** | **Pumasi Booking** — the engine (`core/`), the service (`service/`), and both specifications | The product changes |
 
 Items do **not** vendor the governance files. Their merge gate reads
@@ -217,7 +217,7 @@ drifted, and were several commits behind the repositories that had superseded
 them, while being indistinguishable from live files to anyone opening the
 folder. Those ignore rules were deleted along with the copies: **a stray tree
 here should now appear in `git status` rather than be silently hidden.** That is
-[`L-008`](https://github.com/pumasi-ai/governance/blob/main/lessons/L-008-a-boundary-is-not-a-repository.md).
+[`L-008`](lessons/L-008-a-boundary-is-not-a-repository.md).
 
 ### One repository per product, and no shared libraries yet
 
@@ -230,7 +230,7 @@ That duplication is deliberate, and it is the only place this project permits
 any. Extracting shared foundations from a single example means guessing the
 interface, and **a wrong shared interface is harder to remove than the
 duplication it was meant to prevent** — machinery ahead of evidence, which is
-[`L-001`](https://github.com/pumasi-ai/governance/blob/main/lessons/L-001-governance-ahead-of-evidence.md)
+[`L-001`](lessons/L-001-governance-ahead-of-evidence.md)
 and has already been paid for once here.
 
 **The trigger: analyse for extraction when the third product exists.** Two is
@@ -322,7 +322,7 @@ never for sale · no open-core, no dual licensing, no license switch, no metered
 reads, no advertising, no hosted-exclusive features · anyone may leave and take
 everything with them.
 
-Full text: [`CHARTER.md` Part 1](https://github.com/pumasi-ai/governance/blob/main/governance/CHARTER.md).
+Full text: [`CHARTER.md` Part 1](governance/CHARTER.md).
 
 ---
 
