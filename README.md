@@ -184,6 +184,34 @@ Items do **not** vendor the governance files. Their merge gate reads
 `charter.yaml` from the governance repository, so there is one source of truth
 rather than a copy per repository that drifts.
 
+### What belongs in this repository
+
+Everything here is **general to the commons and true across every product.**
+Nothing here is specific to one product, and there is no code here at all.
+
+| Belongs in `pumasi` | Belongs in the product's own repository |
+|---|---|
+| The front door and [`catalog.json`](catalog.json) | Source, specifications, acceptance suites, build files |
+| A **gap** — a need recorded *before* anything is built for it | The **roadmap** of a product that now exists |
+| Rules about how products relate to one another | Anything true of only one product |
+
+**A gap is a commons artifact until it becomes a product; after that, its
+roadmap belongs to the product.** [`GAP-0001`](gap/0001-scheduling.md) stays
+here as the record of the need that produced Pumasi Booking. Where that product
+goes *next* is Pumasi Booking's business, and belongs beside the code that has
+to change.
+
+**This was got wrong once, and it is worth saying plainly.** Until 2026-08-29
+this repository still held the entire scheduling implementation, both
+specification trees, and the whole governance tree — untracked on disk and
+hidden by a `.gitignore` stanza reading *"moved to their own repositories, kept
+locally as a working copy"*. They had indeed been moved. The copies stayed,
+drifted, and were several commits behind the repositories that had superseded
+them, while being indistinguishable from live files to anyone opening the
+folder. Those ignore rules were deleted along with the copies: **a stray tree
+here should now appear in `git status` rather than be silently hidden.** That is
+[`L-008`](https://github.com/pumasi-ai/governance/blob/main/lessons/L-008-a-boundary-is-not-a-repository.md).
+
 ### One repository per product, and no shared libraries yet
 
 More products are coming — a CRM, a signing tool, others. Each gets its own

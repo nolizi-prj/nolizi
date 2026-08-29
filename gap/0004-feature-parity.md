@@ -2,7 +2,7 @@
 
 **Filed:** 2026-08-01 · **Status:** open, roadmap — **not converted to a spec**
 **Signed:** *(single identity; the steward is also the sponsor — `governance/DEBT.md` D-101)*
-**Related:** SPEC-0001 ([`core/spec`](https://github.com/pumasi-ai/pumasi-booking/tree/main/core/spec)) (the engine, in progress) ·
+**Related:** SPEC-0001 ([`core/spec`](https://github.com/pumasi-ai/pumasi-booking/tree/main/core/spec)) (the engine, built) ·
 `GAP-0002` *(calendar integration — reserved, unwritten)* ·
 [`core/spec/DUPLICATION.md`](https://github.com/pumasi-ai/pumasi-booking/blob/main/core/spec/DUPLICATION.md)
 
@@ -68,8 +68,8 @@ earlier ones are correct.
 
 | # | Item | Why here |
 |---|---|---|
-| **1** | **Scheduling core** — slots, booking, cancel, reschedule | In progress as `spec/0001`. Everything below depends on "when is this person free, and can this slot be claimed" being right. |
-| **1b** | **Deployable service** — accounts, booking pages, confirmations, cancel/reschedule links, deployed from GitHub to Railway | `spec/0002`, added 2026-08-01 on the steward's direction, written **in parallel** with item 1 rather than after it. Wraps the engine; does not replace it. It is numbered 1b because it is a delivery vehicle for item 1, not a further feature — everything from item 2 down now lands *inside* it. |
+| **1** | **Scheduling core** — slots, booking, cancel, reschedule | Built — [`core/spec`](https://github.com/pumasi-ai/pumasi-booking/tree/main/core/spec). Everything below depends on "when is this person free, and can this slot be claimed" being right. |
+| **1b** | **Deployable service** — accounts, booking pages, confirmations, cancel/reschedule links, deployed from GitHub to Railway | [`service/spec/0002`](https://github.com/pumasi-ai/pumasi-booking/tree/main/service/spec/0002), added 2026-08-01 on the steward's direction, written **in parallel** with item 1 rather than after it. Wraps the engine; does not replace it. It is numbered 1b because it is a delivery vehicle for item 1, not a further feature — everything from item 2 down now lands *inside* it. |
 | **2** | **Booking limits and periods** — per week/month/year, total-duration caps, rolling windows, business-day counting, fixed date ranges, `offset_start` | Pure functions over item 1. Cheap once the engine is correct, and each is a known bug source in the incumbents. Currently deferred in `SPEC.md` §2.1. |
 | **3** | **Recurrence** — RFC 5545 RRULE expansion via a reused library | Standard, and `DUPLICATION.md` §5.1 already forbids hand-rolling an expander. |
 | **2b** | **Calendar providers** — Google, Microsoft | [`GAP-0002`](./0002-calendar-integration.md). **Promoted 2026-08-03**, from item 4 to next after the engine. Not a refinement: without it the service offers times the owner is already busy and confirms bookings on top of them, so it is the difference between a demonstration and a product. Still the first item holding third-party credentials. |
