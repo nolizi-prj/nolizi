@@ -17,33 +17,45 @@ values choice, not a legal one, and we would rather say so than dress it up.
 
 ## The short version
 
-When you run Pumasi software, it sends **test results and platform facts** to the
-Pumasi commons, so the software gets tested in more environments than any one
-machine can provide.
+When you run Pumasi software it sends two different things, and the difference
+between them matters more than anything else in this document.
 
-**Those reports are public.** Anyone can read them, forever, and they can be
-copied by anyone without asking us.
+- **A conformance report — public.** Which tests passed in your environment, and
+  the platform facts that explain why one failed. Anyone can read it, forever,
+  and copy it without asking us. **It is signed with your identity.**
+- **Operating and quality signal — not public.** How the software behaved: which
+  paths were used, what was slow, what crashed, which configuration shapes broke.
+  We keep this, we use it to make the software better, we do not publish it, and
+  you can ask us to delete it and we can actually comply.
 
-It never sends your data, your configuration, your users, or your code.
+It never sends the content your software processes, your customers' records, your
+credentials, or the code you wrote around ours.
 
-**It does identify you.** Every report is signed with the agent, model, and
-sponsor behind it. If that sponsor is you personally, your name is attached to a
-permanent public record of what software you run and in what environment.
+**The public half identifies you.** Every conformance report is signed with the
+agent, model, and sponsor behind it. If that sponsor is you personally, your name
+is attached to a permanent public record of what software you run and where.
 
-Turn it off in one step. Nothing else changes when you do.
+One setting turns off both. Nothing else changes when you do.
 
 **If you do not want to be publicly identified as running this software, turn
 reporting off.** That is the honest one-line summary of this whole document.
 
 ---
 
-## Your report is published, not collected
+## Your conformance report is published, not collected
 
 This is the part most telemetry documents bury, so it goes first.
 
 Pumasi is a commons. Everything in it is readable by anyone, unmetered and
 without an account, and everything can be mirrored and forked in full by anyone
-at any time. **That includes reports.**
+at any time. **That includes conformance reports.**
+
+It does **not** include the operating and quality signal described further down.
+That half is collected in the ordinary way — held by the foundation, used to
+improve the software, kept to a stated schedule, deleted when you ask. We split
+the two deliberately: anything published here cannot be recalled from somebody
+else's fork, so the public half is kept narrow and the half that can be corrected
+or deleted carries the detail.
 
 So a report is not "data we collect about you." It is **a contribution you
 publish**. Concretely:
@@ -110,22 +122,46 @@ A report looks like this. This is the whole shape — there is no other payload.
 }
 ```
 
-That is it: which item, which version, which cases passed and failed, and the
-facts about the environment that determine whether a failure is real or is a
-property of the machine. The `tzdata` line is the whole reason this exists —
+That is the **public** half in full: which item, which version, which cases passed
+and failed, and the facts about the environment that determine whether a failure
+is real or is a property of the machine.
+
+The **private** half is a separate payload — feature counters, timings, error and
+crash detail, and the shape of your configuration. It is not signed, not
+published, and not part of the record above. `report --show` prints it too; it is
+documented in the source alongside the public one, and the same rule applies: a
+field that reaches us and is not documented is a bug, and we want the report. The `tzdata` line is the whole reason this exists —
 identical code genuinely passes on one machine and fails on another, and no one
 can see that from a single environment.
 
 ## What is never sent
 
-- Your data, in any form
-- Your configuration, credentials, connection strings, or environment variables
-- Anything about your users
-- Your code, including code you wrote around ours
-- File contents, hostnames, IP addresses, or file paths
+Neither half — public or private — ever carries:
+
+- **The content your software processes.** Documents, messages, records, the
+  bookings, whatever you put in. In any form.
+- **Your credentials**, connection strings, secrets, tokens, or the *values* of
+  your environment variables.
+- **Your customers' or your users' records.**
+- **Your code**, including the code you wrote around ours.
+- **File contents.**
 - Anything about **reading**. Browsing the catalog, specs, history, or ledger is
   unmetered and unauthenticated. Nothing is collected from anyone reading
   anything, ever. This applies only to software you chose to run.
+
+**What changed, stated plainly rather than slipped in.** An earlier version of
+this document also promised never to send *your configuration* or *any file
+path*. It no longer does. The private half now carries **configuration shape** —
+which options are set, of what kind, in what combination — because that is what
+tells us why the software broke for you and not for us, and the earlier promise
+meant we could not answer that question at all. Values are still not sent: that
+you have an SMTP host configured travels; what it is does not. Paths may appear
+in a crash trace the scrubber could not clean, which is covered below, and such a
+trace is never published.
+
+The rule underneath both lists is one line: **how our software behaved is ours to
+learn from; what you put into it is yours.** Structure, shape, timing and counts
+cross that line. Contents never do.
 
 **Not on this list: who sent it.** The report is signed — see above. We list that
 separately rather than burying it under "never personal data," because a document
@@ -140,10 +176,13 @@ was handling.
 
 So:
 
-- Traces are **scrubbed to function and module names** before sending. No
-  arguments, no paths, no values.
-- **If the scrubber cannot confidently reduce a trace to that form, it is not
-  sent.** Instead the software offers it to you, on your machine, and you decide.
+- Traces are **scrubbed of literal values, arguments, and paths** before sending.
+- **If the scrubber cannot confidently clean a trace, it now goes to the private
+  half rather than being thrown away.** The earlier rule dropped it entirely,
+  which meant the crashes we understood least were the ones we never saw. A trace
+  that failed scrubbing is held, retained on the stated schedule, deletable on
+  request — and **never published**, because that is the half we could not take
+  back. You can still see it before it goes, and still refuse it.
 - **Scrubbing is best-effort and we cannot prove it is exhaustive.** Nobody can:
   a scrubber is a program, and the space of things a trace might contain is not
   bounded. What we can promise is the *fallback* — when in doubt, do not send —
@@ -176,6 +215,10 @@ commons requires itself to offer the channel; it does not require you to use it.
 ```
 <command> report --off       # one step, permanent, no penalty
 ```
+
+One setting covers **both halves** — the public conformance report and the
+private operating signal. There is no way to be opted into one and not the other,
+because a split switch is a switch people get wrong.
 
 When reporting is off:
 
@@ -222,9 +265,10 @@ be least true.
 The software tells you, the first time it runs, in about four lines:
 
 ```
-This build sends test results to the public Pumasi commons, so it gets tested
-in more environments than one machine can cover. Reports are PUBLIC, permanent,
-and SIGNED with your identity. Never your data, config, or users.
+This build reports to the Pumasi commons so it improves for everyone.
+  PUBLIC + permanent + SIGNED with your identity: which tests passed, platform.
+  PRIVATE, kept by us, deletable:  usage, timings, crashes, config shape.
+  NEVER sent: your content, your users' records, your credentials, your code.
   See it:     <command> report --show
   Turn off:   <command> report --off        Details: REPORTING.md
 ```
@@ -254,12 +298,19 @@ Two things weigh against us and are stated rather than omitted:
   "no personal data, therefore no consent needed" argument does **not** apply
   here. We are relying on disclosure plus a genuine one-step opt-out, which is a
   weaker footing than obtaining consent would be.
-- **The question is formally unresolved and deferred.** No lawful basis has been
-  established and no lawyer has reviewed this. That is recorded as `D-105` in the
-  governance debt register, openly, including that no date was set to resolve it.
-- **Default-on may be harder to defend than opt-in**, precisely because we
-  publish rather than merely collect. A regulator could reasonably take the view
-  that publishing identifiable data permanently should require an active choice.
+- **The basis we rely on is now stated, and it has not yet been reviewed by a
+  lawyer.** For the public half: your own decision to publish a signed
+  contribution. For the private half: our legitimate interest in operating and
+  improving software we give away — the ordinary basis for product telemetry, and
+  the reason the private half is *not* published, is retained to a stated
+  schedule, and is deletable on request. Status is tracked as `D-105` in the
+  governance debt register.
+- **Default-on is harder to defend for the public half than for the private
+  one**, precisely because publishing cannot be undone. That asymmetry is why the
+  two halves exist and why the detail sits on the side we can delete. A regulator
+  could still reasonably say that publishing identifiable data permanently should
+  require an active choice; if we are told that, the public half goes opt-in and
+  the private half stays as it is.
 
 We think the trade is fair and we have tried to make it legible instead of
 burying it. But a lawyer may well say the default should be off, and if so we
@@ -269,14 +320,15 @@ If you believe something here is wrong, or that a field carries more than we
 think it does, say so. That is a gap report, it is a contribution, and it does
 not require registering with anyone.
 
-**Reports are currently thin, and we know it.** The limits above mean an
-automatic report tells us whether the suite passed in your environment, not what
-went wrong for you specifically. Making defect reports genuinely useful without
-relaxing those limits is filed as
-[`GAP-0003`](https://github.com/pumasi-ai/pumasi/blob/main/gap/0003-defect-reporting.md), deliberately unbuilt until there
-are users to build it for.
+**Reports used to be thin on purpose, and that is what this version changes.**
+The old limits meant an automatic report told us whether the suite passed in your
+environment and nothing about what actually went wrong for you. The private half
+exists to answer the second question. The design for turning a failure into a
+reproducible case is
+[`GAP-0003`](https://github.com/pumasi-ai/pumasi/blob/main/gap/0003-defect-reporting.md),
+which was blocked on precisely the constraint that has now been lifted.
 
 ---
 
-*The binding rules behind this document are `CHARTER.md` Part 5.1. Where this
-document and the charter disagree, the charter governs and this is a bug.*
+*The binding rules behind this document are `CHARTER.md` Parts 5.1 and 5.2. Where
+this document and the charter disagree, the charter governs and this is a bug.*

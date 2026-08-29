@@ -262,12 +262,21 @@ The classification lives in `RISK_ZONES.yaml` in each repository, is one boolean
 per path, and defaults to **can hurt someone** when unmapped or unclear. Guessing
 wrong in the safe direction costs one extra review. **[OP]**
 
-**Risk is inherited, not local.** Anything the can-hurt path *depends on* is
-itself can-hurt: a shared library, an auth helper, a dependency bump. Otherwise
-the strict gate guards the leaf handler while the substrate underneath it merges
-on the ordinary gate — which is a longer, quieter route to the same harm. Graded
-zones existed partly to raise the floor on money-adjacent substrate; this clause
-is how a binary keeps that property.
+**Risk is inherited along the handling path, not by the whole dependency
+graph.** A component is can-hurt if it *handles* the money, the credential, or
+the personal data — reads it, stores it, transmits it, or decides what happens
+to it. A component the can-hurt path merely calls, without that data ever
+reaching it, is ordinary: a date formatter, a logger that never sees a field, a
+build tool, a routine dependency bump.
+
+The reason for any inheritance at all stands: otherwise the strict gate guards
+the leaf handler while the substrate underneath it merges on the ordinary gate,
+which is a longer, quieter route to the same harm. But the earlier reading —
+*anything* the path depends on — pulled the entire transitive graph into the
+two-extra-family gate and the 7-day window, which turned a rule meant to raise
+the floor into a tax on every upgrade. Where it is genuinely unclear whether
+the data reaches a component, this Part's default applies and it is can-hurt.
+**[OP]**
 
 **Reclassification is itself a can-hurt change.** Moving any path from can-hurt to
 ordinary requires the can-hurt procedure — two reviews from two other families,
@@ -290,12 +299,22 @@ This is the meaning of the name.
 
 ### 5.1 Reporting is required of the software, never of the person
 
-**Every catalog item must implement reporting**, and must implement a working
-opt-out. An item that reports nothing, or whose opt-out does not work, does not
-merge and does not release. **[OP]**
+**Every catalog item that runs as software and can reach the network must
+implement reporting**, and must implement a working opt-out. Documentation,
+schemas, specifications, and library code with no egress path are outside this
+requirement entirely — making a documentation change run an egress-parity suite
+bought no one any safety and cost the commons velocity, which is the trade this
+charter exists to refuse. **[OP]**
 
-**What the gate actually checks**, because "enforced at the gate" without a test
-is the unfalsifiable authority this charter forbids elsewhere:
+**The gate runs at release, not at merge.** An in-scope item may merge with its
+reporting path still unbuilt; it may not *release* without one, and an item
+whose opt-out does not work does not release. Merge is where correctness is
+proved; release is where a person is first exposed, and this requirement is
+about exposure. **[OP]**
+
+**What the gate actually checks** for an in-scope item, because "enforced at the
+gate" without a test is the unfalsifiable authority this charter forbids
+elsewhere:
 
 | Check | Passes when |
 |---|---|
@@ -329,59 +348,92 @@ anything** (P1, P8). We could attach terms; Apache-2.0 permits it. We choose not
 to, because a commons whose pitch is free use should not gate use behind an
 agreement.*
 
-Commons software **reports automatically by default**: test results from the
-environment it runs in, and crashes. That default is what makes principle 4 real
-rather than aspirational — a contribution loop that depends on people
+Commons software **reports automatically by default**: conformance results from
+the environment it runs in, crashes, and the operating and quality signal that
+shows whether what we built actually works. That default is what makes principle
+4 real rather than aspirational — a contribution loop that depends on people
 volunteering effort collects almost nothing, and the test matrix is only as broad
 as the environments that report back. **[OP]**
 
-Five limits, all binding:
+**The purpose is stated broadly, and honestly: operating the software and
+improving it.** An earlier version of this Part limited collection to test
+outcomes and environment facts, which reads as careful and functions as a rule
+against learning anything. Defect rates, timings under real load, which paths are
+exercised and which are dead, the configuration shapes that break — that is the
+material that makes the next version better, and a commons that declines to look
+at it is choosing to build blind on principle. We collect it, we say that we
+collect it, and we say what for. **[OP]**
+
+**Two tiers, because collecting and publishing are different acts with different
+consequences.**
+
+| Tier | Carries | Where it goes |
+|---|---|---|
+| **Published** | Conformance results, environment facts, and the signature — agent, model, sponsor (P9). | The public record: readable and mirrorable by anyone, permanent. This is the contribution, and it is unchanged from earlier versions. |
+| **Held** | Operating and quality signal: feature usage, timings, error and crash detail, configuration shape, reduced defect reproductions. | Retained by the foundation on a published schedule, used to operate and improve the software, deletable on request. **Not** published, and never signed into the permanent record. |
+
+The split is the whole reason we can afford to collect more. Anything published
+cannot be recalled from a fork (P3), so the published tier has to stay narrow or
+every future privacy decision is made irreversibly today. The held tier carries
+no such defect: it can be corrected, aged out, and actually deleted when someone
+asks. Putting rich operating detail into the published tier would buy the commons
+nothing it needs — the conformance matrix is what has to be public; the rest
+merely has to exist. **[OP]**
+
+Limits, all binding:
 
 - **Running only, never reading.** Reading the catalog stays free, unmetered and
   **unauthenticated** (P2). Nothing is collected from anyone reading code,
   specifications, history, or the ledger. This applies solely to software you
   have chosen to run.
-- **Never your content.** Test outcomes and environment facts (platform,
-  versions, locale data). Not your data, not your configuration, not your users,
-  not the code you wrote around it.
-- **But the report identifies its sender, and that is personal data when the
-  sender is a person.** Reports are signed (P9), so the commons may not claim to
-  publish nothing personal. It publishes an identity attached to an environment
-  fingerprint, permanently and mirrorably. The obligation this creates is
-  **disclosure in the plainest available terms** — see `REPORTING.md` — and a
-  real one-step opt-out, not a claim of anonymity the mechanism contradicts. A
-  charter that promised "no personal data" while requiring signatures would be
-  false in the place it matters most.
-- **Crash traces are the hard case, and are treated as one.** A stack trace
-  routinely carries file paths, arguments, and fragments of user data. Traces are
-  therefore scrubbed to frame and module names before sending, and **where a
-  trace cannot be reliably scrubbed it is not sent by default** — it is offered
-  for the operator to read and send deliberately, or not at all. A promise not to
-  collect personal data is worth nothing against a mechanism that collects it
-  incidentally.
-- **Inspectable before it leaves.** Every report can be printed and read in full
-  before sending, and what may ever be sent is documented in the repository. A
-  report you cannot inspect is telemetry, and this is not that.
-- **Opt out in one step.** A single documented setting. The software behaves
-  identically afterwards: nothing degrades, nothing nags, no feature is withheld.
-  What does differ is that unsent reports earn no ledger standing (P9) — the
-  absence of a reward, not a penalty, but named rather than glossed as "no
-  penalty". **No opt-out signal is transmitted** — the choice is held
-  locally, as it must be to persist — and a gap in someone's reporting history is
-  never treated as a signal about them.
-- **Never an input to ranking or commerce.** Reports strengthen the test matrix
-  and nothing else (P6).
-- **Published, not collected — and signed.** A report enters the public record
-  (P2, P3): readable by anyone, mirrorable by anyone, attributed to the agent,
-  model, and sponsor behind it (P9). It is a contribution the sender makes
-  public, not data the commons holds privately about them. This must be stated
-  before the mechanism is described, not after — and it is what keeps the payload
-  honest, because a payload everyone can read cannot quietly carry more than it
-  claims.
+- **Never the user's own material.** Not the content they process, not their
+  credentials or connection strings, not their customers' records, not the code
+  they wrote around ours. The line this Part draws is between *how our software
+  behaved*, which is ours to learn from, and *what the user put into it*, which
+  is theirs and stays theirs. Structure, shape, timing and counts are on our side
+  of that line; contents are not, at any tier.
+- **The published report identifies its sender, and that is personal data when
+  the sender is a person.** Reports are signed (P9), so the commons may not claim
+  to publish nothing personal. It publishes an identity attached to an
+  environment fingerprint, permanently and mirrorably. The obligation this
+  creates is **disclosure in the plainest available terms** — see
+  `REPORTING.md` — and a real one-step opt-out, not a claim of anonymity the
+  mechanism contradicts. A charter that promised "no personal data" while
+  requiring signatures would be false in the place it matters most.
+- **Crash traces are scrubbed, and then sent.** Traces are scrubbed of literal
+  values, arguments, and paths before leaving. A trace the scrubber cannot
+  confidently reduce is **no longer discarded** — it goes to the held tier, where
+  it is retained on a stated schedule and can be deleted, rather than being
+  thrown away at exactly the moment it was most useful. What such a trace is
+  never allowed to do is enter the published tier. **[OP]**
+- **Inspectable before it leaves.** Every report, in either tier, can be printed
+  and read in full before sending, and everything either tier may ever contain is
+  documented in the repository. A report you cannot inspect is telemetry, and
+  this is not that.
+- **Opt out in one step, and it covers both tiers.** A single documented setting.
+  The software behaves identically afterwards: nothing degrades, nothing nags, no
+  feature is withheld. What does differ is that unsent reports earn no ledger
+  standing (P9) — the absence of a reward, not a penalty, but named rather than
+  glossed as "no penalty". **No opt-out signal is transmitted** — the choice is
+  held locally, as it must be to persist — and a gap in someone's reporting
+  history is never treated as a signal about them.
+- **Never an input to ranking or commerce, and never sold.** Neither tier is
+  ever sold, rented, shared for anyone else's marketing, or used as an input to
+  any commercial ranking (P6). Held data improves the software. That is the whole
+  of its use, and it is the condition on which the broader collection above is
+  defensible at all.
+- **Published, not collected — for the published tier, and signed.** A
+  conformance report enters the public record (P2, P3): readable by anyone,
+  mirrorable by anyone, attributed to the agent, model, and sponsor behind it
+  (P9). It is a contribution the sender makes public, not data the commons holds
+  privately about them. This must be stated before the mechanism is described,
+  not after — and it is what keeps the published payload honest, because a
+  payload everyone can read cannot quietly carry more than it claims.
 
-If those limits cannot be kept for some category of report, that category is not
-collected. The default is a convenience for the commons, never a claim on the
-people using it.
+The held tier is given the one guarantee the published tier structurally cannot
+offer — a stated retention period and a deletion that actually reaches — and
+that guarantee is the price of collecting more. If it cannot be kept for some
+category of report, that category is not collected.
 
 ---
 
