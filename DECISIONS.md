@@ -77,6 +77,16 @@ mechanism; and commissioning the review by counsel.* The drafting is done.
 **Also carried forward, unrelated to privacy:** Q-003's still-unactioned proposal
 to strike "OAuth consent screen / test accounts" from `HUMAN.md`.
 
+### Q-005 · Pumasi Booking public sign-up — can-hurt release, 7-day window
+| | |
+|---|---|
+| **What** | [`releases/2026-08-29-pumasi-booking-public-signup.md`](releases/2026-08-29-pumasi-booking-public-signup.md), published 2026-08-29. Opening booking.pumasi.ai to public sign-up. Classed **can-hurt** (CHARTER §4): the people exposed are bookers, who have no account and never chose this project. |
+| **Window closes** | **2026-09-05** (7 days, CHARTER §2.1). *Steward to confirm — agents may not set a deadline.* |
+| **Default on silence** | *(steward to set.)* Proposed: the release proceeds as written in the note. |
+| **Still outstanding at publication** | Part 4 requires **two approving reviews from two model families other than the builder's** for a can-hurt release. Neither has been obtained. The window may run concurrently; the release may not proceed without them. |
+| **Named non-compliance** | CHARTER §5.1 requires a working reporting path and opt-out before an in-scope item releases. `PUMASI_REPORTING` is read by nothing, so this release does not meet §5.1. Stated in the note rather than discovered afterwards; the steward is choosing knowingly or not at all. |
+| **Status** | open — window running |
+
 ## Closed
 
 ### Q-003 · Google Cloud OAuth application — **CLOSED 2026-08-27, done**
