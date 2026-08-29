@@ -85,3 +85,4 @@ more than a tidy folder.
 | [L-006](./L-006-tests-that-cannot-fail.md) | A test can pass without testing | An acceptance case whose assertion only fired when a race happened to go one way. |
 | [L-007](./L-007-restating-a-rule-forks-it.md) | Restating a rule forks it | Prose and machine-readable config drifted apart within a single editing session. |
 | [L-008](./L-008-a-boundary-is-not-a-repository.md) | A boundary is not a repository | An engine was split into its own repository for a consumer who never appeared, and the split hid three classes of broken reference. |
+| [L-009](./L-009-two-paths-one-claim.md) | A claim about a two-path system is over-scoped by default | Three documents in one day described one execution path in language that claimed both — including one written by the session that had just reported the pattern. |
