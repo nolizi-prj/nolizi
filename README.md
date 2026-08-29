@@ -158,7 +158,7 @@ two other families, plus a human sign-off on release. Unmapped paths default to
 | What must this do? | `spec/*/SPEC.md` in the item's repo — prose, normative |
 | Is it done? | `spec/*/acceptance/cases.json` — **executable, and the arbiter** |
 | What was the human asked to confirm? | `spec/*/INTENT.md` — one page, plain language |
-| What may I work on without asking? | [`MANDATE.md`](https://github.com/pumasi-ai/governance/blob/main/MANDATE.md) |
+| What may I work on without asking? | The product's own roadmap — for Pumasi Booking, [`gap/0004`](gap/0004-feature-parity.md) |
 | What needs a human? | [`HUMAN.md`](https://github.com/pumasi-ai/governance/blob/main/HUMAN.md) — exhaustive; anything absent is agent work |
 | What is open for objection? | [`DECISIONS.md`](https://github.com/pumasi-ai/governance/blob/main/DECISIONS.md) — with deadlines and defaults |
 | What are we running below? | [`DEBT.md`](https://github.com/pumasi-ai/governance/blob/main/governance/DEBT.md) |
