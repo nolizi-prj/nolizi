@@ -128,56 +128,5 @@
       "Never copy incompatibly licensed code. Features may be matched; implementations may not."
     ]
   },
-  "structure": {
-    "$comment": "How repositories are organised, and the one rule about when that changes.",
-    "shape": "One repository per product. No shared libraries yet, by decision.",
-    "decided": "2026-08-28",
-    "rationale": "Extracting shared foundations from a single example means guessing the interface, and a wrong shared interface is harder to remove than the duplication it was meant to prevent. That is L-001 -- machinery ahead of evidence -- which this project has already paid for once.",
-    "expect_duplication": true,
-    "duplication_is_deliberate_here": "Accounts, sessions, mail, storage, rate limiting, HTML rendering and charter-required reporting will be rebuilt per product until there is enough evidence to extract them well. This is the ONE place duplication is permitted, and only because the alternative is a worse abstraction.",
-    "extraction_trigger": "Analyse for extraction once THREE products exist. Two is enough to see a pattern and not enough to tell a pattern from a coincidence.",
-    "what_makes_that_analysis_possible": "Every product records what it copied from an existing product, and from where, in its own COPIED.md. Without that the later analysis is archaeology on diffs, and the parts that were copied become indistinguishable from the parts that were written fresh.",
-    "split_engine_from_product": "Do NOT split by default, and do not split on the argument that a core is reusable in principle. That was tried here: the scheduling engine was given its own repository because someone might want it alone, nobody did, and the split cost two merge gates, two spec trees and an unpinned git dependency until it was merged back on 2026-08-28. Split only when a real consumer outside the product exists and asks. Until then the boundary lives in the code -- purity, its own spec, its own acceptance suite -- and `git subtree split` extracts it with full history on the day it is actually wanted. This is the same rule as extraction_trigger, applied to cores.",
-    "what_belongs_where": {
-      "$comment": "Read this before adding anything to the `pumasi` repository. It is the front door, not a home for code.",
-      "pumasi_holds": "Only what is general to the commons and true across every product: the front door, this catalog, the founding documents, and the gap ledger. No source, no specifications, no build files, no governance files.",
-      "product_repository_holds": "Everything true of exactly one product: its source, its specifications and acceptance suites, its build and deployment files, and its own forward roadmap.",
-      "governance_repository_holds": "The charter and its parameters, the debt register, the lessons, the mandate, the decision queue, and the merge-gate tooling.",
-      "gap_ownership": "A gap is a commons artifact until it becomes a product. Once the product exists, the gap stays here as the record of the need, and the product's ONWARD roadmap moves into the product repository, beside the code that has to change.",
-      "no_mirrors": "Nothing is copied between these repositories. A second copy drifts, and a drifted copy is indistinguishable from a live one to whoever opens the folder next.",
-      "learned_from": "Until 2026-08-29 this repository still held the whole scheduling implementation, both spec trees and the entire governance tree, untracked on disk behind a .gitignore stanza reading 'moved to their own repositories, kept locally as a working copy'. They had been moved; the stale copies stayed and fell several commits behind. The ignore rules were removed with them so a stray tree now shows up in `git status` instead of being hidden. See lesson L-008."
-    },
-    "naming": {
-      "repositories": {
-        "$comment": "One repository per product, named for the product. The -core/-service suffixes are WORKSPACE names inside a repository, not repository names -- they described repositories until 2026-08-28.",
-        "repository": "the product name, lowercased and hyphenated -- e.g. pumasi-booking",
-        "core": "workspace: pure, embeddable, no I/O",
-        "service": "workspace: everything that touches the world"
-      },
-      "products": {
-        "$comment": "Settled 2026-08-28. Recorded with the rejected candidates so this is not relitigated.",
-        "pattern": "Pumasi <plain category noun> -- e.g. Pumasi Booking, and the same shape for products that follow.",
-        "why_this_pattern": "It forms a family without a naming exercise or a trademark clearance per product, and each name is searchable by the thing it does.",
-        "rejected": [
-          {
-            "candidate": "pumasi-cal",
-            "reason": "Cal(r) and Cal.com(r) are registered trademarks of Cal.com, Inc. in this exact category. Contains a registered mark for the same goods and services, and concedes the frame to the incumbent."
-          },
-          {
-            "candidate": "Palendar",
-            "reason": "One letter from Cal in the same category, so it carries similar risk. It also misdescribes the product -- the category is booking links, not calendars."
-          },
-          {
-            "candidate": "pumasi-calendar",
-            "reason": "Misdescribes the product for the same reason. This is not a calendar; it connects TO calendars."
-          },
-          {
-            "candidate": "Pooking",
-            "reason": "Reads as poo-king to English speakers, particularly in British and Commonwealth usage. A naming accident that is invisible on the page and unmissable when said aloud."
-          }
-        ],
-        "booking_not_scheduling": "'Book a time' is the user's own verb and the commercial name of the category. 'Scheduling' additionally collides with job schedulers and project scheduling. Repositories still use 'scheduling' because it describes the function precisely; both words are listed under `solves` so either search finds it."
-      }
-    }
-  }
+  "structure_documented_at": "https://github.com/pumasi-ai/pumasi#how-the-repositories-are-arranged"
 }

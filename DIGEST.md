@@ -6,6 +6,43 @@ in a veto window, what waits on `HUMAN.md`.
 
 ---
 
+## 2026-08-29 — the busiest two days: privacy posture, the org, one repository
+
+- **Privacy and legal strictness rebalanced.** The charter now inherits risk along
+  the *handling path* rather than the whole dependency graph (§4), gates reporting
+  at release rather than merge (§5.1), and splits collection into a narrow
+  **published** tier and a richer **held** tier (§5.2) — the commons collects more
+  and publishes no more than before.
+- **D-105 went BLOCKING → DEGRADING.** The lawful basis was already written and in
+  force; what remained was the transfer position and a review by counsel. The
+  5-owner / 200-booking ceilings are now raisable defaults and public sign-up is a
+  deployment decision. You removed the mandate red line that froze them.
+- **Pumasi Booking:** an account-takeover hole closed — public sign-up granted a
+  14-day session for any unverified address; it now mails a single-use link, and
+  answers identically for taken addresses so it cannot enumerate accounts.
+  Operator identity (**ATX APPLE LLC**, Texas) is live on `/privacy`, `/terms`,
+  `/dpa`. Design fixes shipped: destructive delete moved to Settings and styled as
+  destructive; ambiguous weekday headers fixed.
+- **`pumasi-ai` is now an organisation.** `pumasi-dev` is the agent identity,
+  `pumasiAI` the owner. Branch protection was applied to five public repos and
+  then **removed at your instruction** — direct pushes to `main` work again, and
+  restoring it is one command.
+- **One repository.** `governance` merged into `pumasi` with full history and was
+  archived read-only behind a redirect. `MANDATE.md` deleted; the front door lost
+  77 lines of product documentation that had already drifted from the product's
+  own README.
+- **New debt:** `D-107` (held tier has no retention schedule), `D-108` (released
+  without a reporting path, by your decision), `D-109` (can-hurt surfaces are now
+  classified by agents with no human step, by your decision). `D-104` gained a
+  live breadth probe — three model families verified working today, the first
+  check in four weeks.
+- **In a veto window:** **Q-005**, the public sign-up release note — closes
+  **2026-09-05**.
+- **Waiting on you (`HUMAN.md`):** the transfer mechanism and counsel review
+  (D-105); **two cross-family reviews** from Gemini and Grok, which Part 4
+  requires before the can-hurt release can proceed and which no agent here can
+  obtain; and the `PUBLIC_SIGNUP` flip itself.
+
 ## 2026-08-27 (night) — secret store
 
 - **All secrets now live in one place:** the private repo
