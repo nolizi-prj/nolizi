@@ -81,10 +81,30 @@ Also in scope:
 
 ## 5 · What is explicitly out of scope
 
-- Any collection that would require relaxing `REPORTING.md`. If a tier cannot be
-  built within those limits, the tier is not built.
-- Crash-trace enrichment. The scrubbing fallback stands.
-- Anything that makes opting out worse, slower, or more visible.
+**Updated 2026-08-29.** The first two lines below were the binding constraints
+when this gap was filed, and `CHARTER.md` §5.2 has since removed both. They are
+kept visible rather than edited away, because the reasoning in §3 was *built* on
+them and a reader needs to know which parts were load-bearing.
+
+- ~~Any collection that would require relaxing `REPORTING.md`. If a tier cannot
+  be built within those limits, the tier is not built.~~ **Lifted.** §5.2 now
+  defines a **held** tier — collected, retained to a stated schedule, deletable,
+  never published — and tier two below is exactly what it was created to carry.
+- ~~Crash-trace enrichment. The scrubbing fallback stands.~~ **Changed.** A trace
+  the scrubber cannot clean is no longer discarded; it goes to the held tier. The
+  scrubber still runs, and such a trace is still never published.
+- Anything that makes opting out worse, slower, or more visible. **Stands.**
+- **New, and it replaces the old constraint rather than removing it:** nothing in
+  any tier carries a booker's or owner's identity, or any value a user typed
+  (`SPEC-0002` D5). The limit moved from *how much* to *what about whom*.
+
+**§3 is still the right design, and is now an optimisation rather than a
+necessity.** A structure-preserving reduction was originally the only way to get
+a reproduction past the privacy limits. It is still the best artifact — a reduced
+case is already a valid acceptance case, needs no triage, and becomes a permanent
+regression test. What has changed is that a raw failing case can now be *held*
+while the reducer is being built, so tier two no longer has to wait for §8's
+format work to be finished before it collects anything at all.
 
 ## 6 · Disposition is the mechanism that makes people report
 
@@ -111,6 +131,12 @@ change.
 The near-term source of real defect signal is not users. It is **the first
 implementation attempt against SPEC-0001 ([`core/spec`](https://github.com/pumasi-ai/pumasi-booking/tree/main/core/spec))**, which will surface
 more actionable defects in a day than early telemetry would in a year.
+
+**One conversion trigger has been removed, 2026-08-29.** This gap was blocked on
+a constraint as well as on evidence; the constraint is gone and the evidence
+requirement stands unchanged. Do not read the lifting as a reason to build it —
+[`L-001`](https://github.com/pumasi-ai/governance/blob/main/lessons/L-001-governance-ahead-of-evidence.md)
+applies exactly as it did, and there are still zero users.
 
 **Convert this gap to a spec when any of these is true:**
 
