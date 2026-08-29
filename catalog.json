@@ -65,15 +65,14 @@
       "maturity": "seed",
       "tests": {
         "acceptance_engine": 36,
-        "unit_engine": 12,
-        "service": 80,
+        "unit_engine": 19,
+        "service": 246,
         "passing": true
       },
       "published_to_registry": false,
       "runtime": "node>=22, PostgreSQL optional",
       "depends_on": [],
       "known_limitations": [
-        "Cannot read the owner's real calendar, so it will offer a time they are already busy. See gap/0002.",
         "No settled lawful basis for third-party personal data; capped at 5 accounts and 200 bookings."
       ],
       "formerly": {
@@ -95,10 +94,9 @@
     },
     {
       "id": "GAP-0002",
-      "file": "gap/0002-calendar-integration.md",
-      "status": "open",
-      "priority": "next",
-      "summary": "Connect Google and Microsoft calendars so real commitments block times."
+      "status": "built",
+      "moved_to": "https://github.com/pumasi-ai/pumasi-booking/blob/main/roadmap/0002-calendar-integration.md",
+      "summary": "Connect Google and Microsoft calendars so real commitments block times. Built; the file moved to the product, which owns its own roadmap."
     },
     {
       "id": "GAP-0003",
@@ -109,10 +107,9 @@
     },
     {
       "id": "GAP-0004",
-      "file": "gap/0004-feature-parity.md",
-      "status": "open",
-      "priority": "roadmap",
-      "summary": "Feature parity with Cal.com and Calendly, sequenced by dependency."
+      "status": "moved",
+      "moved_to": "https://github.com/pumasi-ai/pumasi-booking/blob/main/roadmap/0004-feature-parity.md",
+      "summary": "Feature parity with Cal.com and Calendly, sequenced by dependency. This is Pumasi Booking's onward roadmap, so it lives with the product -- see structure.what_belongs_where.gap_ownership."
     }
   ],
   "contributing": {

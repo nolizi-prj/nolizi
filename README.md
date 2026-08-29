@@ -57,7 +57,7 @@ It is deliberately hard where scheduling software is usually wrong:
   requester's.
 
 Both category leaders have open bugs in the last two today. `36` acceptance
-cases plus `12` unit tests hold these.
+cases plus `19` unit tests hold these.
 
 ### The service — [`service/`](https://github.com/pumasi-ai/pumasi-booking/tree/main/service)
 
@@ -67,12 +67,6 @@ Deployed anywhere that runs a container or Node 22 — it needs a port and,
 optionally, a PostgreSQL URL. Nothing in it knows about a particular host.
 
 ### What it does not do yet
-
-**It cannot see your real calendar.** The service knows only about bookings made
-inside it, so it will offer a time you are already busy and confirm a booking on
-top of it. Double-booking against your own calendar is the *expected* behaviour
-today. This is [`GAP-0002`](gap/0002-calendar-integration.md), promoted to next,
-and it is the difference between a demonstration and a product.
 
 **No lawful basis has been established for holding third-party personal data.**
 [`DEBT.md`](https://github.com/pumasi-ai/governance/blob/main/governance/DEBT.md)
@@ -96,7 +90,7 @@ configuration — it runs a real PostgreSQL in-process, so the constraints are
 genuinely enforced, but nothing survives a restart.
 
 ```bash
-npm test        # 128: 36 engine acceptance, 12 engine unit, 80 service
+npm test        # 301: 36 engine acceptance, 19 engine unit, 246 service
 ```
 
 For real email and a persistent database, see the
@@ -158,7 +152,7 @@ two other families, plus a human sign-off on release. Unmapped paths default to
 | What must this do? | `spec/*/SPEC.md` in the item's repo — prose, normative |
 | Is it done? | `spec/*/acceptance/cases.json` — **executable, and the arbiter** |
 | What was the human asked to confirm? | `spec/*/INTENT.md` — one page, plain language |
-| What may I work on without asking? | The product's own roadmap — for Pumasi Booking, [`gap/0004`](gap/0004-feature-parity.md) |
+| What may I work on without asking? | The product's own roadmap — for Pumasi Booking, [`roadmap/`](https://github.com/pumasi-ai/pumasi-booking/tree/main/roadmap) |
 | What needs a human? | [`HUMAN.md`](https://github.com/pumasi-ai/governance/blob/main/HUMAN.md) — exhaustive; anything absent is agent work |
 | What is open for objection? | [`DECISIONS.md`](https://github.com/pumasi-ai/governance/blob/main/DECISIONS.md) — with deadlines and defaults |
 | What are we running below? | [`DEBT.md`](https://github.com/pumasi-ai/governance/blob/main/governance/DEBT.md) |
