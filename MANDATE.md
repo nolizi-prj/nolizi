@@ -36,8 +36,6 @@ steward will set a cap if the digest shows spend worth capping.
 
 - No payments. No AI-suggestion features. (Steward decision 2026-08-01,
   GAP-0004 §3 — revisit on evidence, never by accretion.)
-- **D-105 binds absolutely**: no public signup, and the 5-owner / 200-booking
-  ceilings cannot be raised, while that debt entry is open.
 - P1 licensing and the clean-room rule (GAP-0004 §2.1) on anything that studies
   Cal.com or Calendly.
 - Nothing in `HUMAN.md` is performed by an agent, ever — prepared fully, queued

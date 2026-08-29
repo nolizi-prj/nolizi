@@ -33,9 +33,17 @@ named outcome (CHARTER §2.1).
 | **What** | `CHARTER.md` Parts 4, 5.1 and 5.2, `DEBT.md` D-105/D-107, `REPORTING.md`, `SPEC-0002` and its service code were revised on 2026-08-29 so that strictness follows harm rather than discomfort (branch `privacy-posture`). Three files that agents may never edit (CHARTER §2, §7) still name the old posture and now contradict the rest. **Agents may not fix them. This entry is the proposal; the edit is the steward's.** |
 | **Deadline** | *(steward to set)* |
 | **Default on silence** | *(steward to set — agents may not. Until it is set, the contradiction stands and `MANDATE.md` governs, which means the ceilings remain frozen in practice however the spec now reads.)* |
-| **Status** | open — awaiting steward edit |
+| **Status** | **item 1 DONE 2026-08-29** — the steward removed the D-105 red line from `MANDATE.md`. Items 2 and 3 remain open. |
 
-**1 · `MANDATE.md` → Red lines.** Replace:
+**1 · `MANDATE.md` → Red lines. — DONE 2026-08-29 by the steward.** The red line
+below is deleted; public signup and the ceilings are no longer forbidden by the
+mandate. The steward made the edit in their local working copy; an agent
+transported the deletion verbatim into this repository and authored none of it.
+Two editor artifacts in that copy were deliberately **not** carried over: a
+whole-file reflow, and the `L-003` link rewritten to a `file:///home/m/dev/...`
+path that would be broken for every reader but its author.
+
+The deleted text was:
 
 > - **D-105 binds absolutely**: no public signup, and the 5-owner / 200-booking
 >   ceilings cannot be raised, while that debt entry is open.
