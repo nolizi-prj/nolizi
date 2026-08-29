@@ -37,79 +37,24 @@ without exploring. This README is the same information for people.
 ## What actually exists
 
 [**Pumasi Booking**](https://github.com/pumasi-ai/pumasi-booking) — a booking
-page people can send someone to pick a time on. One repository, two workspaces,
-and below is an honest account of what it does not yet do.
+page people can send someone to pick a time on.
 
-### The engine — [`core/`](https://github.com/pumasi-ai/pumasi-booking/tree/main/core)
+**Its documentation lives with it**, in
+[that repository's README](https://github.com/pumasi-ai/pumasi-booking#readme):
+what it does, what it does not do yet, how to run it, which databases it
+supports, and how it deploys.
 
-Availability computation and booking. A **pure function**: no clock of its own,
-no I/O, no ambient state. Same inputs, byte-identical output.
-
-It is deliberately hard where scheduling software is usually wrong:
-
-- A window spanning the spring-forward gap yields **two absolute hours, not
-  three.**
-- A local time that never occurs is **skipped loudly**, with a diagnostic —
-  never silently shifted to the next valid time.
-- A window containing the repeated fall-back hour yields **three hours, not
-  two**, and both occurrences are bookable.
-- A daily cap counts on the **owner's** local date. Not UTC's. Not the
-  requester's.
-
-These are the cases calendar arithmetic is easiest to get wrong, which is why
-each is a named acceptance case rather than left to the implementation. Run
-`npm test` in [`pumasi-booking`](https://github.com/pumasi-ai/pumasi-booking)
-for the current counts; the executable arbiter is
-[`cases.json`](https://github.com/pumasi-ai/pumasi-booking/blob/main/core/spec/acceptance/cases.json).
-
-### The service — [`service/`](https://github.com/pumasi-ai/pumasi-booking/tree/main/service)
-
-**This is Pumasi Booking as you would run it.** Accounts, a public booking page,
-confirmation mail, and management links.
-Deployed anywhere that runs a container or Node 22 — it needs a port and,
-optionally, a PostgreSQL URL. Nothing in it knows about a particular host.
-
-### What it does not do yet
-
-**The privacy pack has not been reviewed by a lawyer.** The lawful basis is
-written and in force — served live at `/privacy`, `/terms` and `/dpa` by the
-running service: performance of the contract plus legitimate interest for
-account holders, and the account holder's legitimate interest, with the service
-as their processor, for the people who book. What remains genuinely unresolved
-is narrower and is
-[`DEBT.md` D-105](governance/DEBT.md),
-open at **DEGRADING**: the international transfer position — the service is
-operated from the United States, data is processed there, and no standard
-contractual clauses are in place — and the review by counsel itself.
-
-A fresh deployment starts at five owner accounts and two hundred retained
-bookings with public sign-up off. Those are **deployment defaults an operator
-may raise**, set low so that a deployment nobody is watching does not quietly
-grow, not caps the service refuses to lift.
+*This page used to describe the product itself — the engine, the service, how to
+run it — in about eighty lines. That was a second copy of a story the product
+already tells, and it drifted exactly as [L-007](lessons/L-007-restating-a-rule-forks-it.md)
+says a copy does: on 2026-08-29 it still said no lawful basis had been
+established and that both category leaders had open bugs, hours after both were
+corrected in the product's own README. One repository per product is the rule
+[below](#what-belongs-in-this-repository); the front door names a product and
+points at it.*
 
 ---
 
-## Run Pumasi Booking
-
-```bash
-git clone https://github.com/pumasi-ai/pumasi-booking
-cd pumasi-booking && npm install && npm run build
-node service/dist/server.js
-```
-
-It prints a sign-up link on first start. Follow it and you have an account, a
-booking page, and availability you can edit. No database, no container, no
-configuration — it runs a real PostgreSQL in-process, so the constraints are
-genuinely enforced, but nothing survives a restart.
-
-```bash
-npm test        # 301: 36 engine acceptance, 19 engine unit, 246 service
-```
-
-For real email and a persistent database, see the
-[Pumasi Booking README](https://github.com/pumasi-ai/pumasi-booking#readme).
-
----
 
 ## Working here
 
@@ -184,7 +129,7 @@ event, not something buried in a code commit.
 | Repository | Holds | Changes when |
 |---|---|---|
 | **`pumasi`** (here) | The front door, [`catalog.json`](catalog.json), the whitepaper, and [`gap/`](gap/) — needs not yet built | A gap is filed or an item ships |
-| **[`governance`](README.md)** | Charter, debt register, lessons, mandate, decision queue | The rules change — deliberately its own event, not buried in a code commit |
+| **this repository** | Charter, debt register, lessons, decision queue | The rules change — deliberately its own event, not buried in a code commit |
 | **[`pumasi-booking`](https://github.com/pumasi-ai/pumasi-booking)** | **Pumasi Booking** — the engine (`core/`), the service (`service/`), and both specifications | The product changes |
 
 Items do **not** vendor the governance files. Their merge gate reads

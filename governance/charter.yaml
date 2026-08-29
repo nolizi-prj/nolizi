@@ -136,8 +136,8 @@ risk:
   can_hurt:
     min_reviews_from_non_builder_family: 2  # from two DIFFERENT other families
     distinct_model_families_total: 3        # builder + two reviewers
-    steward_signoff_per_change: false       # surface authorised by mandate entry
-    surface_authorised_by: mandate_entry
+    steward_signoff_per_change: false       # Part 4: no human sign-off at any point
+    surface_authorised_by: risk_zones_classification   # agent-written; see DEBT D-109
     release_proceeds_via: 7_day_veto_window # on a published plain-language note
     release_staged: ceilings_first
   inherited_by: handling_path               # a component that reads, stores, transmits

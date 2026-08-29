@@ -25,12 +25,11 @@ mirror file of it — a restated record forks and drifts (L-007).
 ## Ground rules
 
 - **Read first, from this repository:** `DECISIONS.md` · `HUMAN.md` ·
-  `MANDATE.md` (the authorised can-hurt surfaces — it no longer sequences
-  work) · `governance/CHARTER.md` Part 3 · `lessons/README.md`. Never
-  edit `MANDATE.md` or `HUMAN.md`; never move a deadline or change a default
+  `governance/CHARTER.md` Part 3 · `lessons/README.md`. Never
+  edit `HUMAN.md`; never move a deadline or change a default
   in `DECISIONS.md` (CHARTER §2 — L-003).
 - **Every verdict is posted as an issue comment with its reasoning**, citing
-  the specific mandate item, charter clause, or catalog entry it rests on —
+  the specific charter clause or catalog entry it rests on —
   auditable in the thread itself, not only in a session transcript.
 - **The steward veto is absolute.** An issue the steward reopens after a
   `rejected` verdict is re-triaged with the reopening treated as the
@@ -63,13 +62,13 @@ mirror file of it — a restated record forks and drifts (L-007).
    - **Duplicate?** Check the commons catalog (`catalog.json` in
      `pumasi-ai/pumasi`), the repository's other issues, and its `gap/`.
    - **Red line?** An issue whose ask would raise the D-105 ceilings, enable
-     public signup, bypass any part of the merge gate, cross a `MANDATE.md`
+     public signup, bypass any part of the merge gate, cross a red line
      red line, or have an agent edit an agent-untouchable file is
      **rejected on that ground** — never escalated. A red line is not a
      question, and no default may be able to cross one on silence. The
      thread names the one route that exists: the steward editing the
-     binding file (`MANDATE.md`, `DEBT.md`), which no agent may do.
-   - **In scope?** The mandate's standing direction and sequence, and the
+     binding file (`DEBT.md`), which no agent may do.
+   - **In scope?** The product's own roadmap, and the
      charter. Out of scope is a ground to reject, not to hold. An issue that
      belongs to a *different* commons repository is not rejected for the
      accident of where it was filed — say so in the thread and move or
@@ -78,7 +77,7 @@ mirror file of it — a restated record forks and drifts (L-007).
      not spam, not a support question answered by a README link.
    - **Needs a steward act?** An issue that is in scope and real but whose
      substance requires an action from `HUMAN.md` — a terms acceptance, a
-     spend, an account the project does not hold, an edit to `MANDATE.md` or
+     spend, an account the project does not hold, an edit to
      `HUMAN.md` itself — escalates; it is never decided here.
 
 3. **Apply the verdict**, in this order — comment first, then label, so an
@@ -103,7 +102,7 @@ mirror file of it — a restated record forks and drifts (L-007).
      the thread and leave the issue open and `accepted`; a later run
      resumes it. When the merge lands, close the issue with a comment
      linking the merged commit.
-   - **Reject** → comment citing the specific charter or mandate ground;
+   - **Reject** → comment citing the specific charter ground;
      label `rejected`; close.
    - **Escalate** → append the queued steward act to `DECISIONS.md` in this
      repository, prepared to one click, with a stated default and a
@@ -127,7 +126,7 @@ The same lines as `tools/DRIVER.md`:
 
 - An open veto window: never act on a defaulted outcome before its deadline.
 - Anything that would raise the D-105 ceilings, enable public signup, touch a
-  mandate red line, or edit an agent-untouchable file.
+  red line, or edit an agent-untouchable file.
 - A cited review objection: resolve it or amend the spec in the open — never
   argue past it, never merge over it.
 - No merge without `GATE: PASS`. There is no triage-shaped exception to the

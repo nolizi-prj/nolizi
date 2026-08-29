@@ -19,9 +19,9 @@ Invocation, from the repository root, any of:
 2. **Close expired windows.** Any `DECISIONS.md` entry whose window has passed
    without a steward veto: mark it closed with the date and outcome
    "proceeded on silence", and treat its default as decided.
-3. **Pick the work:** the lowest-numbered mandate item that is authorised and
-   not blocked by an open window or an unrouted human dependency. Within
-   the item, do the next step of the charter flow: intent → (window) → spec +
+3. **Pick the work:** the next unbuilt item in the product's own roadmap, not
+   blocked by an open window or an unrouted human dependency. Within the item,
+   do the next step of the charter flow: intent → (window) → spec +
    frozen tests → spec review → build → code review → merge → release
    (can-hurt: note + 7-day window, ceilings first).
 4. **Reviews are run, not requested:** `tools/review.sh spec <dir>` /

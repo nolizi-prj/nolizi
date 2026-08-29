@@ -87,42 +87,22 @@ to strike "OAuth consent screen / test accounts" from `HUMAN.md`.
 | **Named non-compliance — now a recorded decision** | CHARTER §5.1 requires a working reporting path and opt-out before an in-scope item releases. `PUMASI_REPORTING` is read by nothing, so this release does not meet §5.1. **The steward decided on 2026-08-29 to release anyway**, with building it first offered and declined; that decision, its reasoning, what it costs, and the trigger that ends it are recorded as **`DEBT.md` D-108**. It is an exception for this release, not a standing permission — any release after this one clears it or reopens the question. |
 | **Status** | open — window running |
 
-### Q-006 · `MANDATE.md` reduced rather than deleted — what that closed
-| | |
-|---|---|
-| **What** | The steward directed on 2026-08-29 that `MANDATE.md` be retired as no longer useful. It held two jobs. The **sequencing** job is gone — work is taken from the product's own roadmap. The **can-hurt authorising** job is kept, because `charter.yaml` `risk.can_hurt.surface_authorised_by: mandate_entry` has no other source and `risk.can_hurt` sits in `amendment.may_not_touch`, *"by effect, under any name"*. The file is now the surface list and nothing else. |
-| **Deadline** | *(steward to set — agents may not.)* |
-| **Default on silence** | *(steward to set — agents may not.)* |
-| **Status** | open — **no longer blocking.** The two blocking items are resolved by this change; two cosmetic ones remain and are steward-only. |
+### Q-006 · `MANDATE.md` deleted — **CLOSED 2026-08-29, decided**
+The steward deleted `MANDATE.md`. Its **sequencing** job was already gone: work
+comes from the product's own roadmap. Its **authorising** job is not replaced —
+the steward decided that can-hurt surfaces need no human authorisation step,
+*"if there is genuinely big risks, agents will report them."* Per-change steward
+sign-off was offered as the alternative and declined.
 
-**Resolved here.**
+`charter.yaml` now matches the prose it had drifted from — Part 4 already read
+*"No human sign-off at any point: the classification is a boolean per path in
+`RISK_ZONES.yaml`"* after `0ccfc39`, while the config still named the mandate.
+Prose governs; the config was the bug.
 
-**3 · The merge gate could not pass.** `merge_gate.item_named_in_mandate: true`
-and Part 3.1's *"against an item the mandate names"* meant that with no mandate
-no item could be named, so **no change passed the gate at all** — including the
-change that removed the mandate. That is [L-001](lessons/L-001-governance-ahead-of-evidence.md):
-a rule calibrated for a structure that does not exist, preventing work rather
-than governing it. Fixed: the flag is gone and Part 3.1 now reads *"against a
-published intent statement"*.
-
-**4 · Can-hurt work had no authorisation route.** The proposed replacement was
-`surface_authorised_by: risk_zones_classification` — a file **agents may edit**,
-which would have made can-hurt surfaces self-authorising, with the change's own
-comment reading *"no human sign-off at any point."* Part 7 names the scenario
-that clause exists to prevent: *"the booking path could be relabelled ordinary
-and shipped under the weaker gate by the same person who approved it."* Not
-taken. Keeping the surface list costs two lines and leaves `risk.can_hurt`
-untouched.
-
-**Still open, both cosmetic and steward-only.**
-
-**1 · Part 2's "three instruments".** Still accurate — the mandate remains an
-instrument, with a narrower job. No edit needed unless the steward wants the
-description sharpened.
-
-**2 · The exclusion lists.** `roles.agent.may_never_edit` and
-`amendment.agents_may_not_touch` still name `MANDATE.md`, and should: it is
-still steward-only. No edit needed.
+The residual is recorded as [`DEBT.md` **D-109**](governance/DEBT.md), including
+what it does not fix and the bet being made, so that if it fails it fails on the
+record. The can-hurt **gate** itself is untouched: two extra families, a
+published release note, the 7-day veto window, ceilings first.
 
 ## Closed
 

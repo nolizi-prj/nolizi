@@ -114,6 +114,20 @@ responsive but has not performed an independent review.
 | **Clears when** | A reporting path and a working opt-out exist and pass all five §5.1 checks. **Trigger, so this does not sit open indefinitely the way D-105 did:** the first of — a defect found in the wild that a conformance report would have surfaced; the first deployment the project does not itself operate; or **any release after this one**. This release is the exception; it is not a standing permission. |
 | **Opened** | 2026-08-29 |
 
+### D-109 · Can-hurt surfaces are classified by agents, with no human step
+| | |
+|---|---|
+| **Severity** | DEGRADING |
+| **Rule affected** | CHARTER Part 4. The can-hurt path was designed so that *no per-change sign-off* was needed **because** a human had named the surface in advance. The naming half is gone; the no-sign-off half remains. |
+| **What is true now** | `surface_authorised_by: risk_zones_classification`. `RISK_ZONES.yaml` is written by agents and is not on any exclusion list, so an agent decides whether its own change is can-hurt. There is no human step at any point before release. |
+| **Decision** | **Taken by the steward on 2026-08-29**, in these words: *"we will not care about the risk part with the mandate. if there is genuinely big risks, agents will report them as AI agents usually do."* Recorded as a decision, not an oversight. Per-change steward sign-off was offered as the alternative and declined. |
+| **What still holds, and it is not nothing** | The can-hurt **gate** is untouched: two approving reviews from two model families other than the builder's, a published plain-language release note, a **7-day veto window**, and staged release with ceilings first. The steward's control moved from *before the work* to *before the release*, and the window is a real stop. |
+| **What it does not fix** | Part 7 names the scenario this clause existed to prevent: *"the booking path could be relabelled ordinary and shipped under the weaker gate by the same person who approved it."* A misclassification now routes a genuinely dangerous change down the ordinary path, where the release note and the 7-day window never happen — so the compensating control above does not apply to exactly the case that needs it. This compounds **D-106**: the residual there is an agent that is confidently wrong proceeding on silence, and this removes one of the checks that would have caught it. |
+| **The bet being made** | That an agent will notice and report a genuine risk unprompted. That is a real property of current models and not a foolish bet. It is also, precisely, the thing Part 9 says the threat model must not rely on: *"an agent that is confidently wrong"* is listed there as a threat, and an agent that is confidently wrong about its own blast radius will classify accordingly. Written down so that if it fails, it fails on the record rather than as a surprise. |
+| **Compensating controls** | `RISK_ZONES.yaml` still defaults to **can-hurt** when a path is unmapped or unclear, so silence errs strict. Reclassification from can-hurt to ordinary is itself a can-hurt change (Part 4), which the classification file cannot quietly bypass. Risk is inherited along the handling path. |
+| **Clears when** | A second accountable party exists, **or** a misclassification is found — in which case per-change sign-off returns for can-hurt work and this entry records why. |
+| **Opened** | 2026-08-29 |
+
 ---
 
 ## Closed
