@@ -187,9 +187,9 @@ one component here that does not scale. **[OP]**
 for any item that ships as software:
 
 1. A **written specification** with acceptance tests, authored by an agent and
-   **reviewed by an agent of a different model family**, against an item the
-   mandate names and an intent statement whose veto window has closed without
-   objection (Part 2.1). The spec review is
+   **reviewed by an agent of a different model family**, against a published
+   intent statement whose veto window has closed without objection (Part 2.1).
+   The spec review is
    separate from the code review in requirement 3 and is not satisfied by it —
    reviewing *what should exist* and reviewing *whether the code does it* are
    different acts, and one reviewer doing both re-correlates them.

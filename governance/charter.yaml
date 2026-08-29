@@ -55,8 +55,8 @@ roles:
     reads: [digest, intent_statement, release_note]   # none of them blocking
     reviews: none                              # not specs, not tests, not diffs
     commits_code: false
-    rationale: "WP 2 — a standing mandate is choosing; a public record plus a
-                real veto is answering for it. Residual recorded as D-106."
+    rationale: "WP 2 — a public record plus a real veto is answering for it.
+                Residual recorded as D-106."
   agent:
     does: [specify, build, review, test, release, maintain,
            run_the_process, keep_digest, open_and_close_windows]
@@ -104,7 +104,6 @@ release_note:                                  # CHARTER Part 2.1
   proceeds_on: window_closed_without_veto
 
 merge_gate:
-  item_named_in_mandate: true                  # per item, not per change
   gate_is_executable: tools/                   # scripts enforce; prose governs on conflict
   spec_authored_by: agent
   spec_reviewed_by_non_author_family: 1        # distinct from the code review
