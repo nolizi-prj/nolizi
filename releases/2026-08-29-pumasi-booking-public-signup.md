@@ -52,9 +52,14 @@ their availability.
   plainly rather than name a mechanism that does not exist.
 - **The service does not report on itself.** `PUMASI_REPORTING` is read by
   nothing. CHARTER §5.1 requires a working reporting path and opt-out before an
-  in-scope item releases, so **this release does not meet that requirement.** It
-  is named here rather than discovered later. `DEBT.md` **D-107** covers the
-  related retention gap.
+  in-scope item releases, so **this release does not meet that requirement.** The
+  steward decided on 2026-08-29 to release anyway, with building it first offered
+  and declined; the decision and its reasoning are `DEBT.md` **D-108**, and it is
+  an exception for this release rather than a standing permission. What it costs
+  is that the test matrix stays one machine wide — nothing will tell us whether
+  this works anywhere but where it was built. It can hurt the project's evidence;
+  it cannot hurt anyone using the software, which is why it is separable from
+  D-105. `DEBT.md` **D-107** covers the related retention gap.
 - **Deletion does not reach mail already sent**, and never will.
 - **Ceilings are now defaults rather than caps.** Five owners and two hundred
   bookings still apply until an operator raises them deliberately.

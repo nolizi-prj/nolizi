@@ -84,7 +84,7 @@ to strike "OAuth consent screen / test accounts" from `HUMAN.md`.
 | **Window closes** | **2026-09-05** (7 days, CHARTER §2.1). *Steward to confirm — agents may not set a deadline.* |
 | **Default on silence** | *(steward to set.)* Proposed: the release proceeds as written in the note. |
 | **Still outstanding at publication** | Part 4 requires **two approving reviews from two model families other than the builder's** for a can-hurt release. Neither has been obtained. The window may run concurrently; the release may not proceed without them. |
-| **Named non-compliance** | CHARTER §5.1 requires a working reporting path and opt-out before an in-scope item releases. `PUMASI_REPORTING` is read by nothing, so this release does not meet §5.1. Stated in the note rather than discovered afterwards; the steward is choosing knowingly or not at all. |
+| **Named non-compliance — now a recorded decision** | CHARTER §5.1 requires a working reporting path and opt-out before an in-scope item releases. `PUMASI_REPORTING` is read by nothing, so this release does not meet §5.1. **The steward decided on 2026-08-29 to release anyway**, with building it first offered and declined; that decision, its reasoning, what it costs, and the trigger that ends it are recorded as **`DEBT.md` D-108**. It is an exception for this release, not a standing permission — any release after this one clears it or reopens the question. |
 | **Status** | open — window running |
 
 ## Closed

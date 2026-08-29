@@ -98,6 +98,21 @@ responsive but has not performed an independent review.
 | **Clears when** | The retention period is published in `REPORTING.md` and the deletion path is implemented and tested, **before** the first release of an item that collects held data. |
 | **Opened** | 2026-08-29 |
 
+### D-108 · Released without a reporting path — Part 5.1 run below, by decision
+| | |
+|---|---|
+| **Severity** | **BLOCKING for the rule itself**: Pumasi Booking does not satisfy CHARTER §5.1 and is being released anyway. Not blocking the release, because the steward has decided otherwise. |
+| **Rule affected** | **CHARTER §5.1** — an in-scope item must implement reporting **and a working opt-out** before it releases. §5.1 is not on this register's never-suspend list, so it may be run below with an entry. This is that entry. |
+| **What is actually true** | `PUMASI_REPORTING` is read into `Config.reportingEnabled` and then **read by nothing**. There is no egress code, no payload, no `report --show`, no first-run notice. §5.1 names *"a flag nothing reads"* as a specific way to fail its gate, so this is not a near miss — it is the exact failure the clause was written to catch. All five gate checks (`reporting_path_exists`, `opt_out_stops_egress`, `opt_out_behaviour_parity`, `payload_inspectable`, `first_run_notice_present`) fail vacuously. |
+| **Decision** | **Taken by the steward on 2026-08-29**, on an agent's recommendation, with the alternative — build the reporting path before opening public sign-up — offered and declined. Recorded as a decision, not an oversight. |
+| **The reasoning, so it can be argued with later** | Building a reporting pipeline for a service with no users is [L-001](../lessons/L-001-governance-ahead-of-evidence.md): governance ahead of evidence, which is the failure that produced a charter unable to merge a documentation change. It is the same argument [`GAP-0003`](https://github.com/pumasi-ai/pumasi/blob/main/gap/0003-defect-reporting.md) already makes for not building the defect-report tiers yet, and applying it to one and not the other would be inconsistent. A reporting path built before any real environment exists would be designed against imagined ones. |
+| **Who this can hurt** | **Nobody outside the project, which is why it is defensible.** §5.1 is a promise the commons makes to *itself* — that releases earn their way by passing in many environments rather than on one machine. Running below it costs the project its evidence, not any user their safety or privacy. This is the whole reason it is separable from D-105, which *can* hurt someone and is treated far more carefully. |
+| **What it costs, stated rather than glossed** | The test matrix stays one machine wide. Nothing tells us whether the service works anywhere but where it was built. The first real defect in the wild will be reported by a person, if at all, rather than by the software — which is precisely the gap §5.1 exists to close and precisely the failure GAP-0003 §7's trigger 2 is waiting for. |
+| **Compensating controls** | The release note ([`releases/2026-08-29-pumasi-booking-public-signup.md`](../releases/2026-08-29-pumasi-booking-public-signup.md)) states the non-compliance in plain language, so the 7-day veto window runs with this in front of whoever declines to veto. `Q-005` records it as named non-compliance. The privacy pack was corrected so it does **not** claim a reporting stream that does not exist — the one version of this that would have been dishonest rather than merely incomplete. |
+| **What would make this indefensible** | Shipping a stub that returns success, or a flag with a reader that sends nothing, in order to pass the gate on paper. §5.1 forbids exactly that, and an absent mechanism honestly named is worth more than a present one that lies. The absence stays visible until it is filled. |
+| **Clears when** | A reporting path and a working opt-out exist and pass all five §5.1 checks. **Trigger, so this does not sit open indefinitely the way D-105 did:** the first of — a defect found in the wild that a conformance report would have surfaced; the first deployment the project does not itself operate; or **any release after this one**. This release is the exception; it is not a standing permission. |
+| **Opened** | 2026-08-29 |
+
 ---
 
 ## Closed
