@@ -5,10 +5,10 @@
   "licence": "Apache-2.0",
   "inbound_equals_outbound": true,
   "governance": {
-    "repository": "https://github.com/pumasi-ai/governance",
-    "charter": "https://github.com/pumasi-ai/governance/blob/main/governance/CHARTER.md",
-    "charter_parameters": "https://github.com/pumasi-ai/governance/blob/main/governance/charter.yaml",
-    "debt_register": "https://github.com/pumasi-ai/governance/blob/main/governance/DEBT.md",
+    "repository": "https://github.com/pumasi-ai/pumasi",
+    "charter": "https://github.com/pumasi-ai/pumasi/blob/main/governance/CHARTER.md",
+    "charter_parameters": "https://github.com/pumasi-ai/pumasi/blob/main/governance/charter.yaml",
+    "debt_register": "https://github.com/pumasi-ai/pumasi/blob/main/governance/DEBT.md",
     "note": "Items do not vendor these. The merge gate reads charter.yaml from here so there is one source of truth."
   },
   "products": [
