@@ -1,30 +1,25 @@
-# This repository is the front door and the catalog index. Implementations,
-# governance and tooling live in their own repositories -- see catalog.json.
+# This repository is the commons front door: the catalog index, the gap ledger,
+# and the founding documents. It holds nothing product-specific and no code.
+#
+# Products live in their own repositories (see catalog.json). The rules and the
+# merge-gate tooling live in `governance`. Nothing from either is mirrored here
+# -- a copy per repository is exactly the drift this project exists to prevent.
+#
+# Deliberately NOT ignored: implementation trees, build files, governance files.
+# If one appears in `git status`, that is the point -- it is in the wrong
+# repository and should be visible, not silently hidden.
+
 node_modules/
 dist/
 .build/
+
 .env
 .env.*
+
+# Editor and OS artifacts
 *~
 .DS_Store
-
-# Moved to their own repositories, kept locally as a working copy
-/governance/
-/lessons/
-/tools/
-/spec/
-/packages/
-/apps/
-/MANDATE.md
-/DECISIONS.md
-/HUMAN.md
-/DIGEST.md
-/REPORTING.md
-/SUBPROCESSORS.md
-/Dockerfile
-/compose.yaml
-/package.json
-/package-lock.json
+.~lock.*#
 
 # Claude Code worktrees and session state
 .claude/

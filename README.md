@@ -56,8 +56,11 @@ It is deliberately hard where scheduling software is usually wrong:
 - A daily cap counts on the **owner's** local date. Not UTC's. Not the
   requester's.
 
-Both category leaders have open bugs in the last two today. `36` acceptance
-cases plus `12` unit tests hold these.
+These are the cases calendar arithmetic is easiest to get wrong, which is why
+each is a named acceptance case rather than left to the implementation. Run
+`npm test` in [`pumasi-booking`](https://github.com/pumasi-ai/pumasi-booking)
+for the current counts; the executable arbiter is
+[`cases.json`](https://github.com/pumasi-ai/pumasi-booking/blob/main/core/spec/acceptance/cases.json).
 
 ### The service — [`service/`](https://github.com/pumasi-ai/pumasi-booking/tree/main/service)
 
@@ -68,17 +71,21 @@ optionally, a PostgreSQL URL. Nothing in it knows about a particular host.
 
 ### What it does not do yet
 
-**It cannot see your real calendar.** The service knows only about bookings made
-inside it, so it will offer a time you are already busy and confirm a booking on
-top of it. Double-booking against your own calendar is the *expected* behaviour
-today. This is [`GAP-0002`](gap/0002-calendar-integration.md), promoted to next,
-and it is the difference between a demonstration and a product.
+**The privacy pack has not been reviewed by a lawyer.** The lawful basis is
+written and in force — served live at `/privacy`, `/terms` and `/dpa` by the
+running service: performance of the contract plus legitimate interest for
+account holders, and the account holder's legitimate interest, with the service
+as their processor, for the people who book. What remains genuinely unresolved
+is narrower and is
+[`DEBT.md` D-105](https://github.com/pumasi-ai/governance/blob/main/governance/DEBT.md),
+open at **DEGRADING**: the international transfer position — the service is
+operated from the United States, data is processed there, and no standard
+contractual clauses are in place — and the review by counsel itself.
 
-**No lawful basis has been established for holding third-party personal data.**
-[`DEBT.md`](https://github.com/pumasi-ai/governance/blob/main/governance/DEBT.md)
-D-105 says so plainly, caps the service at five
-accounts and two hundred bookings, and refuses to raise those ceilings while the
-entry is open.
+A fresh deployment starts at five owner accounts and two hundred retained
+bookings with public sign-up off. Those are **deployment defaults an operator
+may raise**, set low so that a deployment nobody is watching does not quietly
+grow, not caps the service refuses to lift.
 
 ---
 
@@ -96,7 +103,7 @@ configuration — it runs a real PostgreSQL in-process, so the constraints are
 genuinely enforced, but nothing survives a restart.
 
 ```bash
-npm test        # 128: 36 engine acceptance, 12 engine unit, 80 service
+npm test        # 301: 36 engine acceptance, 19 engine unit, 246 service
 ```
 
 For real email and a persistent database, see the
@@ -158,8 +165,8 @@ two other families, plus a human sign-off on release. Unmapped paths default to
 | What must this do? | `spec/*/SPEC.md` in the item's repo — prose, normative |
 | Is it done? | `spec/*/acceptance/cases.json` — **executable, and the arbiter** |
 | What was the human asked to confirm? | `spec/*/INTENT.md` — one page, plain language |
-| What may I work on without asking? | [`MANDATE.md`](https://github.com/pumasi-ai/governance/blob/main/MANDATE.md) |
-| What needs a human? | [`HUMAN.md`](https://github.com/pumasi-ai/governance/blob/main/HUMAN.md) — exhaustive; anything absent is agent work |
+| What may I work on without asking? | The product's own roadmap — for Pumasi Booking, [`roadmap/`](https://github.com/pumasi-ai/pumasi-booking/tree/main/roadmap) |
+| What needs a human? | [`HUMAN.md`](https://github.com/pumasi-ai/governance/blob/main/HUMAN.md) — three rules; anything absent is agent work |
 | What is open for objection? | [`DECISIONS.md`](https://github.com/pumasi-ai/governance/blob/main/DECISIONS.md) — with deadlines and defaults |
 | What are we running below? | [`DEBT.md`](https://github.com/pumasi-ai/governance/blob/main/governance/DEBT.md) |
 
@@ -183,6 +190,34 @@ event, not something buried in a code commit.
 Items do **not** vendor the governance files. Their merge gate reads
 `charter.yaml` from the governance repository, so there is one source of truth
 rather than a copy per repository that drifts.
+
+### What belongs in this repository
+
+Everything here is **general to the commons and true across every product.**
+Nothing here is specific to one product, and there is no code here at all.
+
+| Belongs in `pumasi` | Belongs in the product's own repository |
+|---|---|
+| The front door and [`catalog.json`](catalog.json) | Source, specifications, acceptance suites, build files |
+| A **gap** — a need recorded *before* anything is built for it | The **roadmap** of a product that now exists |
+| Rules about how products relate to one another | Anything true of only one product |
+
+**A gap is a commons artifact until it becomes a product; after that, its
+roadmap belongs to the product.** [`GAP-0001`](gap/0001-scheduling.md) stays
+here as the record of the need that produced Pumasi Booking. Where that product
+goes *next* is Pumasi Booking's business, and belongs beside the code that has
+to change.
+
+**This was got wrong once, and it is worth saying plainly.** Until 2026-08-29
+this repository still held the entire scheduling implementation, both
+specification trees, and the whole governance tree — untracked on disk and
+hidden by a `.gitignore` stanza reading *"moved to their own repositories, kept
+locally as a working copy"*. They had indeed been moved. The copies stayed,
+drifted, and were several commits behind the repositories that had superseded
+them, while being indistinguishable from live files to anyone opening the
+folder. Those ignore rules were deleted along with the copies: **a stray tree
+here should now appear in `git status` rather than be silently hidden.** That is
+[`L-008`](https://github.com/pumasi-ai/governance/blob/main/lessons/L-008-a-boundary-is-not-a-repository.md).
 
 ### One repository per product, and no shared libraries yet
 
