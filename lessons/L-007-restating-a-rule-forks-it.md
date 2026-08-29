@@ -31,6 +31,33 @@ The specification case was the dangerous one: it listed six merge criteria and
 read as exhaustive while omitting the charter's own gate entirely. A reader would
 have concluded the requirements were met when they were not.
 
+## It applies to derived facts, not only to rules — 2026-08-29
+
+The original evidence was all normative: version numbers, thresholds, merge
+criteria. Two instances on the same day showed the same failure with plain
+**counts**, which are restatements of whatever they count:
+
+- A website page said *"Seven lessons, each one paid for."* There were nine. It
+  had been wrong since before that day's additions, so nobody caught it while it
+  was merely one out.
+- The product README said the suite was *"36 acceptance cases + 12 unit + 80
+  service"*. Acceptance was still 36. Unit was 19. Service was **246** — out by
+  a factor of three, in a line nobody had read closely in months.
+
+Neither was a rule. Both were facts whose truth lived in another directory, with
+nothing tying the two together. That is L-007 exactly, and the remedy was the
+one below: **do not restate; point at the thing**.
+
+Both were fixed by **deleting the number rather than correcting it**, which is
+the part worth copying. Updating "seven" to "nine" buys accuracy until the next
+lesson lands and then silently resumes lying. Both replacements also say what
+the text used to claim and why the claim is gone, so the correction is legible
+instead of the document quietly becoming right and waiting to be wrong again.
+
+A count in prose is a cache with no invalidation. If a command or a directory
+listing can produce it, that is the canonical source, and prose should send the
+reader there.
+
 ## What to do instead
 
 **Reference, do not restate.** Where a document depends on a rule that lives
@@ -48,3 +75,6 @@ rather than a convention that holds until someone is in a hurry.
 - A summary of another document's requirements presented as a checklist
 - "For convenience, the rules are repeated here"
 - Two terms for one concept, used in different files
+- **Any count in prose** — of tests, lessons, families, entries — whose subject
+  lives in another file or directory
+- A number that has to be edited when something *else* is added
