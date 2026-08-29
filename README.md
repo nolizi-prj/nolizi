@@ -56,8 +56,11 @@ It is deliberately hard where scheduling software is usually wrong:
 - A daily cap counts on the **owner's** local date. Not UTC's. Not the
   requester's.
 
-Both category leaders have open bugs in the last two today. `36` acceptance
-cases plus `19` unit tests hold these.
+These are the cases calendar arithmetic is easiest to get wrong, which is why
+each is a named acceptance case rather than left to the implementation. Run
+`npm test` in [`pumasi-booking`](https://github.com/pumasi-ai/pumasi-booking)
+for the current counts; the executable arbiter is
+[`cases.json`](https://github.com/pumasi-ai/pumasi-booking/blob/main/core/spec/acceptance/cases.json).
 
 ### The service — [`service/`](https://github.com/pumasi-ai/pumasi-booking/tree/main/service)
 
@@ -68,11 +71,21 @@ optionally, a PostgreSQL URL. Nothing in it knows about a particular host.
 
 ### What it does not do yet
 
-**No lawful basis has been established for holding third-party personal data.**
-[`DEBT.md`](https://github.com/pumasi-ai/governance/blob/main/governance/DEBT.md)
-D-105 says so plainly, caps the service at five
-accounts and two hundred bookings, and refuses to raise those ceilings while the
-entry is open.
+**The privacy pack has not been reviewed by a lawyer.** The lawful basis is
+written and in force — served live at `/privacy`, `/terms` and `/dpa` by the
+running service: performance of the contract plus legitimate interest for
+account holders, and the account holder's legitimate interest, with the service
+as their processor, for the people who book. What remains genuinely unresolved
+is narrower and is
+[`DEBT.md` D-105](https://github.com/pumasi-ai/governance/blob/main/governance/DEBT.md),
+open at **DEGRADING**: the international transfer position — the service is
+operated from the United States, data is processed there, and no standard
+contractual clauses are in place — and the review by counsel itself.
+
+A fresh deployment starts at five owner accounts and two hundred retained
+bookings with public sign-up off. Those are **deployment defaults an operator
+may raise**, set low so that a deployment nobody is watching does not quietly
+grow, not caps the service refuses to lift.
 
 ---
 
