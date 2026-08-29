@@ -15,8 +15,7 @@ events plus a daily sweep, checks this repository out alongside, and runs:
 
 Run by hand from any commons repository root, it does the same. The issues
 being triaged are always **the current repository's**; the rules are always
-**this repository's** — the same single-source rule as `charter.yaml`, so no
-repository carries a drifting copy of the prompt.
+**this repository's**, so no repository carries a drifting copy of the prompt.
 
 GitHub is the ledger. The verdict comment and the labels `accepted` /
 `rejected` / `escalated` are the authoritative triage state; keep **no**

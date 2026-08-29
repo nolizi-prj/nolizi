@@ -5,7 +5,6 @@ The rules of the commons.
 | File | Role |
 |---|---|
 | [`CHARTER.md`](./CHARTER.md) | Normative. **Governs on conflict** — if this and the config disagree, the config is a bug. |
-| [`charter.yaml`](./charter.yaml) | The same rules as machine-readable parameters with stable IDs. |
 | [`DEBT.md`](./DEBT.md) | Every rule the project is currently running below, why, what compensates, and what turns it back on. |
 | [`SUPERSEDED.md`](./SUPERSEDED.md) | What the earlier drafts were, and how to retrieve them from git. |
 

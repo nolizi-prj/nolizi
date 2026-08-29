@@ -94,10 +94,11 @@ the steward decided that can-hurt surfaces need no human authorisation step,
 *"if there is genuinely big risks, agents will report them."* Per-change steward
 sign-off was offered as the alternative and declined.
 
-`charter.yaml` now matches the prose it had drifted from — Part 4 already read
-*"No human sign-off at any point: the classification is a boolean per path in
-`RISK_ZONES.yaml`"* after `0ccfc39`, while the config still named the mandate.
-Prose governs; the config was the bug.
+`charter.yaml` was brought back into line with the prose it had drifted from —
+Part 4 already read *"No human sign-off at any point: the classification is a
+boolean per path in `RISK_ZONES.yaml`"* after `0ccfc39`, while the config still
+named the mandate. **That file was then deleted the same day**: nothing read it,
+and it had drifted twice in one day. Part 4's prose is now the only copy.
 
 The residual is recorded as [`DEBT.md` **D-109**](governance/DEBT.md), including
 what it does not fix and the bet being made, so that if it fails it fails on the

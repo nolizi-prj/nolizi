@@ -132,9 +132,8 @@ event, not something buried in a code commit.
 | **this repository** | Charter, debt register, lessons, decision queue | The rules change — deliberately its own event, not buried in a code commit |
 | **[`pumasi-booking`](https://github.com/pumasi-ai/pumasi-booking)** | **Pumasi Booking** — the engine (`core/`), the service (`service/`), and both specifications | The product changes |
 
-Items do **not** vendor the governance files. Their merge gate reads
-`charter.yaml` from the governance repository, so there is one source of truth
-rather than a copy per repository that drifts.
+Items do **not** vendor the governance files. They read the charter from here,
+so there is one source of truth rather than a copy per repository that drifts.
 
 ### What belongs in this repository
 

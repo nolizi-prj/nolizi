@@ -3,7 +3,6 @@
 **Version:** 0.4-draft · **Status:** Proposed
 **Sources:** [`pumasi-whitepaper-v1.0.md`](https://github.com/pumasi-ai/pumasi/blob/main/pumasi-whitepaper-v1.0.md) ·
 [`pumasi-commercialization-foundations.md`](https://github.com/pumasi-ai/pumasi/blob/main/pumasi-commercialization-foundations.md)
-**Machine-readable companion:** [`charter.yaml`](./charter.yaml)
 
 > The whitepaper says what Pumasi is. The commercialization foundations say what
 > may never be sold. **This charter says only how work gets done — nothing more.**
@@ -430,10 +429,16 @@ A commons that quietly runs below its own rules is worse than one with no rules,
 because it claims a guarantee it is not providing. This file is the whole of our
 honesty mechanism, and it is the one piece of version 0.1 that earned its place.
 
-**Every rule here is testable or it is unverified.** Where this charter and
-`charter.yaml` disagree, **the prose governs and the config is a bug** — file it
-as a defect. A rule with no test is reported as unverified rather than assumed to
-hold. **[OP]**
+**Every rule here is testable or it is unverified.** A rule with no test is
+reported as unverified rather than assumed to hold. **[OP]**
+
+*There was a machine-readable companion, `charter.yaml`, holding the same rules
+as parameters. It was deleted on 2026-08-29 because **nothing ever read it** —
+no gate, no script, no other repository — while it drifted from this prose twice
+in a single day. A file whose best case is being identical to the charter and
+whose worst case is quietly contradicting it is a liability with no upside. That
+is [L-007](../lessons/L-007-restating-a-rule-forks-it.md), and the register it
+kept filling is why that lesson exists.*
 
 ---
 
