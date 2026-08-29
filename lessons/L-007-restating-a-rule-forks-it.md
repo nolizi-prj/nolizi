@@ -69,6 +69,30 @@ Where two representations genuinely must exist — prose for humans, config for
 machines — state which governs, and make agreement a test that fails the build
 rather than a convention that holds until someone is in a hurry.
 
+## Matching the upstream document is not verification
+
+The sharpest finding in this round was a method error, not a stale number, and
+it is the reason forked restatements survive review.
+
+A session reported its test figures as *"accurate, checked against the current
+booking README, matching verbatim."* They did match. **The README was wrong.**
+It had verified a copy against a restatement and called the result verified —
+which confirms only that two documents fork together, which is the failure this
+lesson is about, not evidence against it.
+
+The same session had, two commits earlier, faithfully mirrored a README that
+omitted the deployed build. Faithful to the source and wrong about the world,
+twice, in the same surface.
+
+**So: verify against the artefact, never against another document's claim about
+it.** Count the entries in `cases.json`; run the suite; list the directory. If
+the only evidence for a number is that another file says the same number, there
+is no evidence — the agreement is the symptom.
+
+This applies with most force to the documents that look most authoritative. A
+README is a restatement of the code. A charter summary is a restatement of the
+charter. Checking against either feels like checking and is not.
+
 ## Signals
 
 - The same number, date, or threshold appearing in two files
@@ -78,3 +102,9 @@ rather than a convention that holds until someone is in a hurry.
 - **Any count in prose** — of tests, lessons, families, entries — whose subject
   lives in another file or directory
 - A number that has to be edited when something *else* is added
+- **A number in undated prose.** A figure in dated content — a post, a report, a
+  release note — is a *record* of what was true on a stated day, and the dateline
+  is its invalidation mechanism. The same figure on an evergreen page is a
+  *cache* with none, because the reader has no way to know when it was last true.
+  Rot threatens the undated one only.
+- "Checked against `<other document>`, matches verbatim" offered as verification
