@@ -123,6 +123,18 @@ by `tools/families.sh`: Claude, Gemini (`agy`), Grok (`grok`).
 | **Clears when** | A second accountable party exists, or a misclassification is found — in which case per-change sign-off returns. |
 | **Opened** | 2026-08-29 |
 
+### D-110 · Public sign-up released with one non-builder review, by steward waiver
+| | |
+|---|---|
+| **Severity** | DEGRADING |
+| **Rule affected** | CHARTER §4 — a can-hurt change needs **two** approving reviews from two families other than the builder's. The register's own never-suspend list names this bar, which is why this entry is written rather than the fact being handled quietly. |
+| **What is true** | Gemini approved the final range twice. Grok's two completed reviews each found a real defect — the I8 cookie oracle, the composed D3 deletion holes — and both were fixed with tests that fail without the fix. Grok's review of the *final* state died mid-run: `402, Grok Build usage balance exhausted`. Topping up is money, which is `HUMAN.md` ground. |
+| **Decision** | Steward, 2026-08-29: *"If gemini agrees, then it is major agreement, because Claude also agreed. then let's approve it."* Recorded precisely: the builder's family does not count under §3 and **is not counted here** — this is one non-builder approval plus an explicit steward waiver of the second, not a two-family gate met. |
+| **What the evidence says** | The two approving families are the two that missed both bugs; the family whose review is waived is the one that found them, twice. Stated so the waiver is made with that in view, not around it. |
+| **Compensating controls** | Every objection Grok did raise was fixed and is test-covered, including through the real worker. 19 core + 248 service + 34 E2E green. The I8 property is asserted against production after deploy. |
+| **Clears when** | Grok (or any second non-builder family) approves the released range. One top-up and one rerun. |
+| **Opened** | 2026-08-29 |
+
 ---
 
 ## Closed

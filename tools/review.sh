@@ -61,9 +61,11 @@ STAMP="$(date +%Y%m%d-%H%M%S)"
 FAIL=0
 for FAMILY in "${FAMILIES[@]}"; do
   case "$FAMILY" in
-    gemini) CMD=(agy -p "$PROMPT") ;;
-    grok)   CMD=(grok -p "$PROMPT") ;;
-    claude) CMD=(claude -p "$PROMPT") ;;
+    # Headless flags are required: without them each CLI auto-denies its own
+    # `git diff` and produces no verdict, which is how this was found.
+    gemini) CMD=(agy --dangerously-skip-permissions -p "$PROMPT") ;;
+    grok)   CMD=(grok --always-approve -p "$PROMPT") ;;
+    claude) CMD=(claude --dangerously-skip-permissions -p "$PROMPT") ;;
     *) echo "unknown family: $FAMILY" >&2; exit 2 ;;
   esac
   OUT="reviews/$STAMP-$ROLE-$FAMILY.md"

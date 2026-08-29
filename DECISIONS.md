@@ -85,7 +85,7 @@ to strike "OAuth consent screen / test accounts" from `HUMAN.md`.
 | **Default on silence** | *(steward to set.)* Proposed: the release proceeds as written in the note. |
 | **Still outstanding at publication** | Part 4 requires **two approving reviews from two model families other than the builder's** for a can-hurt release. Neither has been obtained. The window may run concurrently; the release may not proceed without them. |
 | **Named non-compliance — now a recorded decision** | CHARTER §5.1 requires a working reporting path and opt-out before an in-scope item releases. `PUMASI_REPORTING` is read by nothing, so this release does not meet §5.1. **The steward decided on 2026-08-29 to release anyway**, with building it first offered and declined; that decision, its reasoning, what it costs, and the trigger that ends it are recorded as **`DEBT.md` D-108**. It is an exception for this release, not a standing permission — any release after this one clears it or reopens the question. |
-| **Status** | open — window running |
+| **Status** | **CLOSED 2026-08-29 — approved by the steward before the window's end.** The reviews stand as recorded in `DEBT.md` D-110: Gemini approved the final range; Grok's two earlier objections were both fixed and test-covered; the second non-builder approval is waived by the steward while Grok's balance is exhausted. |
 
 ### Q-006 · `MANDATE.md` deleted — **CLOSED 2026-08-29, decided**
 The steward deleted `MANDATE.md`. Its **sequencing** job was already gone: work
