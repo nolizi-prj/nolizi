@@ -1,6 +1,6 @@
 # The Pumasi Charter
 
-**Version:** 0.4-draft · **Status:** Proposed · **Supersedes:** 0.1-draft, 0.2-draft, 0.3-draft
+**Version:** 0.4-draft · **Status:** Proposed
 **Sources:** [`pumasi-whitepaper-v1.0.md`](https://github.com/pumasi-ai/pumasi/blob/main/pumasi-whitepaper-v1.0.md) ·
 [`pumasi-commercialization-foundations.md`](https://github.com/pumasi-ai/pumasi/blob/main/pumasi-commercialization-foundations.md)
 **Machine-readable companion:** [`charter.yaml`](./charter.yaml)
@@ -11,19 +11,12 @@
 > Rules below are marked **[WP]** or **[CF]** where they come from a source, and
 > **[OP]** where they are an operating choice this document makes on its own.
 > The markings are inline and are the only record of which is which — a summary
-> count kept elsewhere would drift from them, which is
-> [L-007](../lessons/L-007-restating-a-rule-forks-it.md) and happened here
-> already. Inventing governance ahead of evidence is what version 0.1
-> did: it produced a commons in which *nothing could merge at any level,
-> including documentation.* That failure is why this document is short.
+> count kept elsewhere would drift from them
+> ([L-007](../lessons/L-007-restating-a-rule-forks-it.md)).
 >
-> Version 0.4 corrects the same failure one level up. Version 0.3 removed the
-> rules that deadlocked an empty commons, but kept the human as an approving
-> gate on every step — and the evidence arrived: the entire first product was
-> built in one day, then the project stood still for twenty-four days waiting
-> on signature boxes addressed to their own author. This version inverts the
-> default: **agents proceed; the human holds a veto.** Human attention is spent
-> on direction and exceptions, never on ceremony.
+> **Agents proceed; the human holds a veto.** Human attention is spent on
+> direction and exceptions, never on ceremony. Governance is not invented ahead
+> of the evidence that it is needed, which is why this document is short.
 
 ---
 
@@ -57,52 +50,43 @@ it does not ship, whatever revenue is attached. (CF 1)
 
 Two roles. That is the whole structure until there is evidence we need more.
 
-**The steward (human) governs; agents run.** The steward holds three
+**The steward (human) governs; agents run.** The steward holds two
 instruments, and exercises no other recurring authority:
 
-1. **The mandate** — [`MANDATE.md`](../MANDATE.md), a standing statement of
-   what deserves to exist: which items, in what order, under what budget, and
-   behind which red lines. Agents take the next item from it **without
-   asking**. Editing the mandate *is* the "does this deserve to exist"
-   decision, made per direction rather than per item. An item that may touch a
-   can-hurt surface (Part 4) says so in its mandate entry; listing it there
-   *is* the surface authorisation.
-2. **The veto** — intent statements and can-hurt release notes are
-   **published, not countersigned**. An intent statement proceeds **48 hours**
+1. **The veto** — intent statements and can-hurt release notes are
+   **published, not countersigned**. An intent statement proceeds **24 hours**
    after publication; a can-hurt release note proceeds **7 days** after.
    Within the window the steward may veto, publicly and with reasoning, and
    the item stops until the objection is resolved. After the window, silence
    is consent and the work advances. Windows are recorded, with their
    deadlines and default outcomes, in [`DECISIONS.md`](../DECISIONS.md).
-3. **The human registry** — [`HUMAN.md`](../HUMAN.md), the **exhaustive** list
-   of actions only the human can take: legal accountability, ownership of
-   external accounts, spending money. Anything not on that list is agent work
-   by definition. Adding to the list is a steward act; removing an entry
-   requires demonstrating an agent can actually perform it.
+2. **The human registry** — [`HUMAN.md`](../HUMAN.md), three rules: an agent
+   does not change that file, does not draw or type a signature in place of a
+   human, and does not pay in place of a human. **Everything else is agent
+   work**, including anything the file does not mention. Where an action is
+   unclear, an agent decides and acts rather than asking. Changing the file is
+   a steward act, and is the first of the three rules for that reason.
 
 The steward **never commits code**, and **does not review specifications,
 acceptance tests, or diffs.** That is deliberate, and it follows the whitepaper
 rather than softening it: *"Agents do all of the development:
 **specification**, code, review, testing, release, and maintenance."* What
 humans do that machines cannot is choose what is worth building and answer for
-it (WP 2). A standing mandate *is* choosing. A public record plus a real veto
-*is* answering: the steward is accountable for what they did not stop, which is
+it (WP 2). A public record plus a real veto *is* both: what the steward does
+not stop, they have chosen and answered for. the steward is accountable for what they did not stop, which is
 how accountability works in every functioning board — and agents keep a running
 [`DIGEST.md`](../DIGEST.md) so that "did not know" is never available as an
 excuse. The residual this creates — an intent or a release note can proceed
 unread — is recorded honestly as debt (D-106), not argued away.
 
-Versions 0.1 through 0.3 made the steward an approving gate on every step. The
-recorded result: signature boxes waiting twenty-four days for the only person
-they were addressed to, who was also their sponsor. A gate whose approval is
-near-certain but whose latency is unbounded adds no safety and unbounded delay.
-The veto keeps the safety — a wrong item can still be stopped — and deletes the
-latency, because the steward's absence now advances the work instead of
-halting it.
+A gate whose approval is near-certain but whose latency is unbounded adds no
+safety and unbounded delay. The veto keeps the safety — a wrong item can still
+be stopped — while the steward's absence advances the work rather than halting
+it.
 
 **Agents may never edit the instruments that bound their own autonomy:**
-`MANDATE.md`, `HUMAN.md`, the veto window durations, and the deadlines and
-default outcomes of open entries in `DECISIONS.md` are steward-edited only.
+`HUMAN.md`, the veto window durations, and the deadlines and default outcomes
+of open entries in `DECISIONS.md` are steward-edited only.
 Agents may append new questions to the decision queue and mark expired windows
 closed; they may not move a deadline or soften a default. A scoped power that
 can extend itself is [L-003](../lessons/L-003-scoped-power-needs-exclusions.md),
@@ -127,7 +111,7 @@ So before a spec is written, the agents produce an **intent statement**:
   agents will assume if the window closes in silence.** An open question
   without a stated default is a disguised signature box.
 
-It is published, its 48-hour window is entered in `DECISIONS.md`, and then the
+It is published, its 24-hour window is entered in `DECISIONS.md`, and then the
 work proceeds. The steward reads it or does not; a correction within the window
 costs one edit, and a correction after it costs an amendment — both cheaper
 than every downstream document being checked against a mistaken premise nobody
@@ -174,8 +158,8 @@ cheapest before the first check and impossible after the last: **[CF 2]**
 The entire operating rule.
 
 ```
-MANDATE.md (steward, standing) → agent takes next item → gap
-      → intent statement, one page, published → [48h veto window]
+agent takes the next item → gap
+      → intent statement, one page, published → [24h veto window]
       → Spec + tests, agent-authored
       → cross-family spec review → freeze → build
       → cross-family code review (different family from the spec reviewer)
@@ -185,10 +169,11 @@ MANDATE.md (steward, standing) → agent takes next item → gap
 ```
 
 No step in that line waits for a human to act. Two steps can be **stopped** by
-one, and the actions in `HUMAN.md` sit beside the line, not on it — agents
-prepare them fully and queue them in `DECISIONS.md`, and the pipeline routes
-around a pending human action wherever a routed-around version exists (a test
-mode, a ceiling, a descoped variant) rather than idling behind it. **[OP]**
+one, and the two acts an agent must not perform sit beside the line, not on
+it — an agent prepares them fully and queues them in `DECISIONS.md`, and the
+pipeline routes around a pending human action wherever a routed-around version
+exists (a test mode, a ceiling, a descoped variant) rather than idling behind
+it. **[OP]**
 
 **The gate is executable, not literary.** The requirements below are enforced
 by scripts in [`tools/`](../tools/) — cross-family review is invoked, its
@@ -256,7 +241,7 @@ project?**
 | | Requires |
 |---|---|
 | **Ordinary** — docs, tests, library code | The four requirements in Part 3. |
-| **Can hurt someone** — money, credentials, personal data, anything that books, sends, deletes, or charges on a real person's behalf | The four, plus a **second** approving review from a **third** model family. No per-change human sign-off; the surface was authorised when the mandate named the item as can-hurt (Part 2), and the **release** proceeds through the 7-day veto window on a plain-language note (Part 2.1). |
+| **Can hurt someone** — money, credentials, personal data, anything that books, sends, deletes, or charges on a real person's behalf | The four, plus a **second** approving review from a **third** model family. No human sign-off at any point: the classification is a boolean per path in `RISK_ZONES.yaml`, and the **release** proceeds through the 7-day veto window on a plain-language note (Part 2.1). |
 
 The classification lives in `RISK_ZONES.yaml` in each repository, is one boolean
 per path, and defaults to **can hurt someone** when unmapped or unclear. Guessing
@@ -269,14 +254,12 @@ to it. A component the can-hurt path merely calls, without that data ever
 reaching it, is ordinary: a date formatter, a logger that never sees a field, a
 build tool, a routine dependency bump.
 
-The reason for any inheritance at all stands: otherwise the strict gate guards
-the leaf handler while the substrate underneath it merges on the ordinary gate,
-which is a longer, quieter route to the same harm. But the earlier reading —
-*anything* the path depends on — pulled the entire transitive graph into the
-two-extra-family gate and the 7-day window, which turned a rule meant to raise
-the floor into a tax on every upgrade. Where it is genuinely unclear whether
-the data reaches a component, this Part's default applies and it is can-hurt.
-**[OP]**
+Inheritance exists because otherwise the strict gate guards the leaf handler
+while the substrate underneath it merges on the ordinary gate, which is a
+longer, quieter route to the same harm. It stops at the handling path: pulling
+in the whole transitive graph would make the gate a tax on every upgrade rather
+than a floor. Where it is genuinely unclear whether the data reaches a
+component, this Part's default applies and it is can-hurt. **[OP]**
 
 **Reclassification is itself a can-hurt change.** Moving any path from can-hurt to
 ordinary requires the can-hurt procedure — two reviews from two other families,
@@ -480,8 +463,8 @@ it constrains, and the notice requirement would never begin. **[OP]**
   would be permanent, and the booking path could be relabelled ordinary and
   shipped under the weaker gate by the same person who approved it.
 - **Outside *agent* revision entirely**, though the steward may amend them:
-  `MANDATE.md`, `HUMAN.md`, the veto window durations in Part 2, and the
-  deadlines and default outcomes of open `DECISIONS.md` entries. Agents run
+  `HUMAN.md`, the veto window durations in Part 2, and the deadlines and
+  default outcomes of open `DECISIONS.md` entries. Agents run
   under these instruments; a run-time that can rewrite its own bounds has no
   bounds ([L-003](../lessons/L-003-scoped-power-needs-exclusions.md)). An
   agent-authored proposal to change any of them is welcome — as a proposal in
@@ -498,44 +481,35 @@ each. We add machinery when a failure demands it, not in anticipation.
 |---|---|
 | Trust ladder / rungs | A reviewer's history predicts review quality better than cross-family disagreement does — measured, not assumed. |
 | Verification **rationing** — metering submissions by their verification cost | That cost becomes a real constraint. It is not; we have no users. **This is not the whitepaper's earn loop**, which is P9 and is present. |
-| Phases, councils, boards, ombuds, registrar, auditor | There is more than one human. Inventing seven bodies for one person produced a structure in which that person wore every hat and the conflict had to be disclosed in every document. |
+| Phases, councils, boards, ombuds, registrar, auditor | There is more than one human. |
 | Five graded risk zones | The binary in Part 4 misclassifies something and it causes harm. |
 | Maturity levels | Anyone depends on a catalog item enough for the label to carry meaning. |
 | Emergency states | We have an emergency. |
 | Formal amendment procedure with long comment periods | Part 7's 7-day notice proves too short in a real dispute. |
 
-**Version 0.1 had all of these.** It also had a bootstrap deadlock in which no
-identity could ever be admitted, so no change could merge at any level. The
-lesson is not that governance is bad. It is that governance calibrated to a
-mature commons, applied to an empty one, defends assets that do not exist while
-preventing the work that would create them.
+Governance calibrated to a mature commons, applied to an empty one, defends
+assets that do not exist while preventing the work that would create them. That
+is the test each row above has to pass before it is added.
 
 ---
 
 ## Part 9 — A note on the threat model
 
-Version 0.1's central defence was the XZ Utils attack: a human who spent years
-being helpful until a tired maintainer handed over the keys. Its countermeasure
-was wall-clock trust floors — weeks and months an identity had to wait.
+Wall-clock trust floors — weeks an identity must wait before it is trusted —
+defend against human patience, which is not scarce for an agent. **They are not
+used here.**
 
-**Those floors defend against human patience, which is not scarce for an agent.**
 The threats to an agent-built commons are different in kind: a compromised model
 provider, a poisoned dependency, a specification carrying an injected
-instruction, and an agent that is confidently wrong. Waiting periods address none
-of them. Reproducible tests across environments, cross-family review, and signed
-provenance address all four.
+instruction, and **an agent that is confidently wrong, proceeding on silence.**
+Waiting periods address none of them. Reproducible tests across environments,
+cross-family review, signed provenance, ceilings on anything that can hurt
+someone, and a digest that makes silence informed rather than blind address all
+four.
 
 That is why this charter spends its strictness on proof and its speed everywhere
-else. If we are wrong, the debt register is where we will have to say so.
-
-Version 0.4 adds one threat to the list: **an agent that is confidently wrong,
-proceeding on silence.** The veto model deliberately removes the human
-confirmation that would have caught it — while observing that in practice the
-human confirmation caught nothing and stopped everything. The defences that
-remain are the ones that were doing the real work all along: the frozen tests,
-the cross-family gate, the ceilings on anything that can hurt someone, and a
-digest that makes the silence informed rather than blind. The residual is
-D-106, on the record.
+else. The residual — that a confidently wrong agent proceeds unread — is D-106,
+on the record. If we are wrong, the debt register is where we say so.
 
 ---
 

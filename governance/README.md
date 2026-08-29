@@ -10,9 +10,8 @@ The rules of the commons. Three files, and they must agree.
 | [`archive/`](./archive/) | Superseded versions, kept rather than deleted. |
 
 Related, outside this folder: the three operating instruments at the repository
-root — [`MANDATE.md`](../MANDATE.md) (standing direction, steward-edited),
-[`DECISIONS.md`](../DECISIONS.md) (open veto windows and human-queue items),
-[`HUMAN.md`](../HUMAN.md) (the exhaustive list of human-only actions) — plus
+root — [`DECISIONS.md`](../DECISIONS.md) (open veto windows and human-queue items),
+[`HUMAN.md`](../HUMAN.md) (three rules an agent must never break) — plus
 [`DIGEST.md`](../DIGEST.md), the running record agents keep for the steward.
 And [`../lessons/`](../lessons/) — what this project
 got wrong and what to do instead. Read it before designing governance or
@@ -24,12 +23,12 @@ the way they do.
 ## The whole of it, in one screen
 
 **The human governs; agents run.** Three instruments and nothing else: a
-standing **mandate** ([`MANDATE.md`](../MANDATE.md)) that says what deserves to
+**veto** that says what deserves to
 exist — agents take the next item without asking; a **veto** — intent
-statements proceed 48 hours after publication and can-hurt release notes 7
+statements proceed 24 hours after publication and can-hurt release notes 7
 days after, unless the steward objects in the open ([`DECISIONS.md`](../DECISIONS.md)
-holds the clocks); and a **human registry** ([`HUMAN.md`](../HUMAN.md)) — the
-exhaustive list of what only a human can do. No step waits for a human to act;
+holds the clocks); and a **human registry** ([`HUMAN.md`](../HUMAN.md)) — three
+rules an agent must never break, with everything else agent work by definition. No step waits for a human to act;
 two steps can be stopped by one. The steward never reads a spec, a test, or a
 diff — and never has to read anything at all for work to proceed.
 
@@ -58,7 +57,7 @@ change takes 7 days' public notice and is blocked only by a **cited** objection.
 
 Permanent commitments (Part 1) are never amendable, and neither is the can-hurt
 bar, the reclassification rule, or the date sole-steward authority ends.
-`MANDATE.md`, `HUMAN.md`, the veto window durations, and open decision
+`HUMAN.md`, the veto window durations, and open decision
 deadlines are amendable — by the steward only, never by agents.
 
 ## Why version 0.4
@@ -69,8 +68,8 @@ within a month: the whole first product was built in one day, then nothing
 moved for twenty-four days while four signature boxes waited for the one person
 they were addressed to — who was also their author's sponsor. A gate whose
 approval is near-certain but whose latency is unbounded adds no safety, only
-delay. v0.4 inverts the default: agents proceed, the human holds a veto, and
-the only mandatory human actions are the ones listed in `HUMAN.md` because
+delay. The default is inverted: agents proceed, the human holds a veto, and
+the only mandatory human acts are the ones in `HUMAN.md` because
 they are legally or physically impossible to delegate. The residual — work can
 proceed unread — is debt entry D-106, recorded rather than argued away.
 

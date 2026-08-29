@@ -3,7 +3,7 @@
 This is the prompt a scheduled or manually started agent session follows to
 advance Pumasi without a human in the loop. Run it as often as you like — it
 is idempotent: each run does the next useful step and stops at real
-boundaries (an open veto window, a `HUMAN.md` action with no route around).
+boundaries (an open veto window, a `HUMAN.md` act with no route around).
 
 Invocation, from the repository root, any of:
 
@@ -12,15 +12,15 @@ Invocation, from the repository root, any of:
 
 ## The loop
 
-1. **Read, in order:** `MANDATE.md` · `DECISIONS.md` · `HUMAN.md` ·
+1. **Read, in order:** `HUMAN.md` · `DECISIONS.md` ·
    `governance/CHARTER.md` Part 3 · `lessons/README.md`. Never edit
-   `MANDATE.md` or `HUMAN.md`; never move a deadline or change a default in
+   `HUMAN.md`; never move a deadline or change a default in
    `DECISIONS.md` (CHARTER §2 — L-003).
 2. **Close expired windows.** Any `DECISIONS.md` entry whose window has passed
    without a steward veto: mark it closed with the date and outcome
    "proceeded on silence", and treat its default as decided.
 3. **Pick the work:** the lowest-numbered mandate item that is authorised and
-   not blocked by an open window or an unrouted `HUMAN.md` dependency. Within
+   not blocked by an open window or an unrouted human dependency. Within
    the item, do the next step of the charter flow: intent → (window) → spec +
    frozen tests → spec review → build → code review → merge → release
    (can-hurt: note + 7-day window, ceilings first).
@@ -42,7 +42,7 @@ Invocation, from the repository root, any of:
 
 6. **Gate before merge:** `tools/gate.sh` (add `--can-hurt` when §4 says so).
    It must print `GATE: PASS`. Merge to `main`; no other long-lived branches.
-7. **Queue what only a human can do:** anything on `HUMAN.md` — prepare it to
+7. **Queue what only a human can do:** signing, or paying — prepare it to
    one click, append it to `DECISIONS.md` with a stated route-around, and take
    the route-around now if one exists.
 8. **Write the digest:** prepend a dated entry to `DIGEST.md` — what advanced,
@@ -51,9 +51,9 @@ Invocation, from the repository root, any of:
 ## Boundaries — where the driver stops rather than proceeds
 
 - An open veto window: never act on the defaulted outcome before the deadline.
-- A `HUMAN.md` action with no route around (today: nothing — Q-002 blocks only
+- A `HUMAN.md` act with no route around (today: nothing — Q-002 blocks only
   public signup, Q-003 has test mode).
 - Anything that would raise the D-105 ceilings, enable public signup, touch a
-  red line in `MANDATE.md`, or edit an agent-untouchable file.
+  red line, or edit an agent-untouchable file.
 - A cited review objection: resolve it or amend the spec in the open
   (fresh cross-family spec review) — never argue past it.

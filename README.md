@@ -27,8 +27,7 @@ source of truth rather than a copy per repository.
 
 | File | For |
 |---|---|
-| [`MANDATE.md`](MANDATE.md) | What agents may take without asking. Steward-edited only. |
-| [`HUMAN.md`](HUMAN.md) | The **exhaustive** list of what only a human can do. Anything absent is agent work by definition. |
+| [`HUMAN.md`](HUMAN.md) | Three rules an agent must never break. Everything else is agent work by definition. |
 | [`DECISIONS.md`](DECISIONS.md) | Open veto windows, with deadlines and defaults. Silence is a decision. |
 | [`DIGEST.md`](DIGEST.md) | The running record kept for the steward. Reading it blocks nothing. |
 | [`REPORTING.md`](REPORTING.md) | What the software sends, and how to turn it off. Disclosure, not terms of use. |
