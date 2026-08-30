@@ -124,6 +124,15 @@ published release note, the 7-day veto window, ceilings first.
 | **Default on silence** | Proceed with the intent statement's own assumptions: intake address defaults to `https://report.pumasi.ai/v1/reports`, documented as not yet live; held-tier (operating) reports retained twelve months, deletable earlier on request; the Cloudflare deployment sends nothing yet, revisited no later than the `launched` promotion; no report ever carries owner or booker data, or counts derived from them. |
 | **Status** | open — pre-`launched` (CHARTER Part 0), so work proceeds on this default at once and a veto reverts. |
 
+### Q-009 · Pumasi Booking reporting path — can-hurt release, 7-day window
+| | |
+|---|---|
+| **What** | [`releases/2026-08-30-pumasi-booking-reporting-path.md`](releases/2026-08-30-pumasi-booking-reporting-path.md), published 2026-08-30. The CHARTER §5.1 reporting mechanism and opt-out (BACKLOG item 1, `spec/0004`), with the D-107 retention schedule published. Classed can-hurt by `RISK_ZONES.yaml` (service paths). |
+| **Window closes** | **2026-09-06** (7 days, CHARTER §2.1). *Steward to confirm — agents may not set a deadline; this is the charter's own duration applied, not a chosen one.* |
+| **Default on silence** | The release stands as written in the note. Nothing egresses in practice today: the live Cloudflare deployment is not wired and the documented intake is not live. A veto reverts the merge or sets `PUMASI_REPORTING=false` guidance, whichever the veto states. |
+| **Reviews** | Gemini approved spec and code (transcripts in `pumasi-booking/reviews/`). Grok unreachable — D-104 condition live; pre-`launched`, review is advisory (Part 0) and the single non-builder bar (P5) is met. |
+| **Status** | open — pre-`launched` (Part 0): the window does not hold the (reversible) release; a veto reverts. |
+
 ## Closed
 
 ### Q-003 · Google Cloud OAuth application — **CLOSED 2026-08-27, done**
