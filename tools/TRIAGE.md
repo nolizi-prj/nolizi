@@ -8,11 +8,20 @@ driver it is idempotent: **the labels are the
 guard.** Re-running on an already-triaged issue is a no-op, so overlapping
 runs are safe.
 
-It is invoked by a thin `.github/workflows/triage.yml` in the repository whose
-issues are being triaged (today: `pumasi-ai/pumasi`), which fires on issue
-events plus a daily sweep, checks this repository out alongside, and runs:
+It runs **on the steward's machine, through the `pumasi-ops` queue** — the
+project-manager tick enqueues a triage packet whenever unlabelled issues
+exist, and the dispatcher runs it. By hand, from the checkout of the
+repository whose issues are being triaged:
 
-    claude -p "Follow tools/TRIAGE.md"
+    claude -p "Follow /home/m/dev/pumasi/tools/TRIAGE.md"
+
+*A GitHub Actions version existed for one day (2026-08-29) and was removed
+the same day, by the steward's call: it put a subscription token and a
+`contents: write` credential in a runner that reads untrusted issue text,
+pulled its agent unpinned from npm on every run, and failed quietly. The
+cost of removal is latency — a new issue now waits for the next tick, up to
+six hours, instead of minutes — and that trade is recorded here rather than
+rediscovered.*
 
 Run by hand from any commons repository root, it does the same. The issues
 being triaged are always **the current repository's**; the rules are always
