@@ -3,7 +3,8 @@
 This is the prompt an agent session follows to process a commons repository's
 GitHub issues end to end: evaluate, decide, and — where the verdict is accept —
 implement in the same run. It is the issue-tracker sibling of
-`tools/DRIVER.md`, and like the driver it is idempotent: **the labels are the
+the coder's driver brief (now in the private ops repository), and like the
+driver it is idempotent: **the labels are the
 guard.** Re-running on an already-triaged issue is a no-op, so overlapping
 runs are safe.
 
@@ -45,7 +46,8 @@ mirror file of it — a restated record forks and drifts (L-007).
    - **`accepted`** → accepted but not yet landed; resume the implementation.
    - **`escalated`** → check its `DECISIONS.md` entry. Window still open: do
      not act. Window closed without a veto: mark the entry closed with the
-     date and outcome "proceeded on silence" (as `tools/DRIVER.md` step 2
+     date and outcome "proceeded on silence" (the same expired-window rule the
+     coder's brief applies
      does), carry out the stated default, and close the issue linking the
      outcome — so the daily sweep never proceeds on the same default twice.
    - **`rejected` but open** → the steward reopened it; that is a veto of
@@ -83,7 +85,7 @@ mirror file of it — a restated record forks and drifts (L-007).
    interrupted run is re-entrant:
    - **Accept** → comment the reasoned verdict; label `accepted`; then
      **implement in the same run** through the charter flow exactly as
-     `tools/DRIVER.md` steps 3–6 run it — intent where required, spec and
+     the coder's loop runs it — intent where required, spec and
      frozen tests, *invoked* cross-family reviews for spec and code
      (`tools/review.sh`, different families, two for can-hurt), the signed
      record, and `tools/gate.sh` (`--can-hurt` where §4 says so, and
@@ -121,7 +123,7 @@ mirror file of it — a restated record forks and drifts (L-007).
 
 ## Boundaries — where triage stops rather than proceeds
 
-The same lines as `tools/DRIVER.md`:
+The same red lines as the coder's brief:
 
 - An open veto window: never act on a defaulted outcome before its deadline.
 - Anything that would raise the D-105 ceilings, enable public signup, touch a
