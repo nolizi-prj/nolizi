@@ -151,7 +151,9 @@ started lying to itself.
 
 - **Part 1** — all permanent commitments, P1–P12
 - **Acceptance tests frozen at approval** — the builder may not edit them
-- **Cross-family review** — a same-family review never satisfies §3
+- **Cross-family review at `launched`** — from that stage a same-family review
+  never satisfies §3; pre-`launched` it is advisory (CHARTER Part 0, steward
+  2026-08-30)
 - **Risk inheritance and reclassification** — the rule that relabelling a path is itself a can-hurt change (the two-review bar left the charter 2026-08-29, by the steward's override of its own entrenchment)
 - **Uncited objections discarded** — no unfalsifiable authorities
 - **Sole-steward authority ends 2028-01-28** — and may not extend itself

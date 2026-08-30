@@ -7,9 +7,10 @@ and is the steward's to read; this file is everyone's.
 ## 2026-08-30 — the charter guides until `launched`, then binds
 
 - **Charter Part 0 added** (steward): pre-`launched`, open windows do not hold
-  reversible work — agents proceed on the stated default and a veto reverts.
-  Never suspended at any stage: Part 1, `HUMAN.md`, and irreversible acts
-  (personal data, licensing, credentials, mail).
+  reversible work — agents proceed on the stated default and a veto reverts —
+  and **P5's per-merge review is advisory** (a builder may merge unreviewed;
+  mandatory again from `launched`). Never suspended at any stage: `HUMAN.md`
+  and irreversible acts — personal data, licensing, credentials, mail.
 
 ## 2026-08-30 — reporting binds at `launched`
 

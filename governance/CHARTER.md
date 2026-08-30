@@ -36,14 +36,24 @@ a product that took the shortcuts.
 
 **Never suspended, at any stage — because no revert can undo them:**
 
-- **Part 1**, all of it, including P5's one non-builder review per merge.
 - **`HUMAN.md`** — money, accounts, signatures are reality, not process.
 - **Irreversible acts**: publishing a person's data, adopting incompatibly
   licensed code, granting or exposing a credential, sending mail — anything
   `git revert` cannot undo. These wait out their windows at every stage.
+  This clause carries Part 1's substance wherever it is irreversible by
+  nature: licensing (P1), free reading (P2), mirrorability (P3), no
+  enclosure (P7).
+
+**P5's per-merge review is relaxed pre-`launched`** (steward, 2026-08-30): a
+builder may merge its own unreviewed work while the product's stage is below
+`launched`; from `launched`, every merge requires the non-builder review as
+Part 1 writes it. This knowingly overrides Part 1's own unamendability — the
+same sole-author reality Part 7 already records — and it is bounded the same
+way everything here is: the shortcut ends where the `launched` claim begins.
 
 *Added 2026-08-30 by the steward, generalizing the §5.1 amendment of the same
-day. The 7-day notice was not observed; recorded rather than pretended.*
+day; P5 relaxation added hours later. The 7-day notice was not observed;
+recorded rather than pretended.*
 
 ---
 

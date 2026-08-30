@@ -56,12 +56,18 @@ done <<EOF2
 $REVIEWS
 EOF2
 
-# 2026-08-29: the steward reduced the can-hurt bar to P5's single
-# non-builder review, so --can-hurt no longer raises the count.
+# 2026-08-29: the can-hurt bar is P5's single non-builder review.
+# 2026-08-30, CHARTER Part 0: pre-`launched` that review is ADVISORY — the
+# gate warns and passes. It becomes mandatory when roadmap/STAGE.md opens
+# with `# STAGE — launched`. No stage file means pre-launched.
 NEED=1
+STAGE="$(head -1 roadmap/STAGE.md 2>/dev/null | grep -oiE 'launched' || true)"
+if [ -z "$STAGE" ]; then NEED=0; fi
 if [ "$COUNT" -lt "$NEED" ]; then
   echo "   need $NEED approving famil$( [ "$NEED" -eq 1 ] && echo y || echo ies), have $COUNT"
   FAIL=1
+elif [ "$NEED" -eq 0 ] && [ "$COUNT" -eq 0 ]; then
+  echo "   no review — ADVISORY pre-launched (Part 0); mandatory at launched"
 fi
 
 # ── 4/4 · reviewer breadth, reported rather than assumed (D-104) ──────────
