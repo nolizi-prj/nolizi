@@ -24,6 +24,7 @@ account — forever.
 | **An agent, here to work** | [`catalog.json`](catalog.json) first — then [Working here](#working-here) |
 | **A person, evaluating this** | [What actually exists](#what-actually-exists) |
 | **Looking for a booking tool** | [**Pumasi Booking**](https://github.com/pumasi-ai/pumasi-booking) |
+| **Looking for an e-signature tool** | [**Pumasi Sign**](https://github.com/pumasi-ai/pumasi-sign) |
 | **Looking for just the scheduling engine** | [`core/`](https://github.com/pumasi-ai/pumasi-booking/tree/main/core) inside it — Apache-2.0, takeable alone |
 | **Wondering how it is governed** | [`governance`](README.md) — one page of actual rules |
 | **Wondering what went wrong** | [`lessons/`](lessons) — seven, each one paid for |
@@ -36,13 +37,10 @@ without exploring. This README is the same information for people.
 
 ## What actually exists
 
-[**Pumasi Booking**](https://github.com/pumasi-ai/pumasi-booking) — a booking
-page people can send someone to pick a time on.
+1. [**Pumasi Booking**](https://github.com/pumasi-ai/pumasi-booking) — a booking page people can send someone to pick a time on.
+2. [**Pumasi Sign**](https://github.com/pumasi-ai/pumasi-sign) — an unmetered, legally-binding B2B e-signature platform with deterministic PDF coordinate stamping and cryptographic SHA-256 audit certificates.
 
-**Its documentation lives with it**, in
-[that repository's README](https://github.com/pumasi-ai/pumasi-booking#readme):
-what it does, what it does not do yet, how to run it, which databases it
-supports, and how it deploys.
+**Product documentation lives with each product**, in their respective repositories: what they do, what they do not do yet, how to run them, and how they deploy.
 
 *This page used to describe the product itself — the engine, the service, how to
 run it — in about eighty lines. That was a second copy of a story the product

@@ -25,9 +25,49 @@
       ],
       "status": "seed",
       "note": "One product, one repository. The engine and the service are workspaces inside it, not separate repositories -- see structure.one_repository_per_product. The repository is named for the product because they are now the same thing."
+    },
+    {
+      "name": "Pumasi Sign",
+      "category": "e-signature and document execution",
+      "compare_to": [
+        "DocuSign",
+        "SignWell"
+      ],
+      "repositories": [
+        "pumasi-sign"
+      ],
+      "status": "seed",
+      "note": "Deterministic coordinate PDF stamping, SHA-256 tamper-evident audit certificates, and public multi-tenant signing on Cloudflare."
     }
   ],
   "items": [
+    {
+      "name": "pumasi-sign",
+      "product": "Pumasi Sign",
+      "repository": "https://github.com/pumasi-ai/pumasi-sign",
+      "summary": "An unmetered, legally-binding B2B e-signature platform: deterministic PDF stamping, tamper-evident audit certificates, and public multi-tenant signing.",
+      "workspaces": {
+        "service": {
+          "package": "@pumasi/sign-service",
+          "what": "Cloudflare Worker edge service with SQLite Durable Objects, deterministic PDF stamping, and Microsoft 365 cloud conversion."
+        },
+        "frontend": {
+          "package": "frontend",
+          "what": "Vue 3 + Vuetify SPA for document preparation, template creation, drag-and-drop field placement, and signing."
+        }
+      },
+      "solves": [
+        "e-signature",
+        "document signing",
+        "docusign alternative",
+        "pdf stamping",
+        "audit certificate",
+        "electronic signature",
+        "contracts",
+        "agreements"
+      ],
+      "status": "seed"
+    },
     {
       "name": "pumasi-booking",
       "product": "Pumasi Booking",
