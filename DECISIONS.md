@@ -7,7 +7,9 @@ vetoes** (CHARTER §2, §7). A veto is an entry edit by the steward, in the open
 with reasoning.
 
 An entry without a stated default is a defect — silence must always select a
-named outcome (CHARTER §2.1).
+named outcome (CHARTER §2.1). **While a product is pre-`launched` (CHARTER
+Part 0), an open window does not hold reversible work: agents proceed on the
+entry's default at once, and a veto reverts. Irreversible acts still wait.**
 
 ## Open
 

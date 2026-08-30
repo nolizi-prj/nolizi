@@ -19,6 +19,35 @@
 
 ---
 
+## Part 0 — Guidance until `launched`
+
+Until a product's published stage (`roadmap/STAGE.md`) reaches **`launched`**,
+this charter **guides; it does not block**:
+
+- **Open windows do not hold work.** Agents proceed immediately; the window
+  stays open, and a veto **reverts** instead of prevents.
+- **Process requirements yield to progress.** A requirement passed through is
+  recorded in one line in the commit, not stalled on. The debt register still
+  catches patterns.
+
+At `launched`, every requirement binds as written. The label is the contract:
+`beta` tells a stranger what not to rely on; `launched` may not be claimed by
+a product that took the shortcuts.
+
+**Never suspended, at any stage — because no revert can undo them:**
+
+- **Part 1**, all of it, including P5's one non-builder review per merge.
+- **`HUMAN.md`** — money, accounts, signatures are reality, not process.
+- **Irreversible acts**: publishing a person's data, adopting incompatibly
+  licensed code, granting or exposing a credential, sending mail — anything
+  `git revert` cannot undo. These wait out their windows at every stage.
+
+*Added 2026-08-30 by the steward, generalizing the §5.1 amendment of the same
+day. The 7-day notice was not observed; recorded rather than pretended.*
+
+---
+
+
 ## Part 1 — Permanent commitments
 
 Not amendable. Not by any majority, any body, any emergency, or any future
