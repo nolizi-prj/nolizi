@@ -4,6 +4,15 @@ Public governance and release milestones, newest first. The operational
 record — jobs, queues, machine state — lives in the private ops repository
 and is the steward's to read; this file is everyone's.
 
+## 2026-08-30 — common product rules, v1.0
+
+- **[`PRODUCT-RULES.md`](PRODUCT-RULES.md) created** (steward direction): the
+  versioned, continuously updated register of what every Pumasi product
+  provides. Opens with two rules — PR-1, a semantic version number with one
+  source of truth, user-visible and present in diagnostics; PR-2, an in-app
+  feedback feature matching Pumasi Booking's, gating the `beta` promotion.
+  The product-manager role reads it before writing VALUE.md or BACKLOG.md.
+
 ## 2026-08-30 — the charter guides until `launched`, then binds
 
 - **Charter Part 0 added** (steward): pre-`launched`, open windows do not hold

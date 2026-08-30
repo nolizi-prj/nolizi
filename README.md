@@ -109,6 +109,7 @@ two other families, plus a human sign-off on release. Unmapped paths default to
 | Is it done? | `spec/*/acceptance/cases.json` — **executable, and the arbiter** |
 | What was the human asked to confirm? | `spec/*/INTENT.md` — one page, plain language |
 | What may I work on without asking? | The product's own roadmap — for Pumasi Booking, [`roadmap/`](https://github.com/pumasi-ai/pumasi-booking/tree/main/roadmap) |
+| What must every product provide? | [`PRODUCT-RULES.md`](PRODUCT-RULES.md) — versioned, continuously updated; read before proposing features |
 | What needs a human? | [`HUMAN.md`](HUMAN.md) — three rules; anything absent is agent work |
 | What is open for objection? | [`DECISIONS.md`](DECISIONS.md) — with deadlines and defaults |
 | What are we running below? | [`DEBT.md`](governance/DEBT.md) |
