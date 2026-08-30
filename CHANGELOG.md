@@ -4,6 +4,13 @@ Public governance and release milestones, newest first. The operational
 record — jobs, queues, machine state — lives in the private ops repository
 and is the steward's to read; this file is everyone's.
 
+## 2026-08-30 — reporting binds at `launched`
+
+- **Charter §5.1 amended** (steward): the reporting-and-opt-out requirement now
+  gates the `launched` stage promotion instead of every release. Below
+  `launched` it is optional. D-108 closes by rule change; a product still
+  cannot claim *works for strangers* on a one-machine test matrix.
+
 ## 2026-08-29 — public sign-up released; one commons repository; the charter tightens and loosens
 
 - **Pumasi Booking opened to public sign-up** (release note:

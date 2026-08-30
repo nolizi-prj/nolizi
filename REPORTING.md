@@ -5,8 +5,10 @@
 > **No catalog item sends anything.** `PUMASI_REPORTING` is read into
 > configuration and then read by nothing; there is no egress code, no payload,
 > no first-run notice. This document is the design and the commitments, not a
-> description of live behaviour. Tracked as
-> [`DEBT.md` D-108](governance/DEBT.md).
+> description of live behaviour. Per §5.1 as amended 2026-08-30, the mechanism
+> is required before a product declares itself `launched`; Pumasi Booking is
+> `beta`, so nothing is in breach — and nothing is `launched` until this
+> exists.
 >
 > The booking service's own privacy page says the same thing in its own words.
 > When the mechanism ships, this page changes and that one does with it.

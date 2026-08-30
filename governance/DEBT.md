@@ -95,20 +95,6 @@ by `tools/families.sh`: Claude, Gemini (`agy`), Grok (`grok`).
 | **Clears when** | The retention period is published and the deletion path is implemented and tested, **before** the first release that collects held data. |
 | **Opened** | 2026-08-29 |
 
-### D-108 · Released without a reporting path — §5.1 run below, by decision
-| | |
-|---|---|
-| **Severity** | **BLOCKING for the rule**; not blocking the release, because the steward decided otherwise. |
-| **Rule affected** | CHARTER §5.1 — an in-scope item must implement reporting **and a working opt-out** before it releases. §5.1 is not on the never-suspend list, so it may be run below with an entry. |
-| **What is true** | `PUMASI_REPORTING` is read into config and then **read by nothing**. No egress code, no payload, no notice. §5.1 names *"a flag nothing reads"* as a specific way to fail — this is the exact failure, not a near miss. All five gate checks fail vacuously. |
-| **Decision** | Steward, 2026-08-29. Building the path first was offered and declined. Reasoning: a reporting pipeline for a service with no users is [L-001](../lessons/L-001-governance-ahead-of-evidence.md), and `GAP-0003` already makes that argument for the defect tiers. |
-| **Who it can hurt** | **Nobody outside the project** — §5.1 is a promise the commons makes to itself. Running below it costs the project its evidence, not any user their safety. That is why it is separable from D-105. |
-| **What it costs** | The test matrix stays one machine wide. Nothing tells us whether the service works anywhere but where it was built. |
-| **Compensating controls** | The release note states the non-compliance in plain language, so the veto window runs with it visible. The privacy pack was corrected so it does not claim a stream that does not exist. |
-| **What would make it indefensible** | A stub that returns success, or a flag with a reader that sends nothing, to pass the gate on paper. An absent mechanism honestly named is worth more than a present one that lies. |
-| **Clears when** | Reporting and a working opt-out pass all five checks. **Trigger:** a defect in the wild a report would have surfaced, the first deployment the project does not operate, or **any release after this one**. This release is the exception, not a standing permission. |
-| **Opened** | 2026-08-29 |
-
 ### D-109 · Can-hurt surfaces are classified by agents, with no human step
 | | |
 |---|---|
@@ -133,6 +119,12 @@ by `tools/families.sh`: Claude, Gemini (`agy`), Grok (`grok`).
 - **D-007 · Builder's own family counted toward its own review** — closed 2026-08-01
   by correcting the rule itself: §3 requirement 3 now requires a family other than
   the builder's. Closed by correction, not compensation.
+- **D-108 · Released without a reporting path** — closed 2026-08-30 **by rule
+  change** (the D-007/D-110 pattern): §5.1 now binds at the `launched` stage
+  promotion rather than at every release. Pumasi Booking is `beta`; the
+  requirement re-attaches the day it claims `launched`. What the entry
+  protected survives in the amended rule — the works-for-strangers claim still
+  cannot be made on a one-machine test matrix.
 - **D-110 · Public sign-up released with one non-builder review** — closed
   2026-08-29 **by rule change, not by compensation** (D-007's pattern): the
   steward reduced Part 4's bar to P5's single non-builder review, and Gemini's

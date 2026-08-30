@@ -283,17 +283,26 @@ This is the meaning of the name.
 ### 5.1 Reporting is required of the software, never of the person
 
 **Every catalog item that runs as software and can reach the network must
-implement reporting**, and must implement a working opt-out. Documentation,
-schemas, specifications, and library code with no egress path are outside this
-requirement entirely — making a documentation change run an egress-parity suite
-bought no one any safety and cost the commons velocity, which is the trade this
-charter exists to refuse. **[OP]**
+implement reporting, and a working opt-out, before it declares itself
+`launched`** in its published stage file (`roadmap/STAGE.md` — the ladder is
+under construction · alpha · beta · launched · deprecated · retired). **Below
+`launched`, reporting is optional**: encouraged and pre-designed
+(`REPORTING.md`), never gating. Documentation, schemas, specifications, and
+library code with no egress path are outside this requirement entirely. **[OP]**
 
-**The gate runs at release, not at merge.** An in-scope item may merge with its
-reporting path still unbuilt; it may not *release* without one, and an item
-whose opt-out does not work does not release. Merge is where correctness is
-proved; release is where a person is first exposed, and this requirement is
-about exposure. **[OP]**
+**The gate runs at the `launched` promotion — not at merge, not at earlier
+releases.** Merge proves correctness. An alpha or beta release already carries
+a stage label telling a stranger what not to rely on. `launched` is the claim
+the reporting evidence exists to back: *works for strangers, verified in many
+environments* — and making that claim on a test matrix one machine wide is
+exactly the overclaim the stage ladder forbids. A promotion to `launched`
+without the five checks below is refused, or reverted with its reasoning.
+**[OP]**
+
+*Amended 2026-08-30 by the steward (previously: required at every release of
+an in-scope item). D-108 — released without a reporting path — closes with
+this amendment, by rule change. The 7-day notice period was not observed;
+recorded rather than pretended, as with the Part 4 amendment.*
 
 **What the gate actually checks** for an in-scope item, because "enforced at the
 gate" without a test is the unfalsifiable authority this charter forbids
