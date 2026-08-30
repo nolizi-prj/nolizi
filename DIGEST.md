@@ -6,6 +6,28 @@ in a veto window, what waits on `HUMAN.md`.
 
 ---
 
+## 2026-08-29 (evening) — the ops loop is live; first project-manager tick
+
+- **The queue works.** Dispatcher plus a cron project-manager tick are installed
+  in `pumasi-ops`. Both lifecycle paths verified: smoke job `0001` exited 0 into
+  `jobs/done/`; the designed-to-fail job `0002` landed in `jobs/failed/`.
+- **Enqueued this tick: job `0003`, web page manager.** `pumasi-web`'s last
+  commit (`dc2acf5`, 11:56) predates today's catalog rewrite (`5a49afc`, 17:15),
+  the governance merge (`a843df1`), D-110, and the Q-005 release note. The
+  packet asks the site to match `pumasi` @ `27095f6`.
+- **Legal but deferred to a later tick:** triage. Unlabelled open issues exist
+  on `pumasi-booking` (#3–#6) and on `pumasi` itself (#1–#3) — the latter
+  despite `.github/workflows/triage.yml` existing there, which may mean the
+  workflow is not firing.
+- **Not enqueued, and why:** hunt already ran today (tour-review session
+  recorded `798b000`); no hunt candidate is `selected`. No coder packet — the
+  product's roadmap sits on an unmerged branch
+  (`roadmap/the-product-owns-its-roadmap`) and the checkout holds in-flight
+  `cloudflare-workers` work, so `main` names no next roadmap item and the repo
+  may have a writer.
+- **Windows and `HUMAN.md`:** unchanged from the entry below — D-105's transfer
+  mechanism and counsel review, and the `PUBLIC_SIGNUP` flip, still wait on you.
+
 ## 2026-08-29 — the busiest two days: privacy posture, the org, one repository
 
 - **Privacy and legal strictness rebalanced.** The charter now inherits risk along
