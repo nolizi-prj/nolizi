@@ -105,6 +105,14 @@ what it does not fix and the bet being made, so that if it fails it fails on the
 record. The can-hurt **gate** itself is untouched: two extra families, a
 published release note, the 7-day veto window, ceilings first.
 
+### Q-007 · Video conferencing integration — roadmap scope addition
+| | |
+|---|---|
+| **What** | [`pumasi-booking#4`](https://github.com/pumasi-ai/pumasi-booking/issues/4) asks for video chat integration — "at least Zoom, Google Chat, Teams." Escalated from feedback intake rather than accepted: conferencing is **not on the GAP-0004 §3 sequence**, that sequence records steward-decided scope (including explicit exclusions), and two of the three named providers require **new third-party developer accounts** (Zoom; Microsoft/Entra app registration for Teams) — an account is escalation ground in the product-manager brief. The parity intent itself covers the *capability*: Cal.com and Calendly both attach a conferencing link to a booking as part of the product. |
+| **Window closes** | **2026-09-01** (72h from 2026-08-29) |
+| **Default on silence** | Accept in principle under GAP-0004's parity intent, as a new sequence item **after 2b (calendar providers)**, adjacent to item 8 (workflows) since both are outbound-integration surface. **Google Meet first**: it can use the existing `pumasi-commons` Google Cloud project and `admin@pumasi.ai` (Q-003) with an added Calendar scope, so no new account is needed. **Zoom and Microsoft Teams follow only when their provider accounts/app registrations exist** — created by the steward or explicitly delegated, as Q-003 was. No provider credential is held before the subprocessor list names the provider, matching the Q-001 default's convention. |
+| **Status** | open |
+
 ## Closed
 
 ### Q-003 · Google Cloud OAuth application — **CLOSED 2026-08-27, done**
