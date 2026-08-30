@@ -6,6 +6,32 @@ in a veto window, what waits on `HUMAN.md`.
 
 ---
 
+## 2026-08-30 — triage ran on this repository's own issue queue
+
+- **All three open issues resolved.** #1 (continuous triage loop) and #2
+  (README slimming) were both rejected as duplicates: `tools/TRIAGE.md`,
+  `.github/workflows/triage.yml`, and the `accepted`/`rejected`/`escalated`
+  labels already existed for #1; the README was already cut back to a link
+  for #2. Neither needed anything built — verdict comments cite the current
+  file state, both closed.
+- **#3 accepted, implemented, not merged.** A credential failure in the
+  triage workflow now opens a `credential-failure` issue (dedup guard and
+  notification in one — GitHub emails this repository's watchers on
+  open/close, no SMTP credential needed) instead of only logging a
+  `::warning::`. Verified live: a simulated failure opened #8, a repeat
+  failure left it open without recreating it, and a simulated success closed
+  it. **Left as branch `issue-3-credential-failure-notice` / a PR, not merged
+  to `main`** — `tools/families.sh` found 0 of 3 reviewer families reachable
+  in this session (no `agy`, no `grok`, and `claude` itself did not answer its
+  own probe), so `tools/review.sh code` could not obtain the one non-builder
+  approval Part 3 requires. Failed transcripts are committed on the branch.
+  Issue #3 stays open and `accepted` for a run with a reachable reviewer
+  family to pick up.
+- **Not done, and named rather than assumed:** true email delivery to
+  `admin@pumasi.ai` specifically (rather than to whoever watches this repo on
+  GitHub) still needs a mail-provider credential, which is `HUMAN.md` ground
+  this session does not decide.
+
 ## 2026-08-29 (evening) — the ops loop is live; first project-manager tick
 
 - **The queue works.** Dispatcher plus a cron project-manager tick are installed
