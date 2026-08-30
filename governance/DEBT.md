@@ -81,7 +81,7 @@ by `tools/families.sh`: Claude, Gemini (`agy`), Grok (`grok`).
 | **Severity** | DEGRADING |
 | **Rule affected** | CHARTER §2 — accountability by veto assumes the steward reads what is published within the window. |
 | **Why** | The veto replaced blocking signatures because the recorded evidence was 24 days of stall behind self-addressed signature boxes. The cost, plainly: an intent statement or release note that nobody reads proceeds anyway. |
-| **Compensating controls** | Open questions must state the default agents will assume (§2.1), so silence selects a named outcome. Can-hurt releases keep the 7-day window, the two-extra-family gate and staged ceilings. `DIGEST.md` is meant to make silence informed rather than blind — **it is only as good as its currency**. |
+| **Compensating controls** | Open questions must state the default agents will assume (§2.1), so silence selects a named outcome. Can-hurt releases keep the 7-day window, the two-extra-family gate and staged ceilings. The ops digest (private ops repo, written by the six-hour tick) is meant to make silence informed rather than blind — **it is only as good as its currency**. |
 | **Clears when** | A second accountable party exists (two vetoes are a quorum, one is a hope), or a veto-window release causes harm an affirmative signature would have caught. |
 | **Opened** | 2026-08-27 |
 

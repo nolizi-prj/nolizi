@@ -10,7 +10,7 @@ The rules of the commons.
 
 Outside this folder: [`DECISIONS.md`](../DECISIONS.md) (open veto windows and the
 human queue) · [`HUMAN.md`](../HUMAN.md) (what only a person may do) ·
-[`DIGEST.md`](../DIGEST.md) (the running record kept for the steward) ·
+[`CHANGELOG.md`](../CHANGELOG.md) (public milestones; the operational digest lives in private ops) ·
 [`lessons/`](../lessons/) (what this project got wrong, and what to do instead —
 read it before designing governance or reviewing your own work) ·
 [`tools/`](../tools/) (the executable gate).

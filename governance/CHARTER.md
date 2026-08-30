@@ -74,7 +74,8 @@ humans do that machines cannot is choose what is worth building and answer for
 it (WP 2). A public record plus a real veto *is* both: what the steward does
 not stop, they have chosen and answered for. the steward is accountable for what they did not stop, which is
 how accountability works in every functioning board — and agents keep a running
-[`DIGEST.md`](../DIGEST.md) so that "did not know" is never available as an
+a running digest (kept in the private ops repository, where the operational
+record lives) so that "did not know" is never available as an
 excuse. The residual this creates — an intent or a release note can proceed
 unread — is recorded honestly as debt (D-106), not argued away.
 
