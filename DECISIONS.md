@@ -116,6 +116,14 @@ published release note, the 7-day veto window, ceilings first.
 | **Default on silence** | Accept in principle under GAP-0004's parity intent, as a new sequence item **after 2b (calendar providers)**, adjacent to item 8 (workflows) since both are outbound-integration surface. **Google Meet first**: it can use the existing `pumasi-commons` Google Cloud project and `admin@pumasi.ai` (Q-003) with an added Calendar scope, so no new account is needed. **Zoom and Microsoft Teams follow only when their provider accounts/app registrations exist** — created by the steward or explicitly delegated, as Q-003 was. No provider credential is held before the subprocessor list names the provider, matching the Q-001 default's convention. |
 | **Status** | open |
 
+### Q-008 · Reporting path and opt-out — intent statement, veto window
+| | |
+|---|---|
+| **What** | [`pumasi-booking` `service/spec/0004/INTENT.md`](https://github.com/pumasi-ai/pumasi-booking/blob/main/service/spec/0004/INTENT.md), published 2026-08-30. BACKLOG item 1: the CHARTER §5.1 reporting path and one-step opt-out, with the D-107 retention schedule published alongside. |
+| **Window closes** | **2026-08-31** (24h from 2026-08-30) |
+| **Default on silence** | Proceed with the intent statement's own assumptions: intake address defaults to `https://report.pumasi.ai/v1/reports`, documented as not yet live; held-tier (operating) reports retained twelve months, deletable earlier on request; the Cloudflare deployment sends nothing yet, revisited no later than the `launched` promotion; no report ever carries owner or booker data, or counts derived from them. |
+| **Status** | open — pre-`launched` (CHARTER Part 0), so work proceeds on this default at once and a veto reverts. |
+
 ## Closed
 
 ### Q-003 · Google Cloud OAuth application — **CLOSED 2026-08-27, done**
