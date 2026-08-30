@@ -240,7 +240,7 @@ project?**
 | | Requires |
 |---|---|
 | **Ordinary** — docs, tests, library code | The four requirements in Part 3. |
-| **Can hurt someone** — money, credentials, personal data, anything that books, sends, deletes, or charges on a real person's behalf | The four, plus a **second** approving review from a **third** model family. No human sign-off at any point: the classification is a boolean per path in `RISK_ZONES.yaml`, and the **release** proceeds through the 7-day veto window on a plain-language note (Part 2.1). |
+| **Can hurt someone** — money, credentials, personal data, anything that books, sends, deletes, or charges on a real person's behalf | The same four requirements — **one approving review from a model family other than the builder's** (P5's own line, reduced from two by the steward on 2026-08-29) — and the **release** proceeds through the 7-day veto window on a plain-language note (Part 2.1). No human sign-off at any point: the classification is a boolean per path in `RISK_ZONES.yaml`. |
 
 The classification lives in `RISK_ZONES.yaml` in each repository, is one boolean
 per path, and defaults to **can hurt someone** when unmapped or unclear. Guessing
@@ -462,11 +462,17 @@ admitting someone else who is accountable, is what ends the drafting period —
 otherwise "still a draft" would be a permanent exemption held by the only person
 it constrains, and the notice requirement would never begin. **[OP]**
 - **Outside the revision power entirely**, by effect and under any name: Part 1;
-  the 2028-01-28 date; this clause; **Part 4's can-hurt bar and the
-  reclassification rule**; and **the two conditions above that end the drafting
-  period**. Without that last one, only P5's single-review line
-  would be permanent, and the booking path could be relabelled ordinary and
-  shipped under the weaker gate by the same person who approved it.
+  the 2028-01-28 date; this clause; **Part 4's reclassification rule**; and
+  **the two conditions above that end the drafting period**.
+
+  *Part 4's two-review can-hurt bar stood in this list until 2026-08-29, when
+  the steward reduced it to P5's single non-builder review — overriding the
+  entrenchment rather than amending around it. Recorded plainly (P6): an
+  entrenchment clause binds a community; it cannot bind its sole author, and
+  this document stops pretending otherwise. What survives is what Part 1
+  guarantees — no merge without one approval from a family other than the
+  builder's — plus the release note, the 7-day window, and the rule that
+  relabelling a path is itself a can-hurt change.*
 - **Outside *agent* revision entirely**, though the steward may amend them:
   `HUMAN.md`, the veto window durations in Part 2, and the deadlines and
   default outcomes of open `DECISIONS.md` entries. Agents run

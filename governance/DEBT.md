@@ -123,17 +123,6 @@ by `tools/families.sh`: Claude, Gemini (`agy`), Grok (`grok`).
 | **Clears when** | A second accountable party exists, or a misclassification is found — in which case per-change sign-off returns. |
 | **Opened** | 2026-08-29 |
 
-### D-110 · Public sign-up released with one non-builder review, by steward waiver
-| | |
-|---|---|
-| **Severity** | DEGRADING |
-| **Rule affected** | CHARTER §4 — a can-hurt change needs **two** approving reviews from two families other than the builder's. The register's own never-suspend list names this bar, which is why this entry is written rather than the fact being handled quietly. |
-| **What is true** | Gemini approved the final range twice. Grok's two completed reviews each found a real defect — the I8 cookie oracle, the composed D3 deletion holes — and both were fixed with tests that fail without the fix. Grok's review of the *final* state died mid-run: `402, Grok Build usage balance exhausted`. Topping up is money, which is `HUMAN.md` ground. |
-| **Decision** | Steward, 2026-08-29: *"If gemini agrees, then it is major agreement, because Claude also agreed. then let's approve it."* Recorded precisely: the builder's family does not count under §3 and **is not counted here** — this is one non-builder approval plus an explicit steward waiver of the second, not a two-family gate met. |
-| **What the evidence says** | The two approving families are the two that missed both bugs; the family whose review is waived is the one that found them, twice. Stated so the waiver is made with that in view, not around it. |
-| **Compensating controls** | Every objection Grok did raise was fixed and is test-covered, including through the real worker. 19 core + 248 service + 34 E2E green. The I8 property is asserted against production after deploy. |
-| **Clears when** | Grok (or any second non-builder family) approves the released range. One top-up and one rerun. |
-| **Opened** | 2026-08-29 |
 
 ---
 
@@ -144,6 +133,14 @@ by `tools/families.sh`: Claude, Gemini (`agy`), Grok (`grok`).
 - **D-007 · Builder's own family counted toward its own review** — closed 2026-08-01
   by correcting the rule itself: §3 requirement 3 now requires a family other than
   the builder's. Closed by correction, not compensation.
+- **D-110 · Public sign-up released with one non-builder review** — closed
+  2026-08-29 **by rule change, not by compensation** (D-007's pattern): the
+  steward reduced Part 4's bar to P5's single non-builder review, and Gemini's
+  approval of the released range meets it. What the entry recorded stays true
+  and worth remembering: the two approving families were the two that missed
+  both launch bugs, and the family whose review was dropped is the one that
+  found them.
+
 
 ## Voided
 
@@ -163,7 +160,7 @@ started lying to itself.
 - **Part 1** — all permanent commitments, P1–P12
 - **Acceptance tests frozen at approval** — the builder may not edit them
 - **Cross-family review** — a same-family review never satisfies §3
-- **Risk inheritance and reclassification** — §4's can-hurt bar, and the rule that relabelling a path is itself a can-hurt change
+- **Risk inheritance and reclassification** — the rule that relabelling a path is itself a can-hurt change (the two-review bar left the charter 2026-08-29, by the steward's override of its own entrenchment)
 - **Uncited objections discarded** — no unfalsifiable authorities
 - **Sole-steward authority ends 2028-01-28** — and may not extend itself
 - **Governance is tested** — a rule without a test is reported unverified

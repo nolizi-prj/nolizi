@@ -8,8 +8,9 @@
 #   2. The signed record: Agent, Model, Spec trailers present
 #      (Sponsor, Token-Cost warned about if absent — P9 wants them).
 #   3. At least one Reviewed-By trailer naming a family and a transcript
-#      that exists and ends in VERDICT: APPROVE. Can-hurt changes need two,
-#      from two different families (§4) — pass --can-hurt to require that.
+#      that exists and ends in VERDICT: APPROVE. One suffices for every
+#      class since 2026-08-29; --can-hurt is kept for compatibility and
+#      changes nothing.
 #
 # Usage: tools/gate.sh [--can-hurt] [commit]
 set -euo pipefail
@@ -55,7 +56,9 @@ done <<EOF2
 $REVIEWS
 EOF2
 
-NEED=1; [ "$CAN_HURT" -eq 1 ] && NEED=2
+# 2026-08-29: the steward reduced the can-hurt bar to P5's single
+# non-builder review, so --can-hurt no longer raises the count.
+NEED=1
 if [ "$COUNT" -lt "$NEED" ]; then
   echo "   need $NEED approving famil$( [ "$NEED" -eq 1 ] && echo y || echo ies), have $COUNT"
   FAIL=1
