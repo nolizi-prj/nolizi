@@ -133,6 +133,15 @@ published release note, the 7-day veto window, ceilings first.
 | **Reviews** | Gemini approved spec and code (transcripts in `pumasi-booking/reviews/`). Grok unreachable — D-104 condition live; pre-`launched`, review is advisory (Part 0) and the single non-builder bar (P5) is met. |
 | **Status** | open — pre-`launched` (Part 0): the window does not hold the (reversible) release; a veto reverts. |
 
+### Q-010 · Zoom connect stores the connection, and the PMI stops leaking — intent statement, veto window
+| | |
+|---|---|
+| **What** | [`pumasi-booking` `service/spec/0005/INTENT.md`](https://github.com/pumasi-ai/pumasi-booking/blob/main/service/spec/0005/INTENT.md), published 2026-08-31. BACKLOG item 1, parts (b) and (c): the OAuth connect flow stamps the owner's *personal meeting URL* onto every Zoom event type and the public booking page prints it to anyone before they book; per-booking meeting creation is suppressed by that same stamp, so the card's "unique room for every booked session" is false for exactly the people who pressed the button. |
+| **Window closes** | **2026-09-01** (24h from 2026-08-31) |
+| **Default on silence** | Proceed with the intent statement's own assumptions: no joinable link on the public pre-booking page for **any** conferencing event type (Zoom, Meet, Teams, Google Chat), not Zoom alone; the personal meeting room kept as a **last-resort** fallback behind a per-booking room and an owner-typed link, and disclosed on the integrations card; **no data migration** of already-stamped links — they are neutralised (never printed publicly, never suppressing a per-booking room) rather than deleted, because they are indistinguishable from fallback links owners typed on purpose. |
+| **Scope** | Correctness of an already-shipped surface. **Not** a provider-scope change: no new provider, no new developer account or app registration, no enlarged permission — so it does not act ahead of **Q-007**, whose window (closes 2026-09-01) governs exactly that. |
+| **Status** | open — pre-`launched` (CHARTER Part 0), so work proceeds on this default at once and a veto reverts. |
+
 ## Closed
 
 ### Q-003 · Google Cloud OAuth application — **CLOSED 2026-08-27, done**
