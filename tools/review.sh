@@ -241,22 +241,6 @@ done
 BUNDLE_BYTES=0
 [ -n "$BUNDLE" ] && BUNDLE_BYTES="$(printf '%s' "$BUNDLE" | wc -c)"
 
-# A ceiling this script cannot lift, said out loud before the calls are spent.
-# review.sh hands the bundle to `recruit` on stdin, which clears Linux's 128 KiB
-# MAX_ARG_STRLEN. pumasi-ops/tools/recruit.sh:86 then puts it straight back into
-# argv (`openrouter -m "$SELECTED_MODEL" -p "$PROMPT"`), so the ceiling returns
-# one process later — measured 2026-08-31 at 133083 bytes:
-#   /home/m/.local/bin/openrouter: Argument list too long
-# The one-line fix is in recruit.sh, not here, and openrouter.sh:25 already
-# accepts `-p -`. Until that lands, a completion family cannot review a bundle
-# this size and will report UNREACHABLE rather than a verdict.
-if [ "$BUNDLE_BYTES" -gt 131072 ]; then
-  echo "!! context bundle is $BUNDLE_BYTES bytes, past the ~131072-byte ceiling" >&2
-  echo "   pumasi-ops/tools/recruit.sh:86 re-passes it in argv. The completion" >&2
-  echo "   families (recruit) will fail 'Argument list too long' and return no" >&2
-  echo "   verdict. Review a narrower range, or use an agentic family." >&2
-fi
-
 mkdir -p reviews
 STAMP="$(date +%Y%m%d-%H%M%S)"
 FAIL=0

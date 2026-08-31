@@ -187,12 +187,36 @@ if [ "$RC" -eq 0 ] && [ "$SENT" -gt 131072 ]
 then ok "12c. a bundle past the 128 KiB argv ceiling still reaches the reviewer ($SENT bytes)"
 else bad "12c. large bundle did not reach the reviewer" "rc=$RC sent=$SENT"; fi
 
+# NOTE ON EDITING THIS CASE, since 12d previously asserted the opposite.
+# CHARTER Part 3 req 2 freezes acceptance tests "when the spec review completes,
+# before implementation begins", and forbids the builder editing them after. That
+# predicate is not met here: this whole file was created by 133d337, the commit
+# immediately prior, by the same job that wrote the guard 12d asserted — there is
+# no spec/ in this repository and no spec review froze it. 12d was also asserting
+# something false about another repository (that recruit.sh:86 re-passes the
+# bundle in argv; as of pumasi-ops 2208b5e that line is the comment saying it
+# does not). Even reading the freeze as binding, req 2's remedy is to amend in
+# the open and take a fresh cross-family review, which is what this is — not to
+# keep a green test pinning a false warning in place.
+#
+# The ceiling this used to warn about is gone. pumasi-ops 2208b5e put the prompt
+# on stdin at every hop: recruit.sh pipes on both branches, openrouter.sh reads
+# it with `jq --rawfile` and posts it with `curl --data-binary @file`. The
+# warning that outlived the wall advised "Review a narrower range", which is a
+# reviewer silently reading less of a change than gets merged — the failure that
+# left pumasi-booking's 0a35ddc driven to five families and reviewed by one.
+# This is what keeps the warning deleted. The byte accounting is deliberately
+# NOT deleted: it is what proved those three reviewers never reached a model.
 reset; approving recruit
 ( cd "$FIX/repo" && head -c 200000 /dev/urandom | base64 > big.txt && git add . && git commit -qm big ) >/dev/null 2>&1
 OUT=$(run code HEAD~1..HEAD qwen)
-if printf '%s' "$OUT" | grep -q 'recruit.sh:86'
-then ok "12d. the ceiling review.sh cannot lift is named before the calls are spent"
-else bad "12d. no warning about the recruit.sh argv ceiling"; fi
+if printf '%s' "$OUT" | grep -qiE 'recruit\.sh:86|narrower range|past the ~?131072-byte ceiling'
+then bad "12d. a ceiling warning came back — the wall is gone, and narrowing the range is the damage it caused"
+else ok "12d. a >131072-byte bundle draws no ceiling warning and no advice to narrow the range"; fi
+TR=$(ls "$FIX/repo/reviews/"*-code-qwen.md 2>/dev/null | head -1)
+if [ -n "$TR" ] && grep -qE 'Context supplied:.*[0-9]{6,} bytes inlined' "$TR"
+then ok "12e. the byte accounting survives the guard's removal ($(grep -oE '[0-9]+ bytes inlined' "$TR" | head -1))"
+else bad "12e. the 'bytes inlined' accounting was lost along with the guard" "transcript=$TR"; fi
 
 # ── nothing to review is a refusal, not an empty transcript ──────────────────
 reset; approving agy
