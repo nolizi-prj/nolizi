@@ -152,6 +152,17 @@ published release note, the 7-day veto window, ceilings first.
 | **Relation to Q-007** | None claimed. This is correctness of an already-shipped surface: no provider added, no developer account or app registration created, no OAuth scope enlarged. Q-007's window (closes 2026-09-01) still governs whether conferencing scope widens. |
 | **Status** | open — pre-`launched` (Part 0): the window does not hold the (reversible) release; a veto reverts. |
 
+### Q-012 · Who deploys a merged fix, and by when
+| | |
+|---|---|
+| **What** | Raised by the `pumasi-booking` product-manager evaluation of 2026-08-31 (ops `DIGEST.md`), from a concrete failure rather than a theory. The Zoom personal-meeting-room leak went through the full charter flow — intent, frozen acceptance cases, cross-family review, `GATE: PASS`, can-hurt release note (Q-011) — and **is still live on `booking.pumasi.ai`**, because nothing carried the build to the worker. `wrangler deployments list` puts the last deployment at 2026-08-30 16:55 UTC; the fix is 2026-08-31 05:27 UTC. `4f56df4` (the §5.1 reporting mechanism) is undeployed for the same reason. The gap is structural, not an oversight by any run: the flow in CHARTER §2.1 ends at a published release note, no role in `pumasi-ops/roles/` names deployment as a duty, and `HUMAN.md` does not reserve it — so it is agent work with no assignee, and a release note written in the present tense ("a public booking page never shows a joinable link") describes the branch while users meet the deployment. |
+| **Why this is the steward's and not this seat's** | The product-manager role's strongest verb is *propose*, and it is disqualified from publishing. Assigning a duty is a change to the role register. This entry is the proposal; the assignment is the steward's. |
+| **Window closes** | *(steward to set — agents may not set a deadline.)* |
+| **Default on silence** | **The coder role deploys, as the last step of the job that merged.** After `GATE: PASS` and the published release note, the same run deploys the reviewed build and records the deployment in its digest entry; a job that cannot deploy says so in the digest instead of leaving it unsaid. Nothing here widens what an agent may touch: `HUMAN.md` reserves only signatures, payment, and edits to itself, and deployment credentials are already held by the tooling. Two riders, so the default is not a licence: **(a)** it applies to a build that passed the gate and carries a release note, never to an unreviewed tree; **(b)** it does not cover raising ceilings, enabling public signup, or rotating secrets, which stay where they are today. |
+| **Named alternative, if the default is wrong** | A separate operator/steward step, deliberately manual — in which case the cost is explicit: a fix to a live user-facing defect waits on a human, and `roadmap/STAGE.md` must say so under "known gaps" rather than implying merged means shipped. Either answer is honest; the current state, where the duty exists but has no owner, is the one that is not. |
+| **Status** | open. **Not** covered by CHARTER Part 0's proceed-on-default rule — that rule releases *reversible* work from an open window, and this entry proposes assigning a duty, which is a register change and not this seat's to make. The undeployed fix meanwhile sits at the top of `pumasi-booking/roadmap/BACKLOG.md` as item 1, marked operator action. |
+
+
 ## Closed
 
 ### Q-003 · Google Cloud OAuth application — **CLOSED 2026-08-27, done**
