@@ -5,6 +5,16 @@ veto window in `DECISIONS.md` (Q-022 is the intent window; Q-023 is this
 note's). Stage is `beta`, so per CHARTER Part 0 the work
 proceeds now and a steward veto reverts it.**
 
+## Which build this is
+
+**`pumasi-booking` `6b597dd`.** `PRODUCT-RULES.md` PR-1 asks every release note
+to state the version it concerns, and this note cannot: the repository's
+`package.json` has said `0.1.0` since its first commit and has never moved, so
+the number would identify nothing. The commit is given instead, and the gap is
+that product's [`BACKLOG.md`](https://github.com/pumasi-ai/pumasi-booking/blob/main/roadmap/BACKLOG.md)
+item 3. Named rather than skipped — PR-1 binds always, and a note that quietly
+omits the clause reads as compliance.
+
 ## Who this is for
 
 Two groups, and neither of them is on `booking.pumasi.ai`.
