@@ -185,6 +185,17 @@ published release note, the 7-day veto window, ceilings first.
 | **Status** | open. Like Q-012, **not** claimed under CHARTER Part 0's proceed-on-default rule: that rule releases reversible work from an open window, and this asks who may take an action that disconnects a live user. Meanwhile `BACKLOG.md` item 1's build half (a) — announcing the scheme the relay actually serves — needs no deploy decision to be written, reviewed and merged. |
 
 
+### Q-015 · Pumasi Booking OAuth callback reachability — can-hurt release, 7-day window
+| | |
+|---|---|
+| **What** | [`releases/2026-08-31-pumasi-booking-oauth-callback.md`](releases/2026-08-31-pumasi-booking-oauth-callback.md), published 2026-08-31. `roadmap/BACKLOG.md` item 2, `service/spec/0006`: `/oauth/*/callback` gates on being able to open a sealed OAuth state rather than on the presence of a calendar hub, so a deployment with a Zoom app and no calendar integration can complete a Zoom connection; and the unsigned `base64url` state three call sites built in that case is deleted. Classed can-hurt by `RISK_ZONES.yaml` (service paths) — it changes the authentication of the value that says whose third-party connection is arriving. |
+| **Window closes** | **2026-09-07** (7 days, CHARTER §2.1). *Steward to confirm — agents may not set a deadline; this is the charter's own duration applied, not a chosen one.* |
+| **Default on silence** | The release stands as written in the note. It is a net removal of exposure: the only unauthenticated state construction in the service is gone, and the gate it replaces is a stronger one (a signature, not a configuration check). No new provider, account or permission. A veto reverts the merge. |
+| **Reviews** | Gemini approved the spec (`reviews/20260831-090554-spec-gemini.md`), the amendment to it (`reviews/20260831-091352-spec-gemini.md`), and the code (`reviews/20260831-092229-code-gemini.md`; an earlier run at `reviews/20260831-091903-code-gemini.md` reviewed the same tree under hashes that a trailer-format rewrite then replaced — kept, and explained in the commit). Grok unreachable — D-104 condition live; pre-`launched`, review is advisory (Part 0) and the single non-builder bar (P5) is met. `GATE: PASS` at `4f6ddf0`. |
+| **Relation to Q-007** | None claimed. Correctness of an already-shipped surface: no provider added, no developer account or app registration created, no OAuth scope enlarged. Q-007's window (closes 2026-09-01) still governs whether conferencing scope widens. |
+| **Relation to Q-012** | **Not deployed, and not deployable by this run.** Q-012 (who carries a merged build to `booking.pumasi.ai`) is open and is explicitly outside Part 0's proceed-on-default rule, so this seat did not deploy and did not take `BACKLOG.md` item 1. Unlike Q-011's release, the undeployed state costs little here: the defect this closes cannot occur on `booking.pumasi.ai`, which has a calendar integration. Those affected are self-hosters who deploy their own copy from the repository. |
+| **Status** | open — pre-`launched` (Part 0): the window does not hold the (reversible) release; a veto reverts. |
+
 ## Closed
 
 ### Q-003 · Google Cloud OAuth application — **CLOSED 2026-08-27, done**
