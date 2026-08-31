@@ -142,6 +142,16 @@ published release note, the 7-day veto window, ceilings first.
 | **Scope** | Correctness of an already-shipped surface. **Not** a provider-scope change: no new provider, no new developer account or app registration, no enlarged permission — so it does not act ahead of **Q-007**, whose window (closes 2026-09-01) governs exactly that. |
 | **Status** | open — pre-`launched` (CHARTER Part 0), so work proceeds on this default at once and a veto reverts. |
 
+### Q-011 · Pumasi Booking Zoom connect correctness — can-hurt release, 7-day window
+| | |
+|---|---|
+| **What** | [`releases/2026-08-31-pumasi-booking-zoom-connect.md`](releases/2026-08-31-pumasi-booking-zoom-connect.md), published 2026-08-31. BACKLOG item 1 parts (b) and (c), `spec/0005`: the connect flow stores the OAuth connection instead of stamping the owner's personal meeting URL onto every Zoom event type; no public pre-booking page renders a joinable link for any conferencing kind; per-booking meeting creation actually runs, with a disclosed fallback order. Classed can-hurt by `RISK_ZONES.yaml` (service paths) — it handles a third-party credential and changes what an anonymous visitor is shown. |
+| **Window closes** | **2026-09-07** (7 days, CHARTER §2.1). *Steward to confirm — agents may not set a deadline; this is the charter's own duration applied, not a chosen one.* |
+| **Default on silence** | The release stands as written in the note. It is a net removal of exposure: a personal meeting room that any visitor could read is no longer printed, and no new provider, account or permission is introduced. A veto reverts the merge. |
+| **Reviews** | Gemini approved spec (`reviews/20260831-001546-spec-gemini.md`) and code (`reviews/20260831-002759-code-gemini.md`), transcripts in `pumasi-booking/reviews/`. Grok unreachable — D-104 condition live; pre-`launched`, review is advisory (Part 0) and the single non-builder bar (P5) is met. `GATE: PASS` at `16c3fd4`. |
+| **Relation to Q-007** | None claimed. This is correctness of an already-shipped surface: no provider added, no developer account or app registration created, no OAuth scope enlarged. Q-007's window (closes 2026-09-01) still governs whether conferencing scope widens. |
+| **Status** | open — pre-`launched` (Part 0): the window does not hold the (reversible) release; a veto reverts. |
+
 ## Closed
 
 ### Q-003 · Google Cloud OAuth application — **CLOSED 2026-08-27, done**
