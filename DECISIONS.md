@@ -209,6 +209,18 @@ published release note, the 7-day veto window, ceilings first.
 | **Status** | open. Pre-`launched` (CHARTER Part 0), so the frontend card work under Option A may proceed on the default; a veto reverts. Nothing here authorizes the Option B backend rework. |
 
 
+### Q-017 · `PRODUCT-RULES.md` exists only on an unmerged branch — merge it, or amend the role file that requires it
+
+| | |
+|---|---|
+| **What** | Raised by the `pumasi-booking` product-manager evaluation of 2026-08-31 (ops `DIGEST.md`), from a file that three consecutive evaluations have flagged and nothing has moved. The product-manager role file opens with **"Read first, every packet: `PRODUCT-RULES.md` in the `pumasi` repository"** and adds that it is read fresh each run, never cached or vendored, because a stale copy is L-007. That file is **not on `pumasi` main**. It exists only on the pushed branch `worktree-product-rules` (`0115758`, v1.0, 2026-08-30, created by steward direction), which is one branch deletion away from taking PR-1 and PR-2 with it. Every packet that obeys the role file today reads a rule register from a branch that `main` does not know about, and each one has had to say in its own commit that absence from `main` is not compliance. |
+| **Why this is the steward's and not this seat's** | The file was created by steward direction, and merging it is what makes PR-1 (version numbers, binds always) and PR-2 (in-app feedback, binds at `beta`) bind on every product — a change to what the products promise, which the role file's own duty 1 defines as escalation ground. This seat may write a `BACKLOG.md` entry against a rule; it may not decide that the rule register is policy. |
+| **Window closes** | *(steward to set — agents may not set a deadline.)* |
+| **Default on silence** | **Merge `worktree-product-rules` into `pumasi` main as it stands**, with no rule edited: v1.0, PR-1 and PR-2 with the stages they already name, the change log intact. The merge is what the file's own header already assumes — it calls itself "Live, continuously updated" and tells the product-manager role to read it every packet. Nothing here adds a rule, changes where one binds, or creates a compliance table; PR-1's version work stays where it is, `pumasi-booking/roadmap/BACKLOG.md` item 3. |
+| **Named alternative, if the default is wrong** | The register is **not** yet policy — in which case the cost is explicit and lands somewhere else: `pumasi-ops/roles/product-manager.md` must stop instructing every packet to read first a file that `main` does not contain, and the `BACKLOG.md` entries citing PR-1 across the products must be re-grounded or dropped. Either answer is workable; the current state, where a mandatory read points at an unmerged branch, is the one that is not. |
+| **What retires this entry** | `PRODUCT-RULES.md` present on `pumasi` main, or the role file amended to match reality. |
+| **Status** | open. **Not** claimed under CHARTER Part 0's proceed-on-default rule: an agent merging the steward's own rule register into `main` would be deciding that the rules are policy, which is not a reversible product change and is not this seat's to make. Meanwhile the role file is obeyed as written — the branch copy is read fresh each packet, and `pumasi-booking`'s PR-1 gap stays ranked on it. |
+
 ## Closed
 
 ### Q-003 · Google Cloud OAuth application — **CLOSED 2026-08-27, done**
