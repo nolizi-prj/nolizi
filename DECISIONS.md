@@ -163,6 +163,16 @@ published release note, the 7-day veto window, ceilings first.
 | **Status** | open. **Not** covered by CHARTER Part 0's proceed-on-default rule — that rule releases *reversible* work from an open window, and this entry proposes assigning a duty, which is a register change and not this seat's to make. The undeployed fix meanwhile sits at the top of `pumasi-booking/roadmap/BACKLOG.md` as item 1, marked operator action. |
 
 
+### Q-013 · `/oauth/*/callback` works without a calendar hub, and the OAuth state is always signed — intent statement, veto window
+| | |
+|---|---|
+| **What** | [`pumasi-booking` `service/spec/0006/INTENT.md`](https://github.com/pumasi-ai/pumasi-booking/blob/main/service/spec/0006/INTENT.md), published 2026-08-31. `roadmap/BACKLOG.md` item 2: on a deployment with no calendar integration configured, `if (!hub) return html(404, …)` (`app.ts` ~999) answers the OAuth callback *before* the `zoom` branch, so the Zoom connect flow can never complete — while `/oauth/zoom/authorize` and the integrations POST start it happily. The same absent hub makes three call sites build the OAuth state as `Buffer.from(JSON.stringify({purpose, owner_id, tag})).toString('base64url')` instead of `hub.sealState(…)`. |
+| **Why both halves in one change** | The unsigned state is unreachable today and that is the whole of its safety: `openState` only ever opens a sealed value, so the fallback is dead, and the 404 is what keeps it dead. Removing the 404 alone would leave a callback whose obvious next "fix" is to accept an attacker-chosen `owner_id` in an unsigned string. The state seal is therefore made the gate, and the unsigned fallback is deleted, in the same change. |
+| **Window closes** | **2026-09-01** (24h from 2026-08-31) |
+| **Default on silence** | Proceed with the intent statement's own assumptions: the OAuth state becomes its own provider-independent facility sealed with `TOKEN_KEY` (one implementation — `CalendarHub.sealState`/`openState` delegate to it rather than restating it, L-007); a deployment with no `TOKEN_KEY` **refuses to start** a Zoom connect with the reason, instead of building an unsigned state, matching the refusal the connection storage already gives after the round trip (Z1c); every other flow riding that callback — Google sign-in, Microsoft sign-in, org OIDC, calendar connect — keeps exactly the reachability it has today, each still guarded by its own credentials; and the neighbouring defect found while reading (**`/auth/microsoft/start` is gated on a *Google* calendar hub, so Microsoft sign-in is off on any deployment without Google Calendar credentials**) is recorded for the roadmap owner to rank, not folded in here. |
+| **Scope** | Correctness of an already-shipped surface. **No** new provider, **no** new developer account or app registration, **no** enlarged OAuth scope — so it does not act ahead of **Q-007**, whose window closes 2026-09-01. |
+| **Status** | open — pre-`launched` (CHARTER Part 0), so work proceeds on this default at once and a veto reverts. |
+
 ## Closed
 
 ### Q-003 · Google Cloud OAuth application — **CLOSED 2026-08-27, done**
