@@ -246,6 +246,38 @@ N=$(ls "$FIX/repo/reviews" 2>/dev/null | wc -l)
 if [ "$N" -eq 2 ]; then ok "16. one transcript per family is written"
 else bad "16. wrong transcript count" "got $N"; fi
 
+# ── the log is bounded to what the diff covers — nothing, for a working tree ──
+# `git diff HEAD` is the working tree against HEAD; `git log HEAD` is the whole
+# history. Job 0086 measured qwen being handed 271,194 bytes of which 237,095
+# were log — 87 % history — and timing out. Both directions are pinned: a
+# working-tree target must NOT carry the history (17a), and a range must still
+# carry exactly its own commits (17b). 17a fails against the old build_bundle,
+# which is what makes it a test of the guard rather than of its absence.
+reset; approving recruit
+FIRST=$(cd "$FIX/repo" && git rev-parse HEAD~1); SECOND=$(cd "$FIX/repo" && git rev-parse HEAD)
+( cd "$FIX/repo" && echo three >> f.txt )
+OUT=$(run code HEAD qwen)
+if grep -q '^+three$' "$STUB/recruit.prompt" 2>/dev/null \
+   && ! grep -q "$FIRST" "$STUB/recruit.prompt" \
+   && ! grep -q '^commit ' "$STUB/recruit.prompt" \
+   && grep -q "$SECOND" "$STUB/recruit.prompt"
+then ok "17a. a working-tree target carries the diff and one base line, not the history"
+else bad "17a. working-tree target still ships history (or lost the diff/base)" "$(grep -c '^commit ' "$STUB/recruit.prompt" 2>/dev/null) commit blocks in prompt"; fi
+TR=$(ls "$FIX/repo/reviews/"*-code-qwen.md 2>/dev/null | head -1)
+if [ -n "$TR" ] && grep -qE 'Context supplied:.* [0-9]+ bytes inlined .*git log [0-9]+, git diff [0-9]+' "$TR" \
+   && printf '%s' "$OUT" | grep -qE 'context bundle.*git log [0-9]+, git diff [0-9]+'
+then ok "17c. the transcript header and the run report the log/diff byte split"
+else bad "17c. no log/diff split in the header or the run" "transcript=$TR"; fi
+
+reset; approving recruit
+FIRST=$(cd "$FIX/repo" && git rev-parse HEAD~1); SECOND=$(cd "$FIX/repo" && git rev-parse HEAD)
+run code HEAD~1..HEAD qwen >/dev/null 2>&1
+if grep -q "^commit $SECOND" "$STUB/recruit.prompt" 2>/dev/null \
+   && grep -q 'Spec: spec/0001' "$STUB/recruit.prompt" \
+   && ! grep -q "$FIRST" "$STUB/recruit.prompt"
+then ok "17b. a range target still carries that range's commits, messages included, and no others"
+else bad "17b. range log wrong" "$(grep -c '^commit ' "$STUB/recruit.prompt" 2>/dev/null) commit blocks in prompt"; fi
+
 echo
 echo "$PASS passed, $FAIL failed"
 [ "$FAIL" -eq 0 ]

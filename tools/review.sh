@@ -180,6 +180,8 @@ file."
 # the TARGET is validated either way: an unreadable range or an empty diff is
 # the same silent nothing-was-reviewed as an empty transcript, one step earlier.
 BUNDLE=""
+BUNDLE_SPLIT=""   # code role only: "git log N, git diff M" — the spec bundle is
+                  # a bounded set of files and has no history to over-send.
 case "$ROLE" in
   spec)
     PROMPT="You are performing the cross-family SPEC review required by
@@ -225,9 +227,30 @@ $VERDICT_RULES"
       echo "script exists to stop. Check the range." >&2
       exit 2
     fi
+    # The log is bounded to the commits the diff covers — and to NOTHING when
+    # there are none. `git diff A..B` and `git log A..B` name the same commits,
+    # but `git diff HEAD` is the working tree against HEAD while `git log HEAD`
+    # is the ENTIRE history. Job 0086 froze an uncommitted tree for review that
+    # way and measured what qwen was sent: 271,194 bytes, of which 237,095 were
+    # log and 34,047 were the change (87 % history); qwen timed out at curl's
+    # 600 s ceiling. A range hid the defect because its log is bounded anyway.
+    # So a working-tree target gets one line naming the base, and no more.
+    case "$TARGET" in
+      *..*)
+        LOG_HEADING="git log $TARGET"
+        LOG="$(git --no-pager log --format='commit %H%n%an <%ae>%n%n%B' "$TARGET" 2>/dev/null || true)" ;;
+      *)
+        LOG_HEADING="base: git log -1 $TARGET  (the diff is the working tree against this commit; there are no commits to log)"
+        LOG="$(git --no-pager log -1 --date=short --format='%H %s (%an, %ad)' "$TARGET" 2>/dev/null || true)" ;;
+    esac
+    LOG_BYTES="$(printf '%s' "$LOG" | wc -c)"
+    DIFF_BYTES="$(printf '%s' "$DIFF" | wc -c)"
+    # The split is what the transcript header reports, so the next measurement
+    # of what a completion family was actually handed costs a grep, not a job.
+    BUNDLE_SPLIT="git log $LOG_BYTES, git diff $DIFF_BYTES"
     build_bundle() {
-      printf '\n===== git log %s =====\n' "$TARGET"
-      git --no-pager log --format='commit %H%n%an <%ae>%n%n%B' "$TARGET" 2>/dev/null || true
+      printf '\n===== %s =====\n' "$LOG_HEADING"
+      printf '%s\n' "$LOG"
       printf '\n===== git diff %s =====\n' "$TARGET"
       printf '%s\n' "$DIFF"
     }
@@ -239,7 +262,10 @@ for F in "${FAMILIES[@]}"; do
   if ! family_reads_the_tree "$F"; then BUNDLE="$(build_bundle)"; break; fi
 done
 BUNDLE_BYTES=0
-[ -n "$BUNDLE" ] && BUNDLE_BYTES="$(printf '%s' "$BUNDLE" | wc -c)"
+if [ -n "$BUNDLE" ]; then
+  BUNDLE_BYTES="$(printf '%s' "$BUNDLE" | wc -c)"
+  echo "── context bundle for the completion-only families: $BUNDLE_BYTES bytes${BUNDLE_SPLIT:+ ($BUNDLE_SPLIT)}"
+fi
 
 mkdir -p reviews
 STAMP="$(date +%Y%m%d-%H%M%S)"
@@ -264,7 +290,7 @@ You cannot run commands or open files: you are a single completion call. Do
 not say you will run anything. Everything you are reviewing is reproduced
 below verbatim. Cite by file and line from it.
 $BUNDLE"
-    CONTEXT_NOTE="$BUNDLE_BYTES bytes inlined (this reviewer has no tools)"
+    CONTEXT_NOTE="$BUNDLE_BYTES bytes inlined (this reviewer has no tools)${BUNDLE_SPLIT:+ — $BUNDLE_SPLIT}"
     # `-p -` reads the prompt from stdin. It has to: Linux caps a SINGLE argv
     # entry at MAX_ARG_STRLEN (128 KiB), and a bundled review prompt goes past
     # that on any sizeable diff — a 132 KiB one produced
