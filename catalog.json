@@ -1,7 +1,7 @@
 {
   "$comment": "The machine-readable index of the Pumasi commons. Fetch this first to answer 'does this already exist?' -- the duplication check the charter requires before any new item. Human-readable equivalent: README.md.",
   "commons": "pumasi",
-  "updated": "2026-08-29",
+  "updated": "2026-09-01",
   "licence": "Apache-2.0",
   "inbound_equals_outbound": true,
   "governance": {
@@ -24,7 +24,7 @@
       "repositories": [
         "pumasi-booking"
       ],
-      "status": "seed",
+      "status": "alpha",
       "note": "One product, one repository. The engine and the service are workspaces inside it, not separate repositories -- see structure.one_repository_per_product. The repository is named for the product because they are now the same thing."
     },
     {
@@ -37,8 +37,22 @@
       "repositories": [
         "pumasi-sign"
       ],
-      "status": "seed",
+      "status": "alpha",
       "note": "Deterministic coordinate PDF stamping, SHA-256 tamper-evident audit certificates, and public multi-tenant signing on Cloudflare."
+    },
+    {
+      "name": "Pumasi Tunnel",
+      "category": "developer tunnels and local service publishing",
+      "compare_to": [
+        "ngrok",
+        "Pinggy",
+        "LocalXpose"
+      ],
+      "repositories": [
+        "pumasi-tunnel"
+      ],
+      "status": "alpha",
+      "note": "A self-hostable HTTP and raw TCP relay with owned names and durable reservations. Public TLS and encrypted native control transport remain known gaps."
     }
   ],
   "items": [
@@ -67,7 +81,41 @@
         "contracts",
         "agreements"
       ],
-      "status": "seed"
+      "status": "alpha"
+    },
+    {
+      "name": "pumasi-tunnel",
+      "product": "Pumasi Tunnel",
+      "repository": "https://github.com/pumasi-ai/pumasi-tunnel",
+      "summary": "A self-hostable relay and CLI that publish a local HTTP or raw TCP service at a stable public address.",
+      "workspaces": {
+        "core": {
+          "what": "Pure framing, routing, ownership, reservation, subdomain, and public-port rules."
+        },
+        "mux": {
+          "what": "Multiplexed logical streams over one relay control connection."
+        },
+        "relay": {
+          "what": "HTTP host routing, raw TCP forwarding, SSH ingress, dashboard, and durable reservation integration."
+        },
+        "agent": {
+          "what": "Outbound-only CLI client that forwards relay streams to a local service."
+        }
+      },
+      "solves": [
+        "developer tunnel",
+        "localhost tunnel",
+        "webhook testing",
+        "reverse tunnel",
+        "raw tcp tunnel",
+        "ngrok alternative"
+      ],
+      "status": "alpha",
+      "runtime": "Go 1.24 or a prebuilt static binary",
+      "known_limitations": [
+        "The hosted relay does not yet terminate public TLS.",
+        "The native CLI control connection is not yet encrypted."
+      ]
     },
     {
       "name": "pumasi-booking",
@@ -103,7 +151,7 @@
         "slots",
         "calendar arithmetic"
       ],
-      "maturity": "seed",
+      "maturity": "alpha",
       "tests": {
         "acceptance_engine": 36,
         "unit_engine": 19,
