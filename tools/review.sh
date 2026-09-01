@@ -58,6 +58,12 @@ set -euo pipefail
 #
 #   claude gemini  agentic — they run `git diff` and open files themselves,
 #                  which is the stronger review, so they come first.
+#   codex          agentic too (OpenAI Codex CLI on a subscription, driven as
+#                  `codex-p` so it takes `-p`). Added 2026-09-01 by steward
+#                  direction; a fourth vendor, so the spec-reviewer / code-
+#                  reviewer separation in §3 has room to bind even with grok
+#                  gone. Its sandbox is read-only on `.git`, which a review
+#                  never needs.
 #   qwen kimi      demonstrated 2026-08-31 on 2b29a0d~1..2b29a0d: both
 #                  returned a cited VERDICT: OBJECT naming tools/gate.sh and
 #                  the charter clause it misses (see reviews/20260831-160735-).
@@ -72,7 +78,7 @@ set -euo pipefail
 #                  families.sh — a family that has gone is a fact worth
 #                  reporting — but last, because a default must not reach for
 #                  a CLI that cannot answer.
-KNOWN_FAMILIES="claude gemini qwen kimi glm grok"
+KNOWN_FAMILIES="claude gemini codex qwen kimi glm grok"
 
 # family_driver <family> — print the argv prefix, one word per line, that
 # `-p <prompt>` is appended to. Returns 1 for an unknown family.
@@ -83,6 +89,7 @@ family_driver() {
   case "$1" in
     claude)        printf '%s\n' claude --dangerously-skip-permissions ;;
     gemini)        printf '%s\n' agy --dangerously-skip-permissions ;;
+    codex)         printf '%s\n' codex-p ;;
     grok)          printf '%s\n' grok --always-approve ;;
     qwen|glm|kimi) printf '%s\n' recruit -f "$1" ;;
     *) return 1 ;;
@@ -100,7 +107,7 @@ family_driver() {
 # findings, no verdict. So for these families the target has to travel INSIDE
 # the prompt, and the transcript header records how many bytes of it did.
 family_reads_the_tree() {
-  case "$1" in claude|gemini|grok) return 0 ;; *) return 1 ;; esac
+  case "$1" in claude|gemini|codex|grok) return 0 ;; *) return 1 ;; esac
 }
 
 # ── Table queries · no repository and no model call needed ───────────────────
