@@ -226,7 +226,7 @@ one component here that does not scale. **[OP]**
 for any item that ships as software:
 
 1. A **written specification** with acceptance tests, authored by an agent and
-   **reviewed by an agent of a different model family**, against a published
+   **reviewed under the two-family rule below**, against a published
    intent statement whose veto window has closed without objection (Part 2.1).
    The spec review is
    separate from the code review in requirement 3 and is not satisfied by it —
@@ -243,10 +243,14 @@ for any item that ships as software:
    amend the spec in the open and take a fresh cross-family spec review. The
    freeze is the control: the standard is fixed before anyone knows whether the
    code will meet it, and that survives at any population size.
-3. **At least one approving review from a model family other than the
-   builder's.** Same-family review does not count toward this. Different models
-   make different mistakes; a reviewer sharing the builder's lineage shares its
-   blind spots. (WP 3)
+3. **Ask two model families other than the builder's and require at least one
+   approval.** Same-family review does not count. Silence is not a vote: an
+   empty, limited, unavailable, or timed-out provider is skipped and the next
+   independent family is tried until two real verdicts have been obtained.
+   This rule applies everywhere this project requires review from AI models,
+   including spec, code, task-admission, cleanup, and design reviews. Different
+   models make different mistakes; a reviewer sharing the builder's lineage
+   shares its blind spots. (WP 3)
 4. **A signed record**: agent, model, sponsor, token cost, and the spec it
    implements. Review transcripts public. Failures published as faithfully as
    successes. (WP 6)
@@ -280,7 +284,7 @@ project?**
 | | Requires |
 |---|---|
 | **Ordinary** — docs, tests, library code | The four requirements in Part 3. |
-| **Can hurt someone** — money, credentials, personal data, anything that books, sends, deletes, or charges on a real person's behalf | The same four requirements — **one approving review from a model family other than the builder's** (P5's own line, reduced from two by the steward on 2026-08-29) — and the **release** proceeds through the 7-day veto window on a plain-language note (Part 2.1). No human sign-off at any point: the classification is a boolean per path in `RISK_ZONES.yaml`. |
+| **Can hurt someone** — money, credentials, personal data, anything that books, sends, deletes, or charges on a real person's behalf | The same four requirements, including the two-family/one-approval review rule, and the **release** proceeds through the 7-day veto window on a plain-language note (Part 2.1). No human sign-off at any point: the classification is a boolean per path in `RISK_ZONES.yaml`. |
 
 The classification lives in `RISK_ZONES.yaml` in each repository, is one boolean
 per path, and defaults to **can hurt someone** when unmapped or unclear. Guessing

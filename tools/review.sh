@@ -37,7 +37,9 @@
 #   VERDICT: APPROVE
 #   VERDICT: OBJECT — <citation of a failing test or a specific clause>
 # An objection without a citation is discarded per CHARTER §3, but is still
-# saved in the transcript. Exit 0 only if every family approves.
+# saved in the transcript. Ask two non-builder families and exit 0 when at
+# least one approves. An unavailable/no-verdict call is replaced so that two
+# real verdicts, rather than merely two attempted calls, are collected.
 #
 # A reviewer that CANNOT ANSWER is not an objection and is not printed like
 # one. `grok` returning 402 and `gemini` finding a real defect both used to set
@@ -78,7 +80,7 @@ set -euo pipefail
 #                  families.sh — a family that has gone is a fact worth
 #                  reporting — but last, because a default must not reach for
 #                  a CLI that cannot answer.
-KNOWN_FAMILIES="claude gemini codex qwen kimi glm grok"
+KNOWN_FAMILIES="codex gemini qwen kimi glm claude grok"
 
 # family_driver <family> — print the argv prefix, one word per line, that
 # `-p <prompt>` is appended to. Returns 1 for an unknown family.
@@ -158,10 +160,9 @@ EOF
   family_driver "$BUILDER" >/dev/null \
     || { echo "unknown builder family: $BUILDER" >&2; exit 2; }
   for F in $KNOWN_FAMILIES; do
-    [ "${#FAMILIES[@]}" -ge "$WIDTH" ] && break
     if [ "$F" != "$BUILDER" ]; then FAMILIES+=("$F"); fi
   done
-  echo "── default reviewers for a '$BUILDER' builder (P5, derived): ${FAMILIES[*]}"
+  echo "── default reviewer candidates for a '$BUILDER' builder (P5, derived): ${FAMILIES[*]}"
 elif [ -n "$BUILDER" ]; then
   for F in "${FAMILIES[@]}"; do
     if [ "$F" = "$BUILDER" ]; then
@@ -174,6 +175,17 @@ fi
 # Reject unknown families before spending a single model call.
 for F in "${FAMILIES[@]}"; do
   family_driver "$F" >/dev/null || { echo "unknown family: $F" >&2; exit 2; }
+done
+
+# Explicit reviewers are tried first. The remaining known non-builder
+# families are fallbacks when a requested provider cannot return a verdict.
+for CANDIDATE in $KNOWN_FAMILIES; do
+  [ "$CANDIDATE" = "$BUILDER" ] && continue
+  FOUND=0
+  for F in "${FAMILIES[@]}"; do
+    [ "$F" = "$CANDIDATE" ] && FOUND=1
+  done
+  [ "$FOUND" -eq 1 ] || FAMILIES+=("$CANDIDATE")
 done
 
 VERDICT_RULES="End your reply with exactly one final line: either
@@ -276,13 +288,14 @@ fi
 
 mkdir -p reviews
 STAMP="$(date +%Y%m%d-%H%M%S)"
-FAIL=0
 WROTE=()
 OUTCOMES=()
+REVIEWED_FAMILIES=()
 APPROVED=0
 ANSWERED=0
 
 for FAMILY in "${FAMILIES[@]}"; do
+  [ "$ANSWERED" -lt "$WIDTH" ] || break
   mapfile -t CMD < <(family_driver "$FAMILY")
   DRIVER_STR="${CMD[*]}"
   if family_reads_the_tree "$FAMILY"; then
@@ -334,7 +347,6 @@ $BUNDLE"
     DETAIL="$(grep -oiE '402|payment required|usage balance|quota|rate.?limit|no OpenRouter key|openrouter error|not found|command not found' "$OUT" | head -1 || true)"
     OUTCOMES+=("$FAMILY|UNREACHABLE|${CMD[0]} exited $RC${DETAIL:+ ($DETAIL)}")
     echo "   $FAMILY → UNREACHABLE (transcript kept: $OUT)" >&2
-    FAIL=1
     continue
   fi
 
@@ -346,19 +358,22 @@ $BUNDLE"
       OUTCOMES+=("$FAMILY|APPROVE|$BODY_BYTES bytes")
       echo "   $FAMILY → APPROVE" ;;
     VERDICT:*OBJECT*)
-      ANSWERED=$((ANSWERED+1)); FAIL=1
+      ANSWERED=$((ANSWERED+1))
+      REVIEWED_FAMILIES+=("$FAMILY")
       OUTCOMES+=("$FAMILY|OBJECT|${VERDICT#VERDICT: OBJECT}")
       echo "   $FAMILY → $VERDICT" ;;
     *)
-      FAIL=1
       OUTCOMES+=("$FAMILY|NO-VERDICT|CLI exited 0 but returned $BODY_BYTES bytes and no VERDICT: line")
       echo "   $FAMILY → NO VERDICT LINE — treated as not approved" >&2 ;;
+  esac
+  case "$VERDICT" in
+    "VERDICT: APPROVE") REVIEWED_FAMILIES+=("$FAMILY") ;;
   esac
 done
 
 # ── Outcome, with unreachable told apart from objecting ──────────────────────
 echo
-echo "── outcome ($ANSWERED of ${#FAMILIES[@]} families returned a verdict; $APPROVED approved)"
+echo "── outcome ($ANSWERED of $WIDTH required families returned a verdict; $APPROVED approved)"
 for O in "${OUTCOMES[@]}"; do
   printf '   %-8s %-12s %s\n' "${O%%|*}" "$(F="${O#*|}"; echo "${F%%|*}")" "${O##*|}"
 done
@@ -391,13 +406,13 @@ if [ -n "$UNTRACKED" ]; then
 fi
 
 echo
-if [ "$FAIL" -eq 0 ]; then
-  echo "ALL FAMILIES APPROVE — cite transcripts in the commit, e.g.:"
-  for I in "${!FAMILIES[@]}"; do
-    echo "Reviewed-By: ${FAMILIES[$I]} ${WROTE[$I]}"
-  done
+if [ "$ANSWERED" -eq "$WIDTH" ] && [ "$APPROVED" -ge 1 ]; then
+  echo "REVIEW PASSED — $APPROVED of $ANSWERED independent families approved."
+  echo "Cite the approving and objecting transcripts in the commit."
+  FAIL=0
 else
-  echo "REVIEW NOT PASSED — read the transcripts in reviews/, address cited"
-  echo "objections (uncited ones are discarded per CHARTER §3), and rerun."
+  echo "REVIEW NOT PASSED — two real non-builder verdicts and at least one"
+  echo "approval are required. Read the transcripts and rerun."
+  FAIL=1
 fi
 exit "$FAIL"

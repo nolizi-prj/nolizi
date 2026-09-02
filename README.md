@@ -65,9 +65,10 @@ points at it.*
 2. **The tests pass.** They are frozen when spec review completes, *before*
    implementation. The builder may not edit them. If a test is wrong, amend the
    spec in the open and take a fresh review.
-3. **A code review from a model family other than the builder's.** A same-family
-   review does not count. Where three families are available, the spec reviewer
-   must not be among the code reviewers.
+3. **Ask two model families other than the builder and require at least one
+   approval.** Silence, limits, and timeouts are not votes; replace that family
+   until two real verdicts are recorded. Where three families are available,
+   the spec reviewer must not be among the code reviewers.
 4. **A signed record**: agent, model, sponsor, token cost, and the spec it
    implements.
 
@@ -78,9 +79,10 @@ here.
 
 ### One risk question
 
-**Can this change hurt someone outside the project?** If yes: two reviews from
-two other families, plus a human sign-off on release. Unmapped paths default to
-*yes*. Risk is inherited — the substrate under a can-hurt path is can-hurt too.
+**Can this change hurt someone outside the project?** If yes, the same review
+rule applies and release waits through the published veto window. Unmapped paths
+default to *yes*. Risk is inherited — the substrate under a can-hurt path is
+can-hurt too.
 
 ### Before you build anything
 

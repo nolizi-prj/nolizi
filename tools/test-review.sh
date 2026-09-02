@@ -41,6 +41,13 @@ reset() {
 
 Spec: spec/0001'
   ) >/dev/null 2>&1
+
+  # Default every provider to a fast, explicit outage. Individual cases
+  # replace the providers they exercise, preventing a fallback from reaching
+  # a real CLI installed on the test machine.
+  for cli in claude agy codex-p grok recruit; do
+    stub "$cli" 1 "test provider unavailable"
+  done
 }
 
 # stub <cli> <exit-code> <reply...>  — a fake reviewer CLI on PATH. It logs the
@@ -73,8 +80,8 @@ echo "review.sh"
 # ── the table, and the single source of truth ────────────────────────────────
 reset
 OUT=$(run --families)
-if [ "$(printf '%s\n' "$OUT" | sort | tr '\n' ' ')" = "claude gemini glm grok kimi qwen " ]
-then ok "1. --families lists all six, qwen/glm/kimi included"
+if [ "$(printf '%s\n' "$OUT" | sort | tr '\n' ' ')" = "claude codex gemini glm grok kimi qwen " ]
+then ok "1. --families lists all seven, including codex and the recruit families"
 else bad "1. --families" "got [$OUT]"; fi
 
 OUT=$(run --driver qwen)
@@ -113,7 +120,7 @@ esac
 reset; approving agy; approving claude
 OUT=$(run code HEAD~1..HEAD gemini claude); RC=$?
 case "$OUT:$RC" in
-  *"ALL FAMILIES APPROVE"*:0) ok "6. every family approving exits 0" ;;
+  *"REVIEW PASSED"*:0) ok "6. every family approving exits 0" ;;
   *) bad "6. two approvals did not pass" "rc=$RC" ;;
 esac
 
@@ -121,24 +128,24 @@ reset; approving agy
 stub claude 0 "f.txt:2 is wrong." "VERDICT: OBJECT — f.txt line 2 fails acceptance A-1"
 OUT=$(run code HEAD~1..HEAD gemini claude); RC=$?
 case "$OUT" in
-  *"OBJECT"*"A-1"*) [ "$RC" -ne 0 ] && ok "7. a cited objection fails the run and prints its citation" \
-                                    || bad "7. objection but exit 0" ;;
+  *"OBJECT"*"A-1"*) [ "$RC" -eq 0 ] && ok "7. one approval plus one cited objection passes and records the citation" \
+                                    || bad "7. one of two approved but run failed" ;;
   *) bad "7. objection not surfaced" "rc=$RC" ;;
 esac
 
 # ── unreachable must not look like an objection (the 402) ────────────────────
-reset; approving agy
+reset; approving agy; approving recruit
 stub grok 1 'Internal error: {"message": "API error (status 402 Payment Required): Grok Build usage balance exhausted"}'
 OUT=$(run code HEAD~1..HEAD gemini grok); RC=$?
-if [ "$RC" -ne 0 ] \
+if [ "$RC" -eq 0 ] \
    && printf '%s' "$OUT" | grep -q 'UNREACHABLE' \
    && printf '%s' "$OUT" | grep -q '402' \
    && printf '%s' "$OUT" | grep -q 'not an objection' \
    && ! printf '%s' "$OUT" | grep -q 'grok *OBJECT'
-then ok "8. a 402 prints as UNREACHABLE with its cause, not as an objection"
+then ok "8. a 402 prints as UNREACHABLE and a fallback supplies the second verdict"
 else bad "8. 402 indistinguishable from an objection" "rc=$RC"; fi
 
-if printf '%s' "$OUT" | grep -q '1 of 2 families returned a verdict'
+if printf '%s' "$OUT" | grep -q '2 of 2 required families returned a verdict'
 then ok "9. the run says how many families actually answered"
 else bad "9. no answered-count in the outcome block"; fi
 
@@ -151,13 +158,13 @@ else bad "10. undeclared builder did not refuse"; fi
 reset; approving agy; approving recruit
 OUT=$(cd "$FIX/repo" && PATH="$BIN:$PATH" BUILDER_FAMILY=claude ./tools/review.sh code HEAD~1..HEAD 2>&1)
 case "$OUT" in
-  *"default reviewers for a 'claude' builder"*"gemini qwen"*) ok "11a. the default is derived and drops the builder's family" ;;
+  *"default reviewer candidates for a 'claude' builder"*"codex gemini"*) ok "11a. the default is derived and drops the builder's family" ;;
   *) bad "11a. derived default wrong" "got [$(printf '%s' "$OUT" | head -1)]" ;;
 esac
 reset; approving claude; approving recruit
 OUT=$(cd "$FIX/repo" && PATH="$BIN:$PATH" BUILDER_FAMILY=gemini ./tools/review.sh code HEAD~1..HEAD 2>&1)
 case "$OUT" in
-  *"claude qwen"*) ok "11b. a gemini builder gets a different default than a claude one" ;;
+  *"codex qwen"*) ok "11b. a gemini builder gets a different default than a claude one" ;;
   *) bad "11b. default did not change with the builder" "got [$(printf '%s' "$OUT" | head -1)]" ;;
 esac
 reset; approving claude

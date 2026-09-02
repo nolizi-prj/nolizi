@@ -7,10 +7,9 @@
 #   1. The test suites pass (frozen acceptance tests included).
 #   2. The signed record: Agent, Model, Spec trailers present
 #      (Sponsor, Token-Cost warned about if absent — P9 wants them).
-#   3. At least one Reviewed-By trailer naming a family and a transcript
-#      that exists and ends in VERDICT: APPROVE. One suffices for every
-#      class since 2026-08-29; --can-hurt is kept for compatibility and
-#      changes nothing.
+#   3. Reviewed-By trailers proving two real verdicts from non-builder model
+#      families, with at least one APPROVE. Empty, unavailable and timed-out
+#      attempts do not count. --can-hurt is kept for compatibility.
 #
 # Usage: tools/gate.sh [--can-hurt] [commit]
 set -euo pipefail
@@ -37,21 +36,34 @@ done
 
 echo "── 3/4 cross-family review"
 REVIEWS="$(trailer Reviewed-By)"
-COUNT=0
+APPROVALS=0
+ANSWERED=0
 FAMILIES_SEEN=""
+BUILDER="$(trailer Model | head -1 | cut -d: -f2- | xargs | awk '{print tolower($1)}')"
 while IFS= read -r LINE; do
   [ -z "$LINE" ] && continue
   # format: Reviewed-By: <family> <transcript-path>
   FAMILY="$(printf '%s' "$LINE" | awk '{print $2}')"
   FILE="$(printf '%s' "$LINE" | awk '{print $3}')"
   if [ ! -f "$FILE" ]; then echo "   transcript missing: $FILE"; FAIL=1; continue; fi
-  if grep -qE '^VERDICT: APPROVE' "$FILE"; then
-    case " $FAMILIES_SEEN " in *" $FAMILY "*) echo "   duplicate family $FAMILY ignored";;
-      *) COUNT=$((COUNT+1)); FAMILIES_SEEN="$FAMILIES_SEEN $FAMILY";; esac
-    echo "   $FAMILY approved ($FILE)"
-  else
-    echo "   $FILE has no VERDICT: APPROVE"; FAIL=1
+  if [ "$(printf '%s' "$FAMILY" | tr '[:upper:]' '[:lower:]')" = "$BUILDER" ]; then
+    echo "   $FAMILY is the builder family and does not count"
+    continue
   fi
+  case " $FAMILIES_SEEN " in
+    *" $FAMILY "*) echo "   duplicate family $FAMILY ignored"; continue ;;
+  esac
+  VERDICT="$(grep -E '^VERDICT:' "$FILE" | tail -1 || true)"
+  case "$VERDICT" in
+    "VERDICT: APPROVE")
+      ANSWERED=$((ANSWERED+1)); APPROVALS=$((APPROVALS+1))
+      FAMILIES_SEEN="$FAMILIES_SEEN $FAMILY"
+      echo "   $FAMILY approved ($FILE)" ;;
+    VERDICT:*OBJECT*)
+      ANSWERED=$((ANSWERED+1)); FAMILIES_SEEN="$FAMILIES_SEEN $FAMILY"
+      echo "   $FAMILY objected ($FILE)" ;;
+    *) echo "   $FAMILY returned no real verdict ($FILE)" ;;
+  esac
 done <<EOF2
 $REVIEWS
 EOF2
@@ -60,13 +72,14 @@ EOF2
 # 2026-08-30, CHARTER Part 0: pre-`launched` that review is ADVISORY — the
 # gate warns and passes. It becomes mandatory when roadmap/STAGE.md opens
 # with `# STAGE — launched`. No stage file means pre-launched.
-NEED=1
+NEED_VERDICTS=2
+NEED_APPROVALS=1
 STAGE="$(head -1 roadmap/STAGE.md 2>/dev/null | grep -oiE 'launched' || true)"
-if [ -z "$STAGE" ]; then NEED=0; fi
-if [ "$COUNT" -lt "$NEED" ]; then
-  echo "   need $NEED approving famil$( [ "$NEED" -eq 1 ] && echo y || echo ies), have $COUNT"
+if [ -z "$STAGE" ]; then NEED_VERDICTS=0; NEED_APPROVALS=0; fi
+if [ "$ANSWERED" -lt "$NEED_VERDICTS" ] || [ "$APPROVALS" -lt "$NEED_APPROVALS" ]; then
+  echo "   need $NEED_VERDICTS real non-builder verdicts and $NEED_APPROVALS approval; have $ANSWERED and $APPROVALS"
   FAIL=1
-elif [ "$NEED" -eq 0 ] && [ "$COUNT" -eq 0 ]; then
+elif [ "$NEED_VERDICTS" -eq 0 ] && [ "$ANSWERED" -eq 0 ]; then
   echo "   no review — ADVISORY pre-launched (Part 0); mandatory at launched"
 fi
 
